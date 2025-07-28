@@ -1,0 +1,57 @@
+server/target/
+server/mvnw
+server/mvnw.cmd
+server/.mvn/
+logs
+server/tokens
+server/Default.xml
+server/qodana.yaml
+server/qodana.sarif.json
+uploads
+server/src/main/resources/application.properties
+server/Dockerfile
+
+client/node_modules/
+client/dist/
+client/build/
+client/.env
+
+client/package-lock.json
+data.js
+test.txt
+
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+/uploads/stories/
+/SQL/
+server/src/main/java/com/chattr/server/services/ChattrUltraService.java

@@ -1,0 +1,55 @@
+name: Format Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  frontend-format:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install dependencies
+      run: npm install
+      working-directory: ./client
+
+    - name: Check frontend formatting
+      run: npx prettier --check "src/**/*.{js,jsx,ts,tsx,css,md,json}" "*.{js,jsx,ts,tsx,css,md,json}"
+      working-directory: ./client
+
+  backend-format:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Cache Maven dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('server/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+
+    - name: Check backend formatting
+      run: mvn spotless:check
+      working-directory: ./server

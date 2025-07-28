@@ -1,0 +1,147 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import loaderImage from '../assets/377.gif';
+
+const PostCard = React.lazy(() => import('./PostCard'));
+const API_URL = import.meta.env.VITE_API_URL;
+
+const PostList = ({ onPostRefresh }) => {
+  const [posts, setPosts] = useState([]);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [delayOver, setDelayOver] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDelayOver(true);
+      setIsLoading(false);
+    }, 1500);
+
+    fetchPosts();
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const fetchPosts = async () => {
+    try {
+      const response = await axios.get(`${API_URL}posts/all?page=0&size=5`, {
+        withCredentials: true,
+      });
+
+      const allPosts = response.data.content || [];
+
+      const filteredPosts = allPosts.filter(
+        (post) => !post.deleted && !post.reported
+      );
+
+      const postsWithUsernames = await Promise.all(
+        filteredPosts.map(async (post, index) => {
+          if (post.authorName) {
+            return { ...post, username: post.authorName };
+          }
+          if (!post.userId) {
+            return { ...post, username: 'User Deleted' };
+          }
+
+          try {
+            const usernameResponse = await axios.get(
+              `${API_URL}users/${post.userId}/username`,
+              {
+                withCredentials: true,
+              }
+            );
+            return { ...post, username: usernameResponse.data };
+          } catch (err) {
+            return { ...post, username: 'User Deleted' };
+          }
+        })
+      );
+
+      postsWithUsernames.sort((a, b) => {
+        const dateA = new Date(
+          a.createTime || a.createdAt || `${a.postDate}T${a.postTime}`
+        );
+        const dateB = new Date(
+          b.createTime || b.createdAt || `${b.postDate}T${b.postTime}`
+        );
+        return dateB - dateA;
+      });
+
+      setPosts(postsWithUsernames);
+    } catch (err) {
+      return (
+        <div
+          style={{
+            textAlign: 'center',
+            padding: '20px',
+            color: 'red',
+            background: 'rgba(255, 0, 0, 0.1)',
+            borderRadius: '8px',
+            margin: '20px auto',
+            maxWidth: '400px',
+          }}
+        >
+          <p>Something went wrong. Please try again later.</p>
+        </div>
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (error) {
+    return null;
+  }
+
+  if (isLoading || !delayOver) {
+    return (
+      <div className='text-loader'>
+        <img
+          src={loaderImage}
+          alt='Loading...'
+          className='list-loader'
+          style={{ width: 30, position: 'relative', left: '45%' }}
+        />
+      </div>
+    );
+  }
+
+  if (posts.length === 0) {
+    return (
+      <div
+        className='no-posts-message'
+        style={{ textAlign: 'center', marginTop: '20px', color: 'white' }}
+      >
+        <p style={{ color: 'black' }}>No more posts.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className='post-list' style={{ marginBottom: 15 }}>
+      {posts.map((post) => (
+        <div key={post.id} className='post-card-wrapper'>
+          <PostCard
+            id={post.id}
+            content={post.content}
+            commentsList={post.commentsList}
+            postDate={new Date(post.createdAt).toLocaleDateString()}
+            postTime={new Date(post.createdAt).toLocaleTimeString()}
+            userId={post.userId}
+            username={post.username}
+            imageUrl={post.imageUrl}
+            onPostRefresh={onPostRefresh}
+            savedUserIds={post.savedUserIds || []}
+            onPostDeleted={(deletedId) => {
+              setPosts((prevPosts) =>
+                prevPosts.filter((p) => p.id !== deletedId)
+              );
+            }}
+          />
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default PostList;
