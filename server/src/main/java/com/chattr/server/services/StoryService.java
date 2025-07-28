@@ -69,8 +69,8 @@ public class StoryService {
 
                 if (!destination.startsWith(userUploadPath)) {
                     String securityDetails = String.format(
-                            "Attempted path: %s, User directory: %s, Original filename: %s",
-                            destination, userUploadPath, file.getOriginalFilename());
+                            "Attempted path: %s, User directory: %s, Original filename: %s", destination,
+                            userUploadPath, file.getOriginalFilename());
 
                     loggingService.logWarn("StoryService", "createStory",
                             "Path traversal attempt detected: " + securityDetails);
@@ -174,16 +174,15 @@ public class StoryService {
         }
 
         if (!trimmedUserId.matches("^[a-zA-Z0-9_-]+$")) {
-            loggingService.logSecurityEvent("INVALID_USER_ID", userId,
-                    loggingService.getCurrentSessionId(),
+            loggingService.logSecurityEvent("INVALID_USER_ID", userId, loggingService.getCurrentSessionId(),
                     String.format("User ID contains invalid characters: %s", userId));
             throw new CustomException(400, "User ID contains invalid characters");
         }
 
         String lowerCaseUserId = trimmedUserId.toLowerCase();
-        if (lowerCaseUserId.startsWith("con") || lowerCaseUserId.startsWith("prn") ||
-                lowerCaseUserId.startsWith("aux") || lowerCaseUserId.startsWith("nul") ||
-                lowerCaseUserId.startsWith("com") || lowerCaseUserId.startsWith("lpt")) {
+        if (lowerCaseUserId.startsWith("con") || lowerCaseUserId.startsWith("prn") || lowerCaseUserId.startsWith("aux")
+                || lowerCaseUserId.startsWith("nul") || lowerCaseUserId.startsWith("com")
+                || lowerCaseUserId.startsWith("lpt")) {
             throw new CustomException(400, "User ID cannot start with reserved system names");
         }
 
@@ -230,11 +229,8 @@ public class StoryService {
             return Set.of("jpg", "jpeg", "png", "gif", "mp4", "mov", "avi");
         }
 
-        return Arrays.stream(allowedExtensionsConfig.split(","))
-                .map(String::trim)
-                .map(String::toLowerCase)
-                .filter(ext -> !ext.isEmpty())
-                .collect(Collectors.toSet());
+        return Arrays.stream(allowedExtensionsConfig.split(",")).map(String::trim).map(String::toLowerCase)
+                .filter(ext -> !ext.isEmpty()).collect(Collectors.toSet());
     }
 
     @Value("${story.upload-dir}")

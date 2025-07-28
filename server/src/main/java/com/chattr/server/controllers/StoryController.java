@@ -20,10 +20,8 @@ public class StoryController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadStory(
-            @RequestParam("files") MultipartFile[] files,
-            @RequestParam("userId") String userId,
-            @RequestParam("username") String username,
+    public ResponseEntity<String> uploadStory(@RequestParam("files") MultipartFile[] files,
+            @RequestParam("userId") String userId, @RequestParam("username") String username,
             @RequestParam(value = "caption", required = false) String caption) {
 
         storyService.createStory(userId, username, files, caption);
@@ -55,9 +53,7 @@ public class StoryController {
     }
 
     @PostMapping("/{storyId}/view")
-    public ResponseEntity<String> markStoryAsViewed(
-            @PathVariable Long storyId,
-            @RequestParam String viewerId) {
+    public ResponseEntity<String> markStoryAsViewed(@PathVariable Long storyId, @RequestParam String viewerId) {
 
         storyService.markStoryAsViewed(storyId, viewerId);
         return ResponseEntity.ok("Story marked as viewed.");

@@ -230,7 +230,7 @@ const Profile = () => {
         opacity: 0.4,
         pointerEvents: 'none',
         zIndex: -1,
-      }
+      },
     },
 
     activeTab: {
@@ -253,7 +253,7 @@ const Profile = () => {
         ${colorVariations.shadow},
         0 0 30px ${colorVariations.primary}50
       `,
-      }
+      },
     },
 
     aboutCard: {
@@ -270,7 +270,7 @@ const Profile = () => {
         border: `1px solid ${colorVariations.primary}40`,
         transform: 'translateY(-2px)',
         boxShadow: `0 10px 25px rgba(0, 0, 0, 0.1)`,
-      }
+      },
     },
 
     bannerOverlay: {
@@ -307,10 +307,9 @@ const Profile = () => {
         borderLeft: `6px solid ${colorVariations.primary}`,
         transform: 'translateX(4px)',
         boxShadow: `0 8px 25px rgba(0, 0, 0, 0.1)`,
-      }
+      },
     },
   };
-
 
   return (
     <div
@@ -329,10 +328,7 @@ const Profile = () => {
               />
               <div className={styles.nameSection}>
                 <h1 className={styles.displayName}>{profile.displayName}</h1>
-                <h2
-                  className={styles.username}
-                  style={dynamicStyles.username}
-                >
+                <h2 className={styles.username} style={dynamicStyles.username}>
                   u/{profile.username}
                 </h2>
               </div>
@@ -444,15 +440,12 @@ const Profile = () => {
         </div>
 
         <div className={styles.rightColumn}>
-          <div
-            className={styles.aboutCard}
-            style={dynamicStyles.aboutCard}
-          >
+          <div className={styles.aboutCard} style={dynamicStyles.aboutCard}>
             <div
               className={styles.bannerImage}
               style={{
                 backgroundImage: `url(${backgroundImage})`,
-                position: 'relative'
+                position: 'relative',
               }}
             >
               <div
@@ -597,7 +590,8 @@ const Profile = () => {
                 <p className={styles.achievementCount}>
                   <span style={dynamicStyles.statHighlight}>
                     {profile.achievements?.length || 0}
-                  </span> Unlocked
+                  </span>{' '}
+                  Unlocked
                 </p>
               </div>
 
@@ -617,7 +611,7 @@ const Profile = () => {
                     className={styles.settingsButton}
                     style={{
                       borderColor: colorVariations.primary,
-                      color: colorVariations.primary
+                      color: colorVariations.primary,
                     }}
                   >
                     <FaCog /> Settings

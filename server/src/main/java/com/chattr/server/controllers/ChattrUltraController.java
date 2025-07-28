@@ -41,8 +41,7 @@ public class ChattrUltraController {
     }
 
     @GetMapping("/history/{conversationId}")
-    public ResponseEntity<List<ChattrUltra>> getConversationHistory(
-            @PathVariable String conversationId) {
+    public ResponseEntity<List<ChattrUltra>> getConversationHistory(@PathVariable String conversationId) {
 
         List<ChattrUltra> history = geminiChatService.getConversationHistory(conversationId);
         return ResponseEntity.ok(history);
