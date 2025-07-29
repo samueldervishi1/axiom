@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import customLoadingGif from '../assets/377.gif';
@@ -24,9 +24,6 @@ const Register = () => {
   });
 
   const navigate = useNavigate();
-
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
 
   const handleInputChange = useCallback((e) => {
     const { name, value } = e.target;
@@ -106,8 +103,6 @@ const Register = () => {
         );
 
         if (response.status === 200) {
-          setSnackbarMessage('User registered successfully!');
-          setSnackbarOpen(true);
           setTimeout(() => navigate('/login'), 2000);
         } else {
           console.log('Unexpected response status:', response);
@@ -187,10 +182,10 @@ const Register = () => {
     <div className={styles.auth_container}>
       <div className={styles.auth_card}>
         <div className={styles.auth_left}>
-          <div className={styles.logo}>𝓒𝓱𝓪𝓽𝓽𝓻</div>
+          <div className={styles.logo}>𝒜𝓍𝒾𝑜𝓂</div>
           <div className={styles.back_link}></div>
           <div className={styles.hero_content}>
-            <h2>Join the conversation.</h2>
+            <h2>Where true voices connect.</h2>
             <div className={styles.dots}>
               <span></span>
               <span className={styles.active}></span>

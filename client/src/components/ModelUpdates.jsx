@@ -11,7 +11,6 @@ const ModelUpdates = () => {
   useEffect(() => {
     const fetchModelUpdates = async () => {
       try {
-        // Use axios to fetch data with credentials
         const apiEndpoint = `${import.meta.env.VITE_API_URL}llm`;
         const response = await axios.get(apiEndpoint, {
           withCredentials: true,
@@ -29,9 +28,7 @@ const ModelUpdates = () => {
     fetchModelUpdates();
   }, []);
 
-  // Format date to a more readable format
   const formatDate = (dateString) => {
-    // Handle MongoDB date format
     if (dateString && typeof dateString === 'object' && dateString.$date) {
       const date = new Date(dateString.$date);
       return date.toLocaleDateString('en-US', {
@@ -48,7 +45,6 @@ const ModelUpdates = () => {
     });
   };
 
-  // Get status badge class based on status
   const getStatusBadgeClass = (status) => {
     switch (status.toLowerCase()) {
       case 'current':
@@ -59,20 +55,19 @@ const ModelUpdates = () => {
         return styles.deprecated;
       case 'beta':
         return styles.beta;
-      case 'alpha':
-        return styles.alpha;
       case 'end-of-life':
         return styles.endOfLife;
       case 'legacy':
         return styles.legacy;
       case 'supported':
         return styles.supported;
+        case 'latest':
+          return styles.latest
       default:
         return '';
     }
   };
 
-  // Toggle card expansion
   const toggleCardExpansion = (id) => {
     setExpandedCards((prev) => ({
       ...prev,
@@ -80,9 +75,7 @@ const ModelUpdates = () => {
     }));
   };
 
-  // Sort model updates by dateTime (latest first)
   const sortedModelUpdates = [...modelUpdates].sort((a, b) => {
-    // Handle MongoDB date format: { $date: "2024-07-11T15:42:35.850Z" }
     const getDateValue = (dateTime) => {
       if (dateTime && typeof dateTime === 'object' && dateTime.$date) {
         return new Date(dateTime.$date);
@@ -92,8 +85,6 @@ const ModelUpdates = () => {
 
     const dateA = getDateValue(a.dateTime);
     const dateB = getDateValue(b.dateTime);
-
-    // Sort by dateTime descending (latest first)
     return dateB - dateA;
   });
 

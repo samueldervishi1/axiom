@@ -3,8 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import axios from 'axios';
 import { getUserIdFromServer, getUsernameFromServer } from '../auth/authUtils';
-// import Box from '@mui/material/Box';
-// import Avatar from '@mui/material/Avatar';
 import { GoHome } from 'react-icons/go';
 import { IoSearchOutline, IoSettingsOutline } from 'react-icons/io5';
 import { CiLogout } from 'react-icons/ci';
@@ -45,7 +43,6 @@ const Navbar = () => {
       try {
         const username = await getUsernameFromServer();
         setCurrentUsername(username);
-        // Set the first letter of the username as the initial for the avatar
         if (username) {
           setUserInitial(username.charAt(0).toUpperCase());
         }
@@ -202,7 +199,7 @@ const Navbar = () => {
                   top: 4,
                 }}
               >
-                𝓒𝓱𝓪𝓽𝓽𝓻
+                𝒜𝓍𝒾𝑜𝓂
               </p>
             </a>
           </div>
@@ -328,7 +325,7 @@ const Navbar = () => {
                 onClick={() => navigate('/chat')}
               >
                 <GiArtificialHive className={styles.icon_p} />
-                <span className={styles.nav_text}>Chattr Ultra</span>
+                <span className={styles.nav_text}>Sophia Supreme</span>
               </button>
 
               <button

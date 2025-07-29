@@ -91,10 +91,8 @@ const Settings = () => {
     }
   }, []);
 
-  // Update URL when section changes
   const handleSectionChange = useCallback((section) => {
     setActiveSection(section);
-    // Update URL without full page reload
     const url = new URL(window.location);
     url.searchParams.set('section', section);
     window.history.pushState({}, '', url);

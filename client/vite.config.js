@@ -14,8 +14,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Chattr',
-        short_name: 'Chattr',
+        name: 'Axiom',
+        short_name: 'Axiom',
         description: 'A modern social media app built with React and Vite',
         theme_color: '#ffffff',
         background_color: '#ffffff',

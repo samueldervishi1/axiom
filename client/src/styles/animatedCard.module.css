@@ -201,7 +201,7 @@
   margin-bottom: 15px;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
   animation: fadeInUp 1s ease-out;
   color: white;
 }

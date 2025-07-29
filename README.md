@@ -1,5 +1,5 @@
 
-# Social Media App | Chattr
+# Social Media App | Axiom
 
 This project aims to create a basic social media platform where users can connect, follow each other, and share posts. It is a work in progress with ongoing development to add more features and enhance functionality.
 

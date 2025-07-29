@@ -54,4 +54,3 @@ build/
 
 /uploads/stories/
 /SQL/
-server/src/main/java/com/chattr/server/services/ChattrUltraService.java

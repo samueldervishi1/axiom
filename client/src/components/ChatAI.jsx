@@ -229,7 +229,7 @@ const ChatAI = () => {
 
       if (response.status === 200) {
         if (response.data.success) {
-          const responseData = response.data.geminiAnswer || 'No response.';
+          const responseData = response.data.chattrAnswer || 'No response.';
 
           setChatMessages((prevMessages) => [
             ...prevMessages,
@@ -516,7 +516,7 @@ const ChatAI = () => {
                 value={userInput}
                 onChange={autoResizeTextarea}
                 onKeyUp={(e) => {
-                  if (e.keyCode === 13 && !e.shiftKey) {
+                  if (e.key === 13 && !e.shiftKey) {
                     e.preventDefault();
                     handleSubmit(e);
                   } else {
@@ -524,7 +524,7 @@ const ChatAI = () => {
                   }
                 }}
                 onKeyDown={(e) => {
-                  if (e.keyCode === 13 && !e.shiftKey) {
+                  if (e.key === 13 && !e.shiftKey) {
                     e.preventDefault();
                   }
                 }}
@@ -599,7 +599,7 @@ const ChatAI = () => {
 
               <div className={styles.right_controls}>
                 <div className={styles.model_selector}>
-                  <span>Chattr Ultra</span>
+                  <span>Sophia Supreme</span>
                   <small>Smart, efficient model</small>
                 </div>
 

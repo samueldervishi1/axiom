@@ -217,28 +217,6 @@ body.register_page {
   gap: 16px;
 }
 
-.google_btn,
-.apple_btn {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background-color: white;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
-  transition: background-color 0.2s;
-}
-
-.google_btn:hover,
-.apple_btn:hover {
-  background-color: #f5f5f5;
-}
-
 .error_message {
   color: #e53935;
   font-size: 14px;

@@ -15,7 +15,6 @@ button {
 
 body {
   scrollbar-width: thin;
-  overflow-x: hidden;
   background-color: #ffffff !important;
   overflow: auto;
 }

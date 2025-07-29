@@ -90,7 +90,7 @@ const LoginScript = () => {
           error.message === 'Failed to fetch' ||
           error.message.includes('NetworkError');
         const generalErrorMessage = isNetworkError
-          ? 'Unable to connect to the server. Please check your internet connection or try again later.'
+          ? 'Unable to connect to Axiom. Please check your internet connection or try again later.'
           : error.message || 'Something went wrong. Please try again.';
 
         setFormState((prev) => ({
@@ -146,7 +146,7 @@ const LoginScript = () => {
     <div className={styles.auth_container}>
       <div className={styles.auth_card}>
         <div className={styles.auth_left}>
-          <div className={styles.logo}>𝓒𝓱𝓪𝓽𝓽𝓻</div>
+          <div className={styles.logo}>𝒜𝓍𝒾𝑜𝓂</div>
           <div className={styles.back_link}></div>
           <div className={styles.hero_content}>
             <h2>Where true voices connect.</h2>

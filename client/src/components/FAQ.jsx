@@ -11,7 +11,7 @@ const FAQItem = memo(({ question, answer, isActive, onToggle }) => (
       className={styles.question}
       role='button'
       tabIndex={0}
-      onKeyPress={(e) => e.key === 'Enter' && onToggle()}
+      onKeyDown={(e) => e.key === 'Enter' && onToggle()}
       aria-expanded={isActive}
     >
       {isActive ? (
