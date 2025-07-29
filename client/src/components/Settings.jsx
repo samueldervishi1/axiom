@@ -1,22 +1,21 @@
 import React, {
-  useState,
   lazy,
+  memo,
   Suspense,
   useCallback,
-  useMemo,
-  memo,
   useEffect,
+  useMemo,
+  useState,
 } from 'react';
 import axios from 'axios';
 import {
-  FaInfoCircle,
-  FaFileContract,
   FaEnvelope,
-  FaQuestionCircle,
-  FaServer,
-  FaTrash,
+  FaFileContract,
+  FaInfoCircle,
   FaPauseCircle,
+  FaQuestionCircle,
   FaRobot,
+  FaTrash,
 } from 'react-icons/fa';
 import styles from '../styles/settings.module.css';
 import { useAuth } from '../auth/AuthContext';
@@ -26,7 +25,6 @@ const About = lazy(() => import('./About'));
 const TermsAndServices = lazy(() => import('./Terms'));
 const Contact = lazy(() => import('./Contact'));
 const FAQ = lazy(() => import('./FAQ'));
-const ServerHealthDashboard = lazy(() => import('./ServerHealthDashboard'));
 const ModelUpdates = lazy(() => import('./ModelUpdates'));
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -202,7 +200,6 @@ const Settings = () => {
       { id: 'terms', icon: FaFileContract, label: 'Terms of Service' },
       { id: 'contact', icon: FaEnvelope, label: 'Contact Us' },
       { id: 'help', icon: FaQuestionCircle, label: 'Help & Support' },
-      { id: 'server', icon: FaServer, label: 'Server Health' },
       { id: 'models', icon: FaRobot, label: 'Model Updates' },
       { id: 'deactivate', icon: FaPauseCircle, label: 'Deactivate Account' },
       { id: 'delete', icon: FaTrash, label: 'Delete Account' },
@@ -254,20 +251,6 @@ const Settings = () => {
             <h2>AI Model Updates</h2>
             <Suspense fallback={<LoadingFallback />}>
               <ModelUpdates />
-            </Suspense>
-          </div>
-        );
-      case 'server':
-        return (
-          <div className={styles.content_section}>
-            <div className={styles.section_header}>
-              <h2>Server Health</h2>
-              <button className={styles.subscribe_button}>
-                Subscribe for Updates
-              </button>
-            </div>
-            <Suspense fallback={<LoadingFallback />}>
-              <ServerHealthDashboard />
             </Suspense>
           </div>
         );

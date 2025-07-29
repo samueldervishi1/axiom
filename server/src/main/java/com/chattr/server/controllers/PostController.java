@@ -2,6 +2,7 @@ package com.chattr.server.controllers;
 
 import com.chattr.server.exceptions.CustomException;
 import com.chattr.server.models.Post;
+import com.chattr.server.models.ScheduledPostRequest;
 import com.chattr.server.services.DBService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.naming.NamingException;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -109,10 +111,33 @@ public class PostController {
 
     @GetMapping("/all")
     public ResponseEntity<Map<String, Object>> getAllPostsPaged(@RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+                                                                @RequestParam(defaultValue = "10") int size) {
         try {
             Map<String, Object> request = new HashMap<>();
             request.put("action", "GET_ALL_POSTS_PAGED");
+            request.put("page", page);
+            request.put("size", size);
+
+            List<Map<String, Object>> result = dbService.executeQuery(request);
+
+            if (result.isEmpty()) {
+                Map<String, Object> response = createEmptyPageResponse(page, size);
+                return ResponseEntity.ok(response);
+            }
+
+            return ResponseEntity.ok(result.get(0));
+        } catch (SQLException | IOException | NamingException e) {
+            throw new CustomException(500, "Database error: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/scheduled")
+    public ResponseEntity<Map<String, Object>> getAllScheduledPostsPaged(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            Map<String, Object> request = new HashMap<>();
+            request.put("action", "GET_ALL_SCHEDULED_POSTS_PAGED");
             request.put("page", page);
             request.put("size", size);
 
@@ -157,9 +182,47 @@ public class PostController {
         }
     }
 
+    @PostMapping("/create-scheduled")
+    public ResponseEntity<Map<String, Object>> createScheduledPost(
+            @RequestBody ScheduledPostRequest request) {
+        try {
+            if (request.getContent() == null || request.getContent().trim().isEmpty()) {
+                throw new CustomException(400, "Post content cannot be empty");
+            }
+
+            if (request.getContent().length() > 4000) {
+                throw new CustomException(400, "Post content too long");
+            }
+
+            if (request.getAuthorId() == null || request.getAuthorId().trim().isEmpty()) {
+                throw new CustomException(400, "Username is required");
+            }
+
+            if (request.getScheduledFor() == null) {
+                throw new CustomException(400, "Scheduled time is required");
+            }
+
+            if (request.getScheduledFor().isBefore(LocalDateTime.now())) {
+                throw new CustomException(400, "Cannot schedule post in the past");
+            }
+
+            List<Map<String, Object>> result = dbService.createScheduledPost(
+                    request.getAuthorId(),
+                    request.getContent(),
+                    request.getAuthorName(),
+                    request.getScheduledFor()
+            );
+
+            return ResponseEntity.ok(result.get(0));
+
+        } catch (SQLException | IOException | NamingException e) {
+            throw new CustomException(500, "Database error: " + e.getMessage());
+        }
+    }
+
     @PostMapping("/like/{postId}")
     public ResponseEntity<Map<String, Object>> likePost(@PathVariable Long postId,
-            @RequestBody Map<String, Object> requestBody) {
+                                                        @RequestBody Map<String, Object> requestBody) {
         try {
             Object userIdObj = requestBody.get("userId");
             String userId;

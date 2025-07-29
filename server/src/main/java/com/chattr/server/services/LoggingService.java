@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 public class LoggingService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private static final String LOG_DIR = "logs/";
+    private static final String LOG_DIR = "server/logs/";
     private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
     private static final DateTimeFormatter FILE_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -43,7 +43,7 @@ public class LoggingService {
 
     @Async
     public void logEvent(String level, String service, String method, String message, Object data,
-            Exception exception) {
+                         Exception exception) {
         CompletableFuture.runAsync(() -> {
             try {
                 Map<String, Object> logEntry = createLogEntry(level, service, method, message, data, exception);
@@ -59,7 +59,7 @@ public class LoggingService {
     }
 
     private Map<String, Object> createLogEntry(String level, String service, String method, String message, Object data,
-            Exception exception) {
+                                               Exception exception) {
         Map<String, Object> logEntry = new HashMap<>();
 
         logEntry.put("timestamp", LocalDateTime.now().format(TIMESTAMP_FORMAT));
@@ -89,19 +89,19 @@ public class LoggingService {
                 logEntry.get("message"));
 
         switch (level) {
-            case "ERROR" :
+            case "ERROR":
                 log.error(message);
                 break;
-            case "WARN" :
+            case "WARN":
                 log.warn(message);
                 break;
-            case "DEBUG" :
+            case "DEBUG":
                 log.debug(message);
                 break;
-            case "PERF" :
+            case "PERF":
                 log.info("[PERFORMANCE] {}", message);
                 break;
-            default :
+            default:
                 log.info(message);
         }
     }

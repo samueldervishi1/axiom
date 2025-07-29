@@ -71,7 +71,6 @@ public class AuthController {
 
             UserInfo userInfo = new UserInfo();
             userInfo.setUsername(claims.getSubject());
-            System.out.println("UserInfo username set to: " + userInfo.getUsername());
 
             Object userIdObj = claims.get("userId");
             long userId;

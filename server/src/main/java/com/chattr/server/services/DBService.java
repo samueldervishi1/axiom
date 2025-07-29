@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import javax.naming.NamingException;
 import java.io.IOException;
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +46,7 @@ public class DBService {
             log.info("DB Request - JSON: {}", jsonRequest);
 
             try (CallableStatement callableStatement = executeCall(conn, executeQueryCall, inParameters);
-                    ResultSet resultSet = (ResultSet) callableStatement.getObject(1)) {
+                 ResultSet resultSet = (ResultSet) callableStatement.getObject(1)) {
 
                 while (resultSet.next()) {
                     String jsonResponse = resultSet.getString("response_text");
@@ -93,6 +94,26 @@ public class DBService {
         }
 
         return call;
+    }
+
+    public List<Map<String, Object>> createScheduledPost(String authorId, String content,
+                                                         String authorName, LocalDateTime scheduledFor)
+            throws SQLException, IOException, NamingException {
+
+        Map<String, Object> request = new HashMap<>();
+        request.put("action", "create_scheduled");
+        request.put("authorId", authorId);
+        request.put("content", content);
+        request.put("authorName", authorName);
+        request.put("scheduledFor", scheduledFor.toString());
+
+        return executeQuery(request);
+    }
+
+    public void publishScheduledPosts() throws SQLException, IOException, NamingException {
+        Map<String, Object> request = new HashMap<>();
+        request.put("action", "publish_scheduled");
+        executeQuery(request);
     }
 
     private Connection getConnection() throws SQLException {

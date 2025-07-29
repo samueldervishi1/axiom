@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/deactivated.module.css';
-// import { Visibility, VisibilityOff } from '@mui/icons-material';
 import customLoadingGif from '../assets/377.gif';
 import { getUserIdFromServer, reactivateAccount } from '../auth/authUtils';
 import { useAuth } from '../auth/AuthContext';
@@ -68,13 +67,6 @@ const DeactivatedAccount = () => {
     }));
   };
 
-  const togglePasswordVisibility = () => {
-    setFormState((prev) => ({
-      ...prev,
-      showPassword: !prev.showPassword,
-    }));
-  };
-
   return (
     <div className={styles.deactivated_container}>
       <div className={styles.card}>
@@ -99,12 +91,6 @@ const DeactivatedAccount = () => {
               required
               className={styles.input}
             />
-            <span
-              className={styles.password_toggle_icon}
-              onClick={togglePasswordVisibility}
-            >
-              {/* {formState.showPassword ? <VisibilityOff /> : <Visibility />} */}
-            </span>
           </div>
 
           <div className={styles.checkbox_container}>

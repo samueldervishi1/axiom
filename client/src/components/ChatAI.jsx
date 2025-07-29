@@ -7,7 +7,14 @@ import bot from '../assets/image2vector.svg';
 import user from '../assets/reshot-icon-user-G3RUDHZMQ6.svg';
 import loaderGif from '../assets/377.gif';
 import { FaRegPenToSquare } from 'react-icons/fa6';
-import { LuSendHorizontal } from 'react-icons/lu';
+import { LuPlus } from 'react-icons/lu';
+import {
+  MdAttachFile,
+  MdImage,
+  MdInsertDriveFile,
+  MdClose,
+} from 'react-icons/md';
+import sendBTN from '../assets/test.svg';
 import styles from '../styles/ai.module.css';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -17,19 +24,22 @@ const ChatAI = () => {
   const [userInput, setUserInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isRateLimited, setIsRateLimited] = useState(false);
-  const [countdown, setCountdown] = useState(0);
+  const [, setCountdown] = useState(0);
   const chatContainerRef = useRef(null);
   const [isThinking, setIsThinking] = useState(false);
   const [hideHeading, setHideHeading] = useState(false);
   const [, setIsMobileView] = useState();
   const [, setShowContinueMessage] = useState(false);
-  const [userId, setUserId] = useState(null);
+  const [, setUserId] = useState(null);
   const [, setIsTypingFinished] = useState(true);
   const [isProcessingResponse, setIsProcessingResponse] = useState(false);
   const [isNearLimit, setIsNearLimit] = useState(false);
   const [username, setUsername] = useState('');
-  const [predefinedQuestions, setPredefinedQuestions] = useState([]);
   const [, setLoadingUsername] = useState(true);
+  const [showAttachments, setShowAttachments] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const fileInputRef = useRef(null);
+  const imageInputRef = useRef(null);
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -117,10 +127,6 @@ const ChatAI = () => {
       : formattedText;
   };
 
-  const getSessionId = () => {
-    return localStorage.getItem('sessionId');
-  };
-
   const formatTimestamp = () => {
     const now = new Date();
     return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -128,7 +134,7 @@ const ChatAI = () => {
 
   const getGreetingByTime = () => {
     const hour = new Date().getHours();
-    let greeting = '';
+    let greeting;
 
     if (hour >= 5 && hour < 12) {
       greeting = 'Good morning';
@@ -138,7 +144,7 @@ const ChatAI = () => {
       greeting = 'Good evening';
     }
 
-    return `${greeting}, ${username}! How can I help you today?`;
+    return `${greeting}, ${username}!`;
   };
 
   const handleSubmit = async (e) => {
@@ -195,11 +201,23 @@ const ChatAI = () => {
       }, 1000);
     };
 
+    const getOrCreateConversationId = () => {
+      const existingId = sessionStorage.getItem('conversationId');
+      if (existingId) {
+        return existingId;
+      }
+
+      const newId = `conv-${Date.now()}`;
+      sessionStorage.setItem('conversationId', newId);
+      return newId;
+    };
+
     try {
       const response = await axios.post(
-        `${API_URL}chatbot/query`,
+        `${API_URL}ask`,
         {
-          message: userInput,
+          question: userInput,
+          conversationId: getOrCreateConversationId(),
         },
         {
           withCredentials: true,
@@ -210,30 +228,29 @@ const ChatAI = () => {
       );
 
       if (response.status === 200) {
-        const responseData = response.data.answer || 'No response.';
+        if (response.data.success) {
+          const responseData = response.data.geminiAnswer || 'No response.';
 
-        setChatMessages((prevMessages) => [
-          ...prevMessages,
-          { content: '', isUser: false },
-        ]);
+          setChatMessages((prevMessages) => [
+            ...prevMessages,
+            { content: '', isUser: false },
+          ]);
 
-        simulateTypingEffect(responseData);
-        setIsThinking(false);
-
-        const sessionId = getSessionId();
-        await axios.post(
-          `${API_URL}history/save/${userId}/session/${sessionId}`,
-          {
-            content: [{ message: userInput }],
-            answer: responseData,
-          },
-          {
-            withCredentials: true,
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          }
-        );
+          simulateTypingEffect(responseData);
+          setIsThinking(false);
+        } else {
+          const errorMessage =
+            response.data.errorMessage ||
+            'Something went wrong with the AI response.';
+          const errorResponse = {
+            content: errorMessage,
+            isUser: false,
+            timestamp: formatTimestamp(),
+          };
+          setChatMessages((prevMessages) => [...prevMessages, errorResponse]);
+          setIsThinking(false);
+          setIsProcessingResponse(false);
+        }
       } else {
         console.error('Error: ', response.statusText);
         setIsThinking(false);
@@ -346,62 +363,6 @@ const ChatAI = () => {
     textarea.style.height = `${newHeight}px`;
   };
 
-  const handlePaste = (e) => {
-    const clipboardData = e.clipboardData || window.clipboardData;
-    const pastedText = clipboardData.getData('text');
-
-    const cursorPosition = e.target.selectionStart;
-    const currentText = userInput;
-    const newText =
-      currentText.substring(0, cursorPosition) +
-      pastedText +
-      currentText.substring(e.target.selectionEnd);
-
-    if (newText.length > 4000) {
-      e.preventDefault();
-
-      const availableSpace =
-        4000 - (currentText.length - (e.target.selectionEnd - cursorPosition));
-
-      if (availableSpace <= 0) {
-        if (toast) {
-          toast.error('Character limit reached. Cannot paste more text.');
-        }
-        return;
-      }
-
-      const truncatedPaste = pastedText.substring(0, availableSpace);
-
-      const truncatedText =
-        currentText.substring(0, cursorPosition) +
-        truncatedPaste +
-        currentText.substring(e.target.selectionEnd);
-
-      setUserInput(truncatedText);
-
-      if (toast) {
-        toast.warning(
-          'Pasted text has been truncated to fit the 4000 character limit'
-        );
-      } else {
-        setIsNearLimit(true);
-        setTimeout(() => setIsNearLimit(false), 3000);
-      }
-
-      setTimeout(() => {
-        const textarea = e.target;
-        textarea.style.height = 'auto';
-        const lineHeight = 24;
-        const maxInitialLines = 3;
-        const newHeight = Math.min(
-          Math.max(lineHeight, textarea.scrollHeight),
-          lineHeight * maxInitialLines
-        );
-        textarea.style.height = `${newHeight}px`;
-      }, 0);
-    }
-  };
-
   const scrollToBottom = () => {
     chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
   };
@@ -410,35 +371,61 @@ const ChatAI = () => {
     scrollToBottom();
   }, [chatMessages, isLoading]);
 
-  useEffect(() => {
-    const fetchPredefinedQuestions = async () => {
-      try {
-        const response = await axios.get(`${API_URL}questions`, {
-          withCredentials: true,
-        });
+  const handleFileUpload = (event) => {
+    const files = Array.from(event.target.files);
+    const newFiles = files.map((file) => ({
+      id: Date.now() + Math.random(),
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      file: file,
+    }));
+    setUploadedFiles((prev) => [...prev, ...newFiles]);
+    setShowAttachments(false);
+  };
 
-        if (response.data && Array.isArray(response.data)) {
-          setPredefinedQuestions(response.data);
-          localStorage.setItem(
-            'predefinedQuestions',
-            JSON.stringify(response.data)
-          );
-        }
-      } catch (error) {
-        console.error('Error fetching predefined questions:', error);
-        setPredefinedQuestions([]);
+  const handleImageUpload = (event) => {
+    const files = Array.from(event.target.files);
+    const imageFiles = files.filter((file) => file.type.startsWith('image/'));
+    const newImages = imageFiles.map((file) => ({
+      id: Date.now() + Math.random(),
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      file: file,
+      preview: URL.createObjectURL(file),
+    }));
+    setUploadedFiles((prev) => [...prev, ...newImages]);
+    setShowAttachments(false);
+  };
+
+  const removeFile = (fileId) => {
+    setUploadedFiles((prev) => {
+      const updated = prev.filter((file) => file.id !== fileId);
+      const fileToRemove = prev.find((file) => file.id === fileId);
+      if (fileToRemove && fileToRemove.preview) {
+        URL.revokeObjectURL(fileToRemove.preview);
       }
+      return updated;
+    });
+  };
+
+  useEffect(() => {
+    return () => {
+      uploadedFiles.forEach((file) => {
+        if (file.preview) {
+          URL.revokeObjectURL(file.preview);
+        }
+      });
     };
-    const cached = localStorage.getItem('predefinedQuestions');
-    if (cached) {
-      setPredefinedQuestions(JSON.parse(cached));
-    }
-    fetchPredefinedQuestions();
   }, []);
 
-  const handleClickPredefinedQuestion = (question) => {
-    setUserInput(question);
-    setHideHeading(true);
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   return (
@@ -458,26 +445,6 @@ const ChatAI = () => {
         {!hideHeading && (
           <div className={styles.welcome_section}>
             <h1 className={styles.heading_center}>{getGreetingByTime()}</h1>
-            <div className={styles.predefined_questions}>
-              {predefinedQuestions.map((question, index) => (
-                <button
-                  key={index}
-                  className={styles.predefined_button}
-                  onClick={() =>
-                    handleClickPredefinedQuestion(question.question)
-                  }
-                >
-                  <img
-                    src={question.iconUrl}
-                    alt={question.question}
-                    width='24'
-                    height='24'
-                    className={styles.icon_svg}
-                  />
-                  {question.question}
-                </button>
-              ))}
-            </div>
           </div>
         )}
 
@@ -540,30 +507,125 @@ const ChatAI = () => {
 
         <div className={styles.chat_input_area}>
           <form className={styles.ai_form} onSubmit={handleSubmit}>
-            <textarea
-              className={styles.ai_textArea}
-              name='message'
-              rows='1'
-              placeholder='Ask Chattr Ultra...'
-              value={userInput}
-              onChange={autoResizeTextarea}
-              onPaste={handlePaste}
-              onKeyUp={(e) => {
-                if (e.keyCode === 13 && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSubmit(e);
-                } else {
-                  autoResizeTextarea(e);
-                }
-              }}
-              onKeyDown={(e) => {
-                if (e.keyCode === 13 && !e.shiftKey) {
-                  e.preventDefault();
-                }
-              }}
-              disabled={isRateLimited || isThinking || isProcessingResponse}
-              maxLength={4000}
-            />
+            <div className={styles.input_field_container}>
+              <textarea
+                className={styles.ai_textArea}
+                name='message'
+                rows='1'
+                placeholder='How can I help you today?'
+                value={userInput}
+                onChange={autoResizeTextarea}
+                onKeyUp={(e) => {
+                  if (e.keyCode === 13 && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit(e);
+                  } else {
+                    autoResizeTextarea(e);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.keyCode === 13 && !e.shiftKey) {
+                    e.preventDefault();
+                  }
+                }}
+                disabled={isRateLimited || isThinking || isProcessingResponse}
+                maxLength={4000}
+              />
+            </div>
+
+            {uploadedFiles.length > 0 && (
+              <div className={styles.uploaded_files}>
+                {uploadedFiles.map((file) => (
+                  <div key={file.id} className={styles.file_item}>
+                    {file.type.startsWith('image/') ? (
+                      <img
+                        src={file.preview}
+                        alt={file.name}
+                        className={styles.file_preview}
+                      />
+                    ) : (
+                      <MdInsertDriveFile className={styles.file_icon} />
+                    )}
+                    <div className={styles.file_info}>
+                      <span className={styles.file_name}>{file.name}</span>
+                      <span className={styles.file_size}>
+                        {formatFileSize(file.size)}
+                      </span>
+                    </div>
+                    <button
+                      type='button'
+                      className={styles.remove_file}
+                      onClick={() => removeFile(file.id)}
+                      title='Remove file'
+                    >
+                      <MdClose />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className={styles.bottom_controls}>
+              <div className={styles.left_controls}>
+                <div className={styles.attachments_dropdown}>
+                  <button
+                    type='button'
+                    className={`${styles.icon_button} ${showAttachments ? styles.active : ''}`}
+                    title='Add attachment'
+                    onClick={() => setShowAttachments(!showAttachments)}
+                  >
+                    <LuPlus />
+                  </button>
+                  {showAttachments && (
+                    <div className={styles.dropdown_menu}>
+                      <div
+                        className={styles.dropdown_item}
+                        onClick={() => imageInputRef.current?.click()}
+                      >
+                        <MdImage />
+                        <span>Upload Image</span>
+                      </div>
+                      <div
+                        className={styles.dropdown_item}
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <MdAttachFile />
+                        <span>Upload File</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className={styles.right_controls}>
+                <div className={styles.model_selector}>
+                  <span>Chattr Ultra</span>
+                  <small>Smart, efficient model</small>
+                </div>
+
+                <button
+                  className={styles.ai_submit}
+                  type='submit'
+                  disabled={
+                    isRateLimited ||
+                    isThinking ||
+                    isProcessingResponse ||
+                    !userInput.trim()
+                  }
+                >
+                  {isThinking || isProcessingResponse ? (
+                    <img
+                      src={loaderGif}
+                      alt='Loading'
+                      className={styles.loader_icon}
+                    />
+                  ) : (
+                    <img src={sendBTN} alt='' className={styles.sendBTN} />
+                  )}
+                </button>
+              </div>
+            </div>
+
             <div
               className={`${styles.char_counter} ${
                 userInput.length > 500 ? styles.visible : ''
@@ -573,6 +635,7 @@ const ChatAI = () => {
             >
               {userInput.length}/4000
             </div>
+
             {isNearLimit && (
               <div
                 className={`${styles.limit_warning} ${
@@ -582,29 +645,24 @@ const ChatAI = () => {
                 You are approaching or have reached the 4000 character limit
               </div>
             )}
-            <button
-              className={styles.ai_submit}
-              type='submit'
-              disabled={isRateLimited || isThinking || isProcessingResponse}
-            >
-              {isThinking || isProcessingResponse ? (
-                <img
-                  src={loaderGif}
-                  alt='Loading'
-                  className={styles.loader_icon}
-                />
-              ) : (
-                <LuSendHorizontal />
-              )}
-            </button>
           </form>
-          <p className={styles.info_text}>
-            {isRateLimited
-              ? countdown > 0
-                ? `Too many requests. Please wait ${countdown} seconds before trying again.`
-                : 'You can continue now.'
-              : 'Chattr Ultra can make mistakes. Check important info.'}
-          </p>
+
+          <input
+            ref={fileInputRef}
+            type='file'
+            multiple
+            style={{ display: 'none' }}
+            onChange={handleFileUpload}
+            accept='.pdf,.doc,.docx,.txt,.csv,.json'
+          />
+          <input
+            ref={imageInputRef}
+            type='file'
+            multiple
+            style={{ display: 'none' }}
+            onChange={handleImageUpload}
+            accept='image/*'
+          />
         </div>
       </div>
     </div>
