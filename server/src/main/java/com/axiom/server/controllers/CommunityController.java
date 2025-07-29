@@ -45,7 +45,7 @@ public class CommunityController {
 
             return ResponseEntity.ok(communities);
 
-        } catch (SQLException | IOException  | CustomException e) {
+        } catch (SQLException | IOException | CustomException e) {
             log.error("Error getting all communities", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -68,7 +68,7 @@ public class CommunityController {
             Community community = mapToCommunity(dbResponse.get(0));
             return ResponseEntity.ok(community);
 
-        } catch (SQLException | IOException  | CustomException e) {
+        } catch (SQLException | IOException | CustomException e) {
             log.error("Error getting community by name: {}", name, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -92,7 +92,7 @@ public class CommunityController {
             Integer count = getIntegerValue(countObj);
             return ResponseEntity.ok(count != null ? count : 0);
 
-        } catch (SQLException | IOException  | CustomException e) {
+        } catch (SQLException | IOException | CustomException e) {
             log.error("Error getting user count for community: {}", name, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -119,7 +119,7 @@ public class CommunityController {
 
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 
-        } catch (SQLException | IOException  | CustomException e) {
+        } catch (SQLException | IOException | CustomException e) {
             log.error("Error creating community for owner: {}", ownerId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -137,7 +137,7 @@ public class CommunityController {
             dbService.executeQuery(requestBody);
             return ResponseEntity.ok("User has successfully joined the community.");
 
-        } catch (SQLException | IOException  | CustomException e) {
+        } catch (SQLException | IOException | CustomException e) {
             log.error("Error joining community {} for user {}", communityId, userId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to join community: " + e.getMessage());
@@ -156,7 +156,7 @@ public class CommunityController {
             dbService.executeQuery(requestBody);
             return ResponseEntity.ok("User has successfully left the community.");
 
-        } catch (SQLException | IOException  | CustomException e) {
+        } catch (SQLException | IOException | CustomException e) {
             log.error("Error leaving community {} for user {}", communityId, userId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to leave community: " + e.getMessage());

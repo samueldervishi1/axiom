@@ -60,15 +60,11 @@ public class DevToolsService {
     }
 
     public Map<String, String> getEasterEgg() {
-        return Map.of(
-                "message", "You found the secret API!",
-                "developer", "Built by " + projectTeam,
-                "coffee", "This API was built on " + getCoffeeCount() + " cups of coffee",
-                "energy_drinks", "Powered by " + getEnergyDrinkCount() + " energy drinks",
-                "total_caffeine", "Total caffeine consumed: " + getTotalCaffeineLevel() + "mg",
-                "project_age", getProjectAgeWithExistentialCrisis(),
-                "version", projectVersion
-        );
+        return Map.of("message", "You found the secret API!", "developer", "Built by " + projectTeam, "coffee",
+                "This API was built on " + getCoffeeCount() + " cups of coffee", "energy_drinks",
+                "Powered by " + getEnergyDrinkCount() + " energy drinks", "total_caffeine",
+                "Total caffeine consumed: " + getTotalCaffeineLevel() + "mg", "project_age",
+                getProjectAgeWithExistentialCrisis(), "version", projectVersion);
     }
 
     public Map<String, Object> getServerMood() {
@@ -129,8 +125,7 @@ public class DevToolsService {
                 days + " days of existence, " + deletedRepos + " git repos sacrificed to the coding gods",
                 "Running for " + days + " days after " + deletedRepos + " 'this will never work' breakdowns",
                 days + " days young, " + deletedRepos + " repos older and wiser (RIP deleted code)",
-                "Project age: " + days + " days | Emotional breakdowns: " + deletedRepos + " | Regrets: ∞"
-        };
+                "Project age: " + days + " days | Emotional breakdowns: " + deletedRepos + " | Regrets: ∞"};
 
         int messageIndex = Math.abs((int) (days % messages.length));
         return messages[messageIndex];

@@ -61,8 +61,8 @@ const ModelUpdates = () => {
         return styles.legacy;
       case 'supported':
         return styles.supported;
-        case 'latest':
-          return styles.latest
+      case 'latest':
+        return styles.latest;
       default:
         return '';
     }
