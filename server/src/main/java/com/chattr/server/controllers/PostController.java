@@ -111,7 +111,7 @@ public class PostController {
 
     @GetMapping("/all")
     public ResponseEntity<Map<String, Object>> getAllPostsPaged(@RequestParam(defaultValue = "0") int page,
-                                                                @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size) {
         try {
             Map<String, Object> request = new HashMap<>();
             request.put("action", "GET_ALL_POSTS_PAGED");
@@ -132,8 +132,7 @@ public class PostController {
     }
 
     @GetMapping("/scheduled")
-    public ResponseEntity<Map<String, Object>> getAllScheduledPostsPaged(
-            @RequestParam(defaultValue = "0") int page,
+    public ResponseEntity<Map<String, Object>> getAllScheduledPostsPaged(@RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         try {
             Map<String, Object> request = new HashMap<>();
@@ -183,8 +182,7 @@ public class PostController {
     }
 
     @PostMapping("/create-scheduled")
-    public ResponseEntity<Map<String, Object>> createScheduledPost(
-            @RequestBody ScheduledPostRequest request) {
+    public ResponseEntity<Map<String, Object>> createScheduledPost(@RequestBody ScheduledPostRequest request) {
         try {
             if (request.getContent() == null || request.getContent().trim().isEmpty()) {
                 throw new CustomException(400, "Post content cannot be empty");
@@ -206,12 +204,8 @@ public class PostController {
                 throw new CustomException(400, "Cannot schedule post in the past");
             }
 
-            List<Map<String, Object>> result = dbService.createScheduledPost(
-                    request.getAuthorId(),
-                    request.getContent(),
-                    request.getAuthorName(),
-                    request.getScheduledFor()
-            );
+            List<Map<String, Object>> result = dbService.createScheduledPost(request.getAuthorId(),
+                    request.getContent(), request.getAuthorName(), request.getScheduledFor());
 
             return ResponseEntity.ok(result.get(0));
 
@@ -222,7 +216,7 @@ public class PostController {
 
     @PostMapping("/like/{postId}")
     public ResponseEntity<Map<String, Object>> likePost(@PathVariable Long postId,
-                                                        @RequestBody Map<String, Object> requestBody) {
+            @RequestBody Map<String, Object> requestBody) {
         try {
             Object userIdObj = requestBody.get("userId");
             String userId;

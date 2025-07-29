@@ -46,7 +46,7 @@ public class DBService {
             log.info("DB Request - JSON: {}", jsonRequest);
 
             try (CallableStatement callableStatement = executeCall(conn, executeQueryCall, inParameters);
-                 ResultSet resultSet = (ResultSet) callableStatement.getObject(1)) {
+                    ResultSet resultSet = (ResultSet) callableStatement.getObject(1)) {
 
                 while (resultSet.next()) {
                     String jsonResponse = resultSet.getString("response_text");
@@ -96,9 +96,8 @@ public class DBService {
         return call;
     }
 
-    public List<Map<String, Object>> createScheduledPost(String authorId, String content,
-                                                         String authorName, LocalDateTime scheduledFor)
-            throws SQLException, IOException, NamingException {
+    public List<Map<String, Object>> createScheduledPost(String authorId, String content, String authorName,
+            LocalDateTime scheduledFor) throws SQLException, IOException, NamingException {
 
         Map<String, Object> request = new HashMap<>();
         request.put("action", "create_scheduled");
