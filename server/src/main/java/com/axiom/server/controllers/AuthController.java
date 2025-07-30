@@ -125,13 +125,11 @@ public class AuthController {
         try {
             Map<String, String> tokens = loginService.loginWithRefreshToken(username, password, ipAddress);
 
-            ResponseCookie accessCookie = ResponseCookie.from("token", tokens.get("accessToken"))
-                    .httpOnly(true).secure(true).path("/")
-                    .sameSite("None").maxAge(Duration.ofMinutes(15)).build();
-                    
+            ResponseCookie accessCookie = ResponseCookie.from("token", tokens.get("accessToken")).httpOnly(true)
+                    .secure(true).path("/").sameSite("None").maxAge(Duration.ofMinutes(15)).build();
+
             ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.get("refreshToken"))
-                    .httpOnly(true).secure(true).path("/")
-                    .sameSite("None").maxAge(Duration.ofDays(7)).build();
+                    .httpOnly(true).secure(true).path("/").sameSite("None").maxAge(Duration.ofDays(7)).build();
 
             response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
             response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
@@ -158,7 +156,7 @@ public class AuthController {
 
         try {
             Claims claims = jwtTokenUtil.parseAndValidateToken(refreshToken);
-            
+
             if (!jwtTokenUtil.isRefreshToken(claims)) {
                 return createResponse(new CustomException(401, "Invalid token type"));
             }
@@ -173,14 +171,13 @@ public class AuthController {
             } else {
                 throw new IllegalArgumentException("Invalid userId type: " + userIdObj.getClass());
             }
-            
+
             String sessionId = claims.get("sessionId", String.class);
-            
+
             String newAccessToken = jwtTokenUtil.generateAccessToken(username, userId, false, sessionId);
 
-            ResponseCookie accessCookie = ResponseCookie.from("token", newAccessToken)
-                    .httpOnly(true).secure(true).path("/")
-                    .sameSite("None").maxAge(Duration.ofMinutes(15)).build();
+            ResponseCookie accessCookie = ResponseCookie.from("token", newAccessToken).httpOnly(true).secure(true)
+                    .path("/").sameSite("None").maxAge(Duration.ofMinutes(15)).build();
 
             response.setHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
 
@@ -198,9 +195,9 @@ public class AuthController {
 
         ResponseCookie tokenCookie = ResponseCookie.from("token", "").httpOnly(true).secure(true).path("/").maxAge(0)
                 .sameSite("None").build();
-        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", "").httpOnly(true).secure(true).path("/").maxAge(0)
-                .sameSite("None").build();
-                
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", "").httpOnly(true).secure(true).path("/")
+                .maxAge(0).sameSite("None").build();
+
         response.addHeader(HttpHeaders.SET_COOKIE, tokenCookie.toString());
         response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 

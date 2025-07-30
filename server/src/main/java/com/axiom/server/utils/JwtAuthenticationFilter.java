@@ -22,8 +22,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.time.Duration;
-import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 
 @Component
@@ -96,7 +94,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     token = extractTokenFromCookies(request);
                     claims = parseTokenSafely(token);
                 }
-                
+
                 if (claims == null) {
                     loggingService.logSecurityEvent("AUTH_TOKEN_EXPIRED", "anonymous", sessionId,
                             String.format("Invalid/expired token for %s %s from IP %s", method, uri, sessionId));
@@ -219,18 +217,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (claims.getExpiration() == null) {
             return false;
         }
-        
+
         long currentTime = System.currentTimeMillis();
         long expirationTime = claims.getExpiration().getTime();
         long timeUntilExpiry = expirationTime - currentTime;
-        
+
         return timeUntilExpiry < 300000;
     }
 
     private boolean tryRefreshToken(String refreshToken, HttpServletResponse response, String sessionId) {
         try {
             Claims refreshClaims = jwtTokenUtil.parseAndValidateToken(refreshToken);
-            
+
             if (!jwtTokenUtil.isRefreshToken(refreshClaims)) {
                 return false;
             }
@@ -245,24 +243,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             } else {
                 return false;
             }
-            
+
             String originalSessionId = refreshClaims.get("sessionId", String.class);
-            
+
             String newAccessToken = jwtTokenUtil.generateAccessToken(username, userId, false, originalSessionId);
 
-            ResponseCookie accessCookie = ResponseCookie.from(TOKEN_COOKIE_NAME, newAccessToken)
-                    .httpOnly(true).secure(true).path("/")
-                    .sameSite("None").maxAge(Duration.ofMinutes(15)).build();
+            ResponseCookie accessCookie = ResponseCookie.from(TOKEN_COOKIE_NAME, newAccessToken).httpOnly(true)
+                    .secure(true).path("/").sameSite("None").maxAge(Duration.ofMinutes(15)).build();
 
             response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
-            
-            loggingService.logInfo("JWTFilter", "tryRefreshToken", 
+
+            loggingService.logInfo("JWTFilter", "tryRefreshToken",
                     String.format("Token refreshed automatically for user %s", username));
 
             return true;
 
         } catch (Exception e) {
-            loggingService.logWarn("JWTFilter", "tryRefreshToken", 
+            loggingService.logWarn("JWTFilter", "tryRefreshToken",
                     "Failed to refresh token automatically: " + e.getMessage());
             return false;
         }

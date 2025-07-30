@@ -142,19 +142,11 @@ public class JwtTokenUtil {
 
     public String generateRefreshToken(String username, Long userId, String sessionId) {
         Instant now = Instant.now();
-        
-        return Jwts.builder()
-                .subject(username)
-                .issuer(ISSUER)
-                .audience().add("axiom-client").and()
-                .claim(CLAIM_USER_ID, userId)
-                .claim(CLAIM_TOKEN_TYPE, "refresh")
-                .claim(CLAIM_SESSION_ID, sessionId)
-                .id(UUID.randomUUID().toString())
-                .issuedAt(Date.from(now))
-                .notBefore(Date.from(now))
-                .expiration(Date.from(now.plus(refreshTokenExpirationMillis, ChronoUnit.MILLIS)))
-                .signWith(secretKey)
+
+        return Jwts.builder().subject(username).issuer(ISSUER).audience().add("axiom-client").and()
+                .claim(CLAIM_USER_ID, userId).claim(CLAIM_TOKEN_TYPE, "refresh").claim(CLAIM_SESSION_ID, sessionId)
+                .id(UUID.randomUUID().toString()).issuedAt(Date.from(now)).notBefore(Date.from(now))
+                .expiration(Date.from(now.plus(refreshTokenExpirationMillis, ChronoUnit.MILLIS))).signWith(secretKey)
                 .compact();
     }
 

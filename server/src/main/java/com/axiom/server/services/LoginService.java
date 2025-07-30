@@ -34,25 +34,25 @@ public class LoginService {
         return performLogin(username, password, ipAddress, true);
     }
 
-    private Map<String, String> performLogin(String username, String password, String ipAddress, boolean includeRefreshToken) {
+    private Map<String, String> performLogin(String username, String password, String ipAddress,
+            boolean includeRefreshToken) {
         String sessionId = loggingService.getCurrentSessionId();
         long totalStart = System.currentTimeMillis();
 
         try {
             User user = findAndValidateUser(username);
             verifyPassword(password, user);
-            
+
             String commonSessionId = jwtTokenUtil.generateSecureSessionId();
-            String accessToken = jwtTokenUtil.generateAccessToken(user.getUsername(), user.getId(), user.isTwoFa(), commonSessionId);
-            
+            String accessToken = jwtTokenUtil.generateAccessToken(user.getUsername(), user.getId(), user.isTwoFa(),
+                    commonSessionId);
+
             runPostLoginAsync(user, ipAddress, username, sessionId);
 
             if (includeRefreshToken) {
-                String refreshToken = jwtTokenUtil.generateRefreshToken(user.getUsername(), user.getId(), commonSessionId);
-                return Map.of(
-                    "accessToken", accessToken,
-                    "refreshToken", refreshToken
-                );
+                String refreshToken = jwtTokenUtil.generateRefreshToken(user.getUsername(), user.getId(),
+                        commonSessionId);
+                return Map.of("accessToken", accessToken, "refreshToken", refreshToken);
             } else {
                 return Map.of("accessToken", accessToken);
             }

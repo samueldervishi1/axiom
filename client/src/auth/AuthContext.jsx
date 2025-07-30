@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
       const response = await axios.post(`${API_URL}auth/refresh`, null, {
         withCredentials: true,
       });
-      
+
       if (response.status === 200) {
         console.log('Token refreshed successfully');
         return true;
@@ -72,9 +72,9 @@ export const AuthProvider = ({ children }) => {
             !isInitialCheck
           ) {
             console.log('401 error caught - attempting token refresh');
-            
+
             const refreshSuccess = await refreshToken();
-            
+
             if (refreshSuccess) {
               console.log('Token refreshed, retrying original request');
               return axios.request(error.config);
@@ -147,32 +147,37 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       if (error.response?.status === 401) {
         console.log('Session expired, attempting token refresh');
-        
+
         const refreshSuccess = await refreshToken();
-        
+
         if (refreshSuccess) {
           console.log('Token refreshed successfully, rechecking session');
           try {
             const retryResponse = await axios.get(`${API_URL}auth/me`, {
               withCredentials: true,
             });
-            
+
             if (retryResponse.status === 200 && retryResponse.data) {
               setIsAuthenticated(true);
               localStorage.setItem('lastAuthCheck', Date.now());
-              
+
               if (retryResponse.data.userId) {
                 setUserId(retryResponse.data.userId);
               }
-              
+
               if (retryResponse.data.username) {
                 setUsername(retryResponse.data.username);
-                
+
                 try {
-                  const deactivated = await isUserDeactivated(retryResponse.data.username);
+                  const deactivated = await isUserDeactivated(
+                    retryResponse.data.username
+                  );
                   setIsDeactivated(deactivated);
                 } catch (profileError) {
-                  console.error('Error checking deactivation status:', profileError);
+                  console.error(
+                    'Error checking deactivation status:',
+                    profileError
+                  );
                   setIsDeactivated(false);
                 }
               }
