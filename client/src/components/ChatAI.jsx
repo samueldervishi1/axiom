@@ -6,7 +6,6 @@ import { getUserIdFromServer, getUsernameFromServer } from '../auth/authUtils';
 import bot from '../assets/image2vector.svg';
 import user from '../assets/reshot-icon-user-G3RUDHZMQ6.svg';
 import loaderGif from '../assets/377.gif';
-import { FaRegPenToSquare } from 'react-icons/fa6';
 import { LuPlus } from 'react-icons/lu';
 import {
   MdAttachFile,
@@ -99,7 +98,7 @@ const ChatAI = () => {
   const loadChatHistory = async (conversationId) => {
     try {
       const response = await axios.get(
-        `${API_URL}ask/history/${conversationId}`,
+        `${API_URL}mindstream/history/${conversationId}`,
         {
           withCredentials: true,
           headers: {
@@ -307,7 +306,7 @@ const ChatAI = () => {
 
     try {
       const response = await axios.post(
-        `${API_URL}ask`,
+        `${API_URL}mindstream/generate`,
         {
           question: userInput,
           conversationId: getOrCreateConversationId(),

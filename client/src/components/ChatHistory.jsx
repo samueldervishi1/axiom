@@ -23,7 +23,7 @@ const ChatHistory = ({
     setError(null);
 
     try {
-      const response = await axios.get(`${API_URL}ask/user-history/${userId}`, {
+      const response = await axios.get(`${API_URL}mindstream/user-history/${userId}`, {
         withCredentials: true,
         headers: {
           'Content-Type': 'application/json',

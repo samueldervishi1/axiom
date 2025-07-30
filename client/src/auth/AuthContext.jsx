@@ -29,6 +29,22 @@ export const AuthProvider = ({ children }) => {
   const [userId, setUserId] = useState(null);
   const [username, setUsername] = useState(null);
 
+  const refreshToken = useCallback(async () => {
+    try {
+      const response = await axios.post(`${API_URL}auth/refresh`, null, {
+        withCredentials: true,
+      });
+      
+      if (response.status === 200) {
+        console.log('Token refreshed successfully');
+        return true;
+      }
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+    }
+    return false;
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await axios.post(`${API_URL}auth/logout`, null, {
@@ -49,17 +65,24 @@ export const AuthProvider = ({ children }) => {
     if (!isInitialCheck) {
       const interceptorId = axios.interceptors.response.use(
         (response) => response,
-        (error) => {
+        async (error) => {
           if (
             error.response &&
             error.response.status === 401 &&
             !isInitialCheck
           ) {
-            console.log(
-              '401 error caught by interceptor - redirecting to login'
-            );
-            logout();
-            window.location.href = '/login';
+            console.log('401 error caught - attempting token refresh');
+            
+            const refreshSuccess = await refreshToken();
+            
+            if (refreshSuccess) {
+              console.log('Token refreshed, retrying original request');
+              return axios.request(error.config);
+            } else {
+              console.log('Token refresh failed - redirecting to login');
+              logout();
+              window.location.href = '/login';
+            }
           }
           return Promise.reject(error);
         }
@@ -68,7 +91,7 @@ export const AuthProvider = ({ children }) => {
         axios.interceptors.response.eject(interceptorId);
       };
     }
-  }, [isInitialCheck, logout]);
+  }, [isInitialCheck, logout, refreshToken]);
 
   // Fixed: Moved checkSession out of useEffect to prevent recreating it
   const checkSession = useCallback(async () => {
@@ -123,18 +146,64 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       if (error.response?.status === 401) {
-        console.log('User not logged in yet.');
+        console.log('Session expired, attempting token refresh');
+        
+        const refreshSuccess = await refreshToken();
+        
+        if (refreshSuccess) {
+          console.log('Token refreshed successfully, rechecking session');
+          try {
+            const retryResponse = await axios.get(`${API_URL}auth/me`, {
+              withCredentials: true,
+            });
+            
+            if (retryResponse.status === 200 && retryResponse.data) {
+              setIsAuthenticated(true);
+              localStorage.setItem('lastAuthCheck', Date.now());
+              
+              if (retryResponse.data.userId) {
+                setUserId(retryResponse.data.userId);
+              }
+              
+              if (retryResponse.data.username) {
+                setUsername(retryResponse.data.username);
+                
+                try {
+                  const deactivated = await isUserDeactivated(retryResponse.data.username);
+                  setIsDeactivated(deactivated);
+                } catch (profileError) {
+                  console.error('Error checking deactivation status:', profileError);
+                  setIsDeactivated(false);
+                }
+              }
+            } else {
+              setIsAuthenticated(false);
+              setIsDeactivated(false);
+              setUsername(null);
+            }
+          } catch (retryError) {
+            console.error('Session recheck failed after refresh:', retryError);
+            setIsAuthenticated(false);
+            setIsDeactivated(false);
+            setUsername(null);
+          }
+        } else {
+          console.log('Token refresh failed, user not authenticated');
+          setIsAuthenticated(false);
+          setIsDeactivated(false);
+          setUsername(null);
+        }
       } else {
         console.error('Session check failed:', error);
+        setIsAuthenticated(false);
+        setIsDeactivated(false);
+        setUsername(null);
       }
-      setIsAuthenticated(false);
-      setIsDeactivated(false);
-      setUsername(null);
     } finally {
       setIsLoading(false);
       setIsInitialCheck(false); // Fixed: Set this after the first check
     }
-  }, []);
+  }, [refreshToken]);
 
   // Fixed: Simplified useEffect with proper dependencies
   useEffect(() => {
@@ -173,6 +242,7 @@ export const AuthProvider = ({ children }) => {
       username,
       login,
       logout,
+      refreshToken,
       markReactivated,
     }),
     [
@@ -183,6 +253,7 @@ export const AuthProvider = ({ children }) => {
       username,
       login,
       logout,
+      refreshToken,
       markReactivated,
     ]
   );
