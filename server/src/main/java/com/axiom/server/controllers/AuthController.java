@@ -123,12 +123,18 @@ public class AuthController {
         String ipAddress = getIpAddress(request);
 
         try {
-            String token = loginService.login(username, password, ipAddress);
+            Map<String, String> tokens = loginService.loginWithRefreshToken(username, password, ipAddress);
 
-            ResponseCookie cookie = ResponseCookie.from("token", token).httpOnly(true).secure(true).path("/")
-                    .sameSite("None").maxAge(Duration.ofHours(4)).build();
+            ResponseCookie accessCookie = ResponseCookie.from("token", tokens.get("accessToken"))
+                    .httpOnly(true).secure(true).path("/")
+                    .sameSite("None").maxAge(Duration.ofMinutes(15)).build();
+                    
+            ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.get("refreshToken"))
+                    .httpOnly(true).secure(true).path("/")
+                    .sameSite("None").maxAge(Duration.ofDays(7)).build();
 
-            response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+            response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+            response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
             return ResponseEntity.ok("Login successful");
 
@@ -141,13 +147,62 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+        String refreshToken = Arrays.stream(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))
+                .filter(c -> "refreshToken".equals(c.getName())).map(Cookie::getValue).findFirst().orElse(null);
+
+        if (refreshToken == null) {
+            return createResponse(new CustomException(401, "Refresh token not found"));
+        }
+
+        try {
+            Claims claims = jwtTokenUtil.parseAndValidateToken(refreshToken);
+            
+            if (!jwtTokenUtil.isRefreshToken(claims)) {
+                return createResponse(new CustomException(401, "Invalid token type"));
+            }
+
+            String username = claims.getSubject();
+            Object userIdObj = claims.get("userId");
+            long userId;
+            if (userIdObj instanceof Integer) {
+                userId = ((Integer) userIdObj).longValue();
+            } else if (userIdObj instanceof Long) {
+                userId = (Long) userIdObj;
+            } else {
+                throw new IllegalArgumentException("Invalid userId type: " + userIdObj.getClass());
+            }
+            
+            String sessionId = claims.get("sessionId", String.class);
+            
+            String newAccessToken = jwtTokenUtil.generateAccessToken(username, userId, false, sessionId);
+
+            ResponseCookie accessCookie = ResponseCookie.from("token", newAccessToken)
+                    .httpOnly(true).secure(true).path("/")
+                    .sameSite("None").maxAge(Duration.ofMinutes(15)).build();
+
+            response.setHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+
+            return ResponseEntity.ok("Token refreshed successfully");
+
+        } catch (Exception e) {
+            loggingService.logError("AuthController", "refreshToken", "Failed to refresh token", e);
+            return createResponse(new CustomException(401, "Invalid refresh token"));
+        }
+    }
+
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletResponse response) {
         SecurityContextHolder.clearContext();
 
-        ResponseCookie cookie = ResponseCookie.from("token", "").httpOnly(true).secure(true).path("/").maxAge(0)
+        ResponseCookie tokenCookie = ResponseCookie.from("token", "").httpOnly(true).secure(true).path("/").maxAge(0)
                 .sameSite("None").build();
-        response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", "").httpOnly(true).secure(true).path("/").maxAge(0)
+                .sameSite("None").build();
+                
+        response.addHeader(HttpHeaders.SET_COOKIE, tokenCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
         return ResponseEntity.ok("Logged out");
     }

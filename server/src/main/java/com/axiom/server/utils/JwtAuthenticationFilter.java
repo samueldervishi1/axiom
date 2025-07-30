@@ -11,6 +11,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -19,12 +21,16 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String TOKEN_COOKIE_NAME = "token";
+    private static final String REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
     private final JwtTokenUtil jwtTokenUtil;
     private final LoggingService loggingService;
@@ -85,14 +91,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             Claims claims = parseTokenSafely(token);
             if (claims == null) {
-                loggingService.logSecurityEvent("AUTH_TOKEN_EXPIRED", "anonymous", sessionId,
-                        String.format("Invalid/expired token for %s %s from IP %s", method, uri, sessionId));
+                String refreshToken = extractRefreshTokenFromCookies(request);
+                if (refreshToken != null && tryRefreshToken(refreshToken, response, sessionId)) {
+                    token = extractTokenFromCookies(request);
+                    claims = parseTokenSafely(token);
+                }
+                
+                if (claims == null) {
+                    loggingService.logSecurityEvent("AUTH_TOKEN_EXPIRED", "anonymous", sessionId,
+                            String.format("Invalid/expired token for %s %s from IP %s", method, uri, sessionId));
 
-                loggingService.logWarn("JWTFilter", "doFilterInternal",
-                        String.format("Invalid or expired token for %s %s from IP %s", method, uri, sessionId));
+                    loggingService.logWarn("JWTFilter", "doFilterInternal",
+                            String.format("Invalid or expired token for %s %s from IP %s", method, uri, sessionId));
 
-                sendErrorResponse(response, "Invalid or expired token");
-                return;
+                    sendErrorResponse(response, "Invalid or expired token");
+                    return;
+                }
+            } else if (shouldRefreshToken(claims)) {
+                String refreshToken = extractRefreshTokenFromCookies(request);
+                if (refreshToken != null) {
+                    tryRefreshToken(refreshToken, response, sessionId);
+                }
             }
 
             String username = claims.getSubject();
@@ -180,6 +199,72 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    private String extractRefreshTokenFromCookies(HttpServletRequest request) {
+        if (request.getCookies() == null) {
+            return null;
+        }
+
+        for (Cookie cookie : request.getCookies()) {
+            if (REFRESH_TOKEN_COOKIE_NAME.equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
+    }
+
+    private boolean shouldRefreshToken(Claims claims) {
+        if (claims.getExpiration() == null) {
+            return false;
+        }
+        
+        long currentTime = System.currentTimeMillis();
+        long expirationTime = claims.getExpiration().getTime();
+        long timeUntilExpiry = expirationTime - currentTime;
+        
+        return timeUntilExpiry < 300000;
+    }
+
+    private boolean tryRefreshToken(String refreshToken, HttpServletResponse response, String sessionId) {
+        try {
+            Claims refreshClaims = jwtTokenUtil.parseAndValidateToken(refreshToken);
+            
+            if (!jwtTokenUtil.isRefreshToken(refreshClaims)) {
+                return false;
+            }
+
+            String username = refreshClaims.getSubject();
+            Object userIdObj = refreshClaims.get("userId");
+            long userId;
+            if (userIdObj instanceof Integer) {
+                userId = ((Integer) userIdObj).longValue();
+            } else if (userIdObj instanceof Long) {
+                userId = (Long) userIdObj;
+            } else {
+                return false;
+            }
+            
+            String originalSessionId = refreshClaims.get("sessionId", String.class);
+            
+            String newAccessToken = jwtTokenUtil.generateAccessToken(username, userId, false, originalSessionId);
+
+            ResponseCookie accessCookie = ResponseCookie.from(TOKEN_COOKIE_NAME, newAccessToken)
+                    .httpOnly(true).secure(true).path("/")
+                    .sameSite("None").maxAge(Duration.ofMinutes(15)).build();
+
+            response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+            
+            loggingService.logInfo("JWTFilter", "tryRefreshToken", 
+                    String.format("Token refreshed automatically for user %s", username));
+
+            return true;
+
+        } catch (Exception e) {
+            loggingService.logWarn("JWTFilter", "tryRefreshToken", 
+                    "Failed to refresh token automatically: " + e.getMessage());
+            return false;
         }
     }
 

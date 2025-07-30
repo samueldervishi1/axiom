@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import static com.axiom.server.models.Messages.INVALID_CREDENTIALS;
@@ -25,16 +26,36 @@ public class LoginService {
     private final LoggingService loggingService;
 
     public String login(String username, String password, String ipAddress) {
+        Map<String, String> tokens = performLogin(username, password, ipAddress, false);
+        return tokens.get("accessToken");
+    }
+
+    public Map<String, String> loginWithRefreshToken(String username, String password, String ipAddress) {
+        return performLogin(username, password, ipAddress, true);
+    }
+
+    private Map<String, String> performLogin(String username, String password, String ipAddress, boolean includeRefreshToken) {
         String sessionId = loggingService.getCurrentSessionId();
         long totalStart = System.currentTimeMillis();
 
         try {
             User user = findAndValidateUser(username);
             verifyPassword(password, user);
-            String token = jwtTokenUtil.generateAccessToken(user.getUsername(), user.getId(), user.isTwoFa());
+            
+            String commonSessionId = jwtTokenUtil.generateSecureSessionId();
+            String accessToken = jwtTokenUtil.generateAccessToken(user.getUsername(), user.getId(), user.isTwoFa(), commonSessionId);
+            
             runPostLoginAsync(user, ipAddress, username, sessionId);
 
-            return token;
+            if (includeRefreshToken) {
+                String refreshToken = jwtTokenUtil.generateRefreshToken(user.getUsername(), user.getId(), commonSessionId);
+                return Map.of(
+                    "accessToken", accessToken,
+                    "refreshToken", refreshToken
+                );
+            } else {
+                return Map.of("accessToken", accessToken);
+            }
 
         } catch (CustomException e) {
             long totalDuration = System.currentTimeMillis() - totalStart;

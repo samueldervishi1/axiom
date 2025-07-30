@@ -59,13 +59,13 @@ public class JwtTokenUtil {
             }
 
             this.accessTokenExpirationMillis = accessTokenExpiration != null ? accessTokenExpiration : 900000L;
-            long refreshTokenExpirationMillis = refreshTokenExpiration != null ? refreshTokenExpiration : 604800000L;
+            this.refreshTokenExpirationMillis = refreshTokenExpiration != null ? refreshTokenExpiration : 604800000L;
 
             warmUpJWT();
 
             loggingService.logInfo("JwtTokenUtil", "init",
                     "JWT initialized with HS512, access token: " + (accessTokenExpirationMillis / 1000 / 60) + "min, "
-                            + "refresh token: " + (refreshTokenExpirationMillis / 1000 / 60 / 60 / 24) + " days");
+                            + "refresh token: " + (this.refreshTokenExpirationMillis / 1000 / 60 / 60 / 24) + " days");
 
         } catch (Exception e) {
             loggingService.logError("JwtTokenUtil", "init", "Failed to initialize JWT utility", e);
@@ -140,6 +140,39 @@ public class JwtTokenUtil {
         return generateAccessToken(username, userId, twoFa, sessionId);
     }
 
+    public String generateRefreshToken(String username, Long userId, String sessionId) {
+        Instant now = Instant.now();
+        
+        return Jwts.builder()
+                .subject(username)
+                .issuer(ISSUER)
+                .audience().add("axiom-client").and()
+                .claim(CLAIM_USER_ID, userId)
+                .claim(CLAIM_TOKEN_TYPE, "refresh")
+                .claim(CLAIM_SESSION_ID, sessionId)
+                .id(UUID.randomUUID().toString())
+                .issuedAt(Date.from(now))
+                .notBefore(Date.from(now))
+                .expiration(Date.from(now.plus(refreshTokenExpirationMillis, ChronoUnit.MILLIS)))
+                .signWith(secretKey)
+                .compact();
+    }
+
+    public String generateRefreshToken(String username, Long userId) {
+        String sessionId = generateSecureSessionId();
+        return generateRefreshToken(username, userId, sessionId);
+    }
+
+    public boolean isRefreshToken(Claims claims) {
+        String tokenType = claims.get(CLAIM_TOKEN_TYPE, String.class);
+        return "refresh".equals(tokenType);
+    }
+
+    public boolean isAccessToken(Claims claims) {
+        String tokenType = claims.get(CLAIM_TOKEN_TYPE, String.class);
+        return "access".equals(tokenType);
+    }
+
     private void validateTokenClaims(Claims claims) {
         if (claims.get(CLAIM_USER_ID) == null) {
             throw new JwtException("Token missing required userId claim");
@@ -186,6 +219,7 @@ public class JwtTokenUtil {
     @Getter
     private SecretKey secretKey;
     private long accessTokenExpirationMillis;
+    private long refreshTokenExpirationMillis;
 
     @Value("${jwt.secret}")
     private String secretKeyString;
