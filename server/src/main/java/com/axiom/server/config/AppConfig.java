@@ -33,7 +33,7 @@ public class AppConfig {
 
         registrationBean.setFilter(rateLimitingFilter);
 
-        registrationBean.addUrlPatterns("/axiom/api/core/v11-loom/auth/*");
+        registrationBean.addUrlPatterns("/axiom/api/core/v16-loom/auth/*");
 
         registrationBean.setOrder(1); // Execute before JWT filter
         registrationBean.setName("authRateLimitingFilter");

@@ -22,6 +22,44 @@ public class CommentsController {
         this.dbService = dbService;
     }
 
+    @GetMapping("/post/{postId}")
+    public ResponseEntity<List<Map<String, Object>>> getCommentsByPostId(@PathVariable String postId,
+            @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size) {
+        try {
+            Map<String, Object> request = new HashMap<>();
+            request.put("action", "GET_COMMENTS_BY_POST_ID");
+            request.put("postId", postId);
+            request.put("page", page);
+            request.put("size", size);
+
+            List<Map<String, Object>> result = dbService.executeQuery(request);
+
+            return ResponseEntity.ok(result);
+        } catch (SQLException | IOException e) {
+            throw new CustomException(500, "Database error: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/{postId}/count")
+    public ResponseEntity<Map<String, Object>> getPostCommentsCount(@PathVariable Long postId) {
+        try {
+            Map<String, Object> request = new HashMap<>();
+            request.put("action", "GET_POST_COMMENTS_COUNT");
+            request.put("postId", postId);
+
+            List<Map<String, Object>> result = dbService.executeQuery(request);
+
+            if (result.isEmpty()) {
+                throw new CustomException(404, "Post not found");
+            }
+
+            return ResponseEntity.ok(result.get(0));
+
+        } catch (SQLException | IOException e) {
+            throw new CustomException(500, "Database error: " + e.getMessage());
+        }
+    }
+
     @PostMapping("/create/{userId}/{postId}")
     public ResponseEntity<Map<String, Object>> createComment(@PathVariable String userId, @PathVariable String postId,
             @RequestBody Comment comment) {
@@ -67,24 +105,6 @@ public class CommentsController {
             }
 
             return ResponseEntity.ok(result.get(0));
-        } catch (SQLException | IOException e) {
-            throw new CustomException(500, "Database error: " + e.getMessage());
-        }
-    }
-
-    @GetMapping("/post/{postId}")
-    public ResponseEntity<List<Map<String, Object>>> getCommentsByPostId(@PathVariable String postId,
-            @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size) {
-        try {
-            Map<String, Object> request = new HashMap<>();
-            request.put("action", "GET_COMMENTS_BY_POST_ID");
-            request.put("postId", postId);
-            request.put("page", page);
-            request.put("size", size);
-
-            List<Map<String, Object>> result = dbService.executeQuery(request);
-
-            return ResponseEntity.ok(result);
         } catch (SQLException | IOException e) {
             throw new CustomException(500, "Database error: " + e.getMessage());
         }

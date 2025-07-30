@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/llm")
@@ -18,27 +17,15 @@ public class LLMController {
         this.llmService = llmService;
     }
 
+    @GetMapping
+    public ResponseEntity<List<LLM>> getAll() {
+        List<LLM> llm = llmService.findAll();
+        return ResponseEntity.ok(llm);
+    }
+
     @PostMapping
     public ResponseEntity<LLM> create(@RequestBody LLM llm) {
         LLM saved = llmService.save(llm);
         return ResponseEntity.ok(saved);
-    }
-
-    @GetMapping
-    public ResponseEntity<List<LLM>> getAll() {
-        List<LLM> llms = llmService.findAll();
-        return ResponseEntity.ok(llms);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<LLM> getById(@PathVariable Long id) {
-        Optional<LLM> llm = llmService.findById(id);
-        return llm.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/count")
-    public ResponseEntity<Long> getCount() {
-        long count = llmService.count();
-        return ResponseEntity.ok(count);
     }
 }

@@ -9,7 +9,6 @@ import {
   FaRegCommentAlt,
   FaRegEyeSlash,
   FaRegThumbsUp,
-  FaTrophy,
 } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import styles from '../styles/profile.module.css';
@@ -193,7 +192,7 @@ const Profile = () => {
       radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.08) 0%, transparent 50%)
     `,
       minHeight: '100vh',
-      borderRadius: '30px',
+      borderRadius: '12px',
       marginTop: '10px',
       marginBottom: '10px',
       backdropFilter: 'blur(20px)',
@@ -328,9 +327,20 @@ const Profile = () => {
               />
               <div className={styles.nameSection}>
                 <h1 className={styles.displayName}>{profile.displayName}</h1>
-                <h2 className={styles.username} style={dynamicStyles.username}>
-                  u/{profile.username}
-                </h2>
+                <div className={styles.usernameRow}>
+                  <h2
+                    className={styles.username}
+                    style={dynamicStyles.username}
+                  >
+                    u/{profile.username}
+                  </h2>
+                  <span
+                    className={styles.karmaDisplay}
+                    style={dynamicStyles.statHighlight}
+                  >
+                    • {profile.karma} karma
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -547,15 +557,6 @@ const Profile = () => {
 
               <div className={styles.userStats}>
                 <div className={styles.stat}>
-                  <span className={styles.statLabel}>Karma</span>
-                  <span
-                    className={styles.statValue}
-                    style={dynamicStyles.statHighlight}
-                  >
-                    {profile.karma}
-                  </span>
-                </div>
-                <div className={styles.stat}>
                   <span className={styles.statLabel}>Cake Day</span>
                   <span className={styles.statValue}>
                     {new Date(profile.accountCreationDate).toLocaleDateString(
@@ -568,31 +569,6 @@ const Profile = () => {
                     )}
                   </span>
                 </div>
-              </div>
-
-              <hr className={styles.divider} />
-
-              <div className={styles.achievements}>
-                <div className={styles.achievementsHeader}>
-                  <FaTrophy
-                    className={styles.trophyIcon}
-                    style={{ color: colorVariations.primary }}
-                  />
-                  <h4>Achievements</h4>
-                  <Link
-                    to={`/user/${profile.username}/achievements`}
-                    className={styles.viewAll}
-                    style={{ color: colorVariations.primary }}
-                  >
-                    View All
-                  </Link>
-                </div>
-                <p className={styles.achievementCount}>
-                  <span style={dynamicStyles.statHighlight}>
-                    {profile.achievements?.length || 0}
-                  </span>{' '}
-                  Unlocked
-                </p>
               </div>
 
               <hr className={styles.divider} />

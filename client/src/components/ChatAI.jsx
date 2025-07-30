@@ -13,9 +13,15 @@ import {
   MdImage,
   MdInsertDriveFile,
   MdClose,
+  MdHistory,
 } from 'react-icons/md';
 import sendBTN from '../assets/test.svg';
 import styles from '../styles/ai.module.css';
+import { writePrompts } from '../constants/writePrompts';
+import { learnPrompts } from '../constants/learnPrompts';
+import { codePrompts } from '../constants/codePrompts';
+import { lifePrompts } from '../constants/lifePrompts';
+import ChatHistory from './ChatHistory';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -30,7 +36,7 @@ const ChatAI = () => {
   const [hideHeading, setHideHeading] = useState(false);
   const [, setIsMobileView] = useState();
   const [, setShowContinueMessage] = useState(false);
-  const [, setUserId] = useState(null);
+  const [userId, setUserId] = useState(null);
   const [, setIsTypingFinished] = useState(true);
   const [isProcessingResponse, setIsProcessingResponse] = useState(false);
   const [isNearLimit, setIsNearLimit] = useState(false);
@@ -40,6 +46,9 @@ const ChatAI = () => {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const fileInputRef = useRef(null);
   const imageInputRef = useRef(null);
+  const [activeCategory, setActiveCategory] = useState(null);
+  const [showChatHistory, setShowChatHistory] = useState(false);
+  const [currentConversationId, setCurrentConversationId] = useState(null);
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -78,15 +87,99 @@ const ChatAI = () => {
   }, []);
 
   const resetChat = () => {
-    const newSessionId = uuidv4();
-    localStorage.setItem('sessionId', newSessionId);
+    const newConversationId = uuidv4();
+    localStorage.setItem('conversationId', newConversationId);
+    setCurrentConversationId(newConversationId);
     setChatMessages([]);
     setUserInput('');
     setHideHeading(false);
+    setShowChatHistory(false);
+  };
+
+  const loadChatHistory = async (conversationId) => {
+    try {
+      const response = await axios.get(
+        `${API_URL}ask/history/${conversationId}`,
+        {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.status === 200 && response.data) {
+        const historyMessages = response.data
+          .map((item) => [
+            {
+              content: item.userQuestion,
+              isUser: true,
+              timestamp: new Date(item.createdAt).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              }),
+            },
+            {
+              content: item.chattrAnswer,
+              isUser: false,
+              timestamp: new Date(item.createdAt).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              }),
+            },
+          ])
+          .flat();
+
+        setChatMessages(historyMessages);
+        if (historyMessages.length > 0) {
+          setHideHeading(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading chat history:', error);
+    }
+  };
+
+  const handleConversationSelect = (conversationId, messages) => {
+    localStorage.setItem('conversationId', conversationId);
+    setCurrentConversationId(conversationId);
+
+    // Convert messages to the format expected by the chat
+    const formattedMessages = messages
+      .map((message) => [
+        {
+          content: message.userQuestion,
+          isUser: true,
+          timestamp: new Date(message.createdAt).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+        },
+        {
+          content: message.chattrAnswer,
+          isUser: false,
+          timestamp: new Date(message.createdAt).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+        },
+      ])
+      .flat();
+
+    setChatMessages(formattedMessages);
+    if (formattedMessages.length > 0) {
+      setHideHeading(true);
+    }
   };
 
   useEffect(() => {
-    resetChat();
+    const existingConversationId = localStorage.getItem('conversationId');
+    if (existingConversationId) {
+      setCurrentConversationId(existingConversationId);
+      loadChatHistory(existingConversationId);
+    } else {
+      resetChat();
+    }
   }, []);
 
   //format the code block provided by the model
@@ -202,13 +295,13 @@ const ChatAI = () => {
     };
 
     const getOrCreateConversationId = () => {
-      const existingId = sessionStorage.getItem('conversationId');
+      const existingId = localStorage.getItem('conversationId');
       if (existingId) {
         return existingId;
       }
 
-      const newId = `conv-${Date.now()}`;
-      sessionStorage.setItem('conversationId', newId);
+      const newId = uuidv4();
+      localStorage.setItem('conversationId', newId);
       return newId;
     };
 
@@ -218,6 +311,7 @@ const ChatAI = () => {
         {
           question: userInput,
           conversationId: getOrCreateConversationId(),
+          userId: userId,
         },
         {
           withCredentials: true,
@@ -430,14 +524,20 @@ const ChatAI = () => {
 
   return (
     <div className={styles.chat_container_wrapper}>
-      <div className={styles.chat_header}>
+      <div className={styles.floating_buttons_container}>
         <button
-          className={styles.new_chat_button}
+          className={styles.floating_button}
+          onClick={() => setShowChatHistory(true)}
+          title='Chat History'
+        >
+          <MdHistory />
+        </button>
+        <button
+          className={styles.floating_button}
           onClick={resetChat}
           title='New Chat'
         >
-          <FaRegPenToSquare />
-          <span>New Chat</span>
+          <LuPlus />
         </button>
       </div>
 
@@ -506,6 +606,155 @@ const ChatAI = () => {
         </div>
 
         <div className={styles.chat_input_area}>
+          <div className={styles.category_cards_container}>
+            <div className={styles.category_cards}>
+              <div
+                className={`${styles.category_card} ${activeCategory === 'write' ? styles.active : ''}`}
+                onClick={() =>
+                  setActiveCategory(activeCategory === 'write' ? null : 'write')
+                }
+              >
+                <svg
+                  className={styles.category_icon}
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='currentColor'
+                >
+                  <path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z' />
+                  <polyline points='14,2 14,8 20,8' />
+                  <line x1='16' y1='13' x2='8' y2='13' />
+                  <line x1='16' y1='17' x2='8' y2='17' />
+                  <polyline points='10,9 9,9 8,9' />
+                </svg>
+                <span>Write</span>
+              </div>
+
+              <div
+                className={`${styles.category_card} ${activeCategory === 'learn' ? styles.active : ''}`}
+                onClick={() =>
+                  setActiveCategory(activeCategory === 'learn' ? null : 'learn')
+                }
+              >
+                <svg
+                  className={styles.category_icon}
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='currentColor'
+                >
+                  <path d='M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z' />
+                  <path d='M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z' />
+                </svg>
+                <span>Learn</span>
+              </div>
+
+              <div
+                className={`${styles.category_card} ${activeCategory === 'code' ? styles.active : ''}`}
+                onClick={() =>
+                  setActiveCategory(activeCategory === 'code' ? null : 'code')
+                }
+              >
+                <svg
+                  className={styles.category_icon}
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='currentColor'
+                >
+                  <polyline points='16,18 22,12 16,6' />
+                  <polyline points='8,6 2,12 8,18' />
+                </svg>
+                <span>Code</span>
+              </div>
+
+              <div
+                className={`${styles.category_card} ${activeCategory === 'life' ? styles.active : ''}`}
+                onClick={() =>
+                  setActiveCategory(activeCategory === 'life' ? null : 'life')
+                }
+              >
+                <svg
+                  className={styles.category_icon}
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='currentColor'
+                >
+                  <path d='M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z' />
+                </svg>
+                <span>Life</span>
+              </div>
+            </div>
+
+            {activeCategory && (
+              <div className={styles.prompts_dropup}>
+                <div className={styles.prompts_list}>
+                  {activeCategory === 'write' && (
+                    <>
+                      {writePrompts.map((prompt) => (
+                        <div
+                          key={prompt.id}
+                          className={styles.prompt_item}
+                          onClick={() => {
+                            setUserInput(prompt.text);
+                            setActiveCategory(null);
+                          }}
+                        >
+                          {prompt.text}
+                        </div>
+                      ))}
+                    </>
+                  )}
+                  {activeCategory === 'learn' && (
+                    <>
+                      {learnPrompts.map((prompt) => (
+                        <div
+                          key={prompt.id}
+                          className={styles.prompt_item}
+                          onClick={() => {
+                            setUserInput(prompt.text);
+                            setActiveCategory(null);
+                          }}
+                        >
+                          {prompt.text}
+                        </div>
+                      ))}
+                    </>
+                  )}
+                  {activeCategory === 'code' && (
+                    <>
+                      {codePrompts.map((prompt) => (
+                        <div
+                          key={prompt.id}
+                          className={styles.prompt_item}
+                          onClick={() => {
+                            setUserInput(prompt.text);
+                            setActiveCategory(null);
+                          }}
+                        >
+                          {prompt.text}
+                        </div>
+                      ))}
+                    </>
+                  )}
+                  {activeCategory === 'life' && (
+                    <>
+                      {lifePrompts.map((prompt) => (
+                        <div
+                          key={prompt.id}
+                          className={styles.prompt_item}
+                          onClick={() => {
+                            setUserInput(prompt.text);
+                            setActiveCategory(null);
+                          }}
+                        >
+                          {prompt.text}
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
           <form className={styles.ai_form} onSubmit={handleSubmit}>
             <div className={styles.input_field_container}>
               <textarea
@@ -515,17 +764,10 @@ const ChatAI = () => {
                 placeholder='How can I help you today?'
                 value={userInput}
                 onChange={autoResizeTextarea}
-                onKeyUp={(e) => {
-                  if (e.key === 13 && !e.shiftKey) {
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     handleSubmit(e);
-                  } else {
-                    autoResizeTextarea(e);
-                  }
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 13 && !e.shiftKey) {
-                    e.preventDefault();
                   }
                 }}
                 disabled={isRateLimited || isThinking || isProcessingResponse}
@@ -665,6 +907,14 @@ const ChatAI = () => {
           />
         </div>
       </div>
+
+      <ChatHistory
+        userId={userId}
+        currentConversationId={currentConversationId}
+        onConversationSelect={handleConversationSelect}
+        show={showChatHistory}
+        onClose={() => setShowChatHistory(false)}
+      />
     </div>
   );
 };

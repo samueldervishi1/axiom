@@ -1,20 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import {
-  FaArrowLeft,
-  FaComment,
-  FaFacebook,
-  FaHeart,
-  FaLink,
-  FaRegHeart,
-  FaShare,
-  FaTwitter,
-  FaWhatsapp,
-} from 'react-icons/fa';
+import { FaArrowLeft } from 'react-icons/fa';
 import userIcon from '../assets/user.webp';
 import styles from '../styles/postDetails.module.css';
 import { useSocialShare } from '../hooks/useSocialShare.js';
+import { usePostInteractions } from '../hooks/usePostInteractions.js';
+import { usePostComments } from '../hooks/usePostComments.js';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -27,28 +19,15 @@ const PostDetails = () => {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isLikeAnimating, setIsLikeAnimating] = useState(false);
-  const [likesCount, setLikesCount] = useState(initialState.initialLikes || 0);
-  const [isLiked, setIsLiked] = useState(
-    initialState.isInitiallyLiked || false
-  );
   const [newComment, setNewComment] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
-  const [sortedComments, setSortedComments] = useState([]);
-  const [copySuccess, setCopySuccess] = useState(false);
-  const shareMenuRef = useRef(null);
-  const { handleSocialShare, showShareMenu, setShowShareMenu } =
-    useSocialShare();
 
-  const sortComments = (comments) => {
-    if (!comments) return [];
-
-    return [...comments].sort((a, b) => {
-      const dateA = `${a.commentDate} ${a.commentTime}`;
-      const dateB = `${b.commentDate} ${b.commentTime}`;
-      return new Date(dateB) - new Date(dateA);
-    });
-  };
+  const {
+    comments,
+    loading: commentsLoading,
+    error: commentsError,
+    addComment,
+  } = usePostComments(postId);
 
   useEffect(() => {
     const fetchPostDetails = async () => {
@@ -58,13 +37,6 @@ const PostDetails = () => {
           withCredentials: true,
         });
         setPost(response.data);
-        setSortedComments(sortComments(response.data.commentList));
-        if (!initialState.initialLikes) {
-          setLikesCount(response.data.likedUserIds?.length || 0);
-          setIsLiked(
-            response.data.likedUserIds?.includes(initialState.userId) || false
-          );
-        }
       } catch (err) {
         setError('Failed to load post details');
         console.error('Error fetching post details:', err);
@@ -77,58 +49,6 @@ const PostDetails = () => {
       fetchPostDetails();
     }
   }, [postId, initialState.initialLikes, initialState.userId]);
-
-  useEffect(() => {
-    if (post?.commentList) {
-      setSortedComments(sortComments(post.commentList));
-    }
-  }, [post?.commentList]);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        shareMenuRef.current &&
-        !shareMenuRef.current.contains(event.target)
-      ) {
-        setShowShareMenu(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleLike = async () => {
-    if (!post || !initialState.userId) return;
-
-    setIsLikeAnimating(true);
-    try {
-      const response = await axios.post(
-        `${API_URL}like/add`,
-        {
-          userId: initialState.userId,
-          postId: post.id,
-        },
-        {
-          withCredentials: true,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        setIsLiked((prev) => !prev);
-        setLikesCount((prev) => prev + (isLiked ? -1 : 1));
-      }
-    } catch (error) {
-      console.error('Error toggling like:', error);
-    } finally {
-      setTimeout(() => {
-        setIsLikeAnimating(false);
-      }, 450);
-    }
-  };
 
   const handleSubmitComment = async (e) => {
     e.preventDefault();
@@ -151,19 +71,15 @@ const PostDetails = () => {
       if (response.status === 200 || response.status === 201) {
         const now = new Date();
         const newCommentObj = {
+          commentId: response.data.id || Date.now().toString(),
           userId: initialState.userId,
+          postId: postId,
           content: newComment,
-          id: response.data.id || Date.now().toString(),
-          commentDate: now.toISOString().split('T')[0],
-          commentTime: now.toTimeString().split(' ')[0],
+          timestamp: now.toISOString(),
         };
 
-        const updatedComments = [...(post.commentList || []), newCommentObj];
-        setPost((prev) => ({
-          ...prev,
-          commentList: updatedComments,
-        }));
-        setSortedComments(sortComments(updatedComments));
+        addComment(newCommentObj);
+        setCommentCount((prev) => prev + 1);
         setNewComment('');
       }
     } catch (error) {
@@ -175,28 +91,6 @@ const PostDetails = () => {
 
   const handleGoBack = () => {
     navigate(-1);
-  };
-
-  const handleShare = (e) => {
-    e.stopPropagation();
-    setShowShareMenu(!showShareMenu);
-  };
-
-  const getShareUrl = () => {
-    return `${window.location.origin}/post/${postId}`;
-  };
-
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(getShareUrl());
-      setCopySuccess(true);
-      setTimeout(() => {
-        setCopySuccess(false);
-        setShowShareMenu(false);
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy link:', err);
-    }
   };
 
   if (loading) {
@@ -244,66 +138,6 @@ const PostDetails = () => {
           )}
         </div>
 
-        <div className={styles.interactionBar}>
-          <button
-            className={`${styles.interactionButton} ${styles.likeButton} 
-              ${isLiked ? styles.liked : ''} 
-              ${isLikeAnimating ? styles.likeAnimation : ''}`}
-            onClick={handleLike}
-          >
-            {isLiked ? <FaHeart /> : <FaRegHeart />}
-            <span>{likesCount} Likes</span>
-          </button>
-          <button className={styles.interactionButton}>
-            <FaComment />
-            <span>{sortedComments.length} Comments</span>
-          </button>
-          <div className={styles.shareContainer}>
-            <button
-              className={styles.interactionButton}
-              onClick={handleShare}
-              aria-label='Share post'
-            >
-              <FaShare />
-              <span>Share</span>
-            </button>
-            {showShareMenu && (
-              <div ref={shareMenuRef} className={styles.shareMenu}>
-                <button
-                  className={styles.shareOption}
-                  onClick={() => handleSocialShare('twitter')}
-                >
-                  <FaTwitter />
-                  Share on Twitter
-                </button>
-                <button
-                  className={styles.shareOption}
-                  onClick={() => handleSocialShare('facebook')}
-                >
-                  <FaFacebook />
-                  Share on Facebook
-                </button>
-                <button
-                  className={styles.shareOption}
-                  onClick={() => handleSocialShare('whatsapp')}
-                >
-                  <FaWhatsapp />
-                  Share on WhatsApp
-                </button>
-                <button className={styles.shareOption} onClick={handleCopyLink}>
-                  <FaLink />
-                  Copy Link
-                </button>
-                {copySuccess && (
-                  <div className={styles.copySuccess}>
-                    Link copied to clipboard!
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
         <div className={styles.commentsSection}>
           <h3 className={styles.commentsHeader}>Comments</h3>
 
@@ -325,32 +159,44 @@ const PostDetails = () => {
             </button>
           </form>
 
-          {sortedComments.length > 0 ? (
+          {commentsLoading ? (
+            <div className={styles.commentsLoading}>Loading comments...</div>
+          ) : commentsError ? (
+            <div className={styles.commentsError}>{commentsError}</div>
+          ) : comments.length > 0 ? (
             <div className={styles.commentsList}>
-              {sortedComments.map((comment) => (
-                <div key={comment.id} className={styles.commentCard}>
-                  <div className={styles.commentHeader}>
-                    <img
-                      src={userIcon}
-                      alt='User'
-                      className={styles.commentAvatar}
-                    />
-                    <div className={styles.commentInfo}>
-                      <h4 className={styles.commentUsername}>
-                        {comment.userId === initialState.userId
-                          ? initialState.username
-                          : 'User'}
-                      </h4>
-                      <span className={styles.commentTime}>
-                        {comment.commentDate}{' '}
-                        {comment.commentTime &&
-                          comment.commentTime.split('.')[0]}
-                      </span>
+              {comments.map((comment) => {
+                const formatTimestamp = (timestamp) => {
+                  const date = new Date(timestamp);
+                  const dateStr = date.toISOString().split('T')[0];
+                  const timeStr = date.toTimeString().split(' ')[0];
+                  return `${dateStr} ${timeStr}`;
+                };
+
+                return (
+                  <div key={comment.commentId} className={styles.commentCard}>
+                    <div className={styles.commentHeader}>
+                      <img
+                        src={userIcon}
+                        alt='User'
+                        className={styles.commentAvatar}
+                      />
+                      <div className={styles.commentInfo}>
+                        <span className={styles.commentUsername}>
+                          {comment.userId === initialState.userId
+                            ? initialState.username
+                            : `User ${comment.userId}`}
+                        </span>
+                        <span className={styles.bullet}>•</span>
+                        <span className={styles.commentTime}>
+                          {formatTimestamp(comment.timestamp)}
+                        </span>
+                      </div>
                     </div>
+                    <p className={styles.commentContent}>{comment.content}</p>
                   </div>
-                  <p className={styles.commentContent}>{comment.content}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className={styles.noComments}>No comments yet</div>

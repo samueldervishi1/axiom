@@ -18,18 +18,6 @@ public class VDataSource {
 
     private DataSource dataSource;
 
-    @Value("${spring.datasource.url}")
-    private String url;
-
-    @Value("${spring.datasource.username}")
-    private String username;
-
-    @Value("${spring.datasource.password}")
-    private String password;
-
-    @Value("${spring.datasource.driver-class-name}")
-    private String driverClassName;
-
     @PostConstruct
     public void init() throws IOException {
         this.dataSource = initDataSource();
@@ -80,4 +68,16 @@ public class VDataSource {
         config.addDataSourceProperty("oracle.jdbc.ReadTimeout", "30000");
         return config;
     }
+
+    @Value("${spring.datasource.url}")
+    private String url;
+
+    @Value("${spring.datasource.username}")
+    private String username;
+
+    @Value("${spring.datasource.password}")
+    private String password;
+
+    @Value("${spring.datasource.driver-class-name}")
+    private String driverClassName;
 }

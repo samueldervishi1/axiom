@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 
 import static com.axiom.server.models.Messages.*;
 
-/** Service responsible for validating and registering new users. */
 @Service
 public class RegisterService {
 

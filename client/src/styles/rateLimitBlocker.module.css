@@ -1,0 +1,260 @@
+.rateLimitModal .modal-dialog {
+  max-width: 500px;
+}
+
+.modalHeader {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
+  color: white;
+  border-bottom: none;
+  padding: 1.5rem;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.shieldIcon {
+  font-size: 1.5rem;
+  color: white;
+}
+
+.modalTitle {
+  margin: 0;
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.modalBody {
+  padding: 2rem;
+}
+
+.warningAlert {
+  border: none;
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  border-left: 4px solid #ffa500;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.warningIcon {
+  color: #856404;
+  font-size: 1.25rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.warningText {
+  margin-bottom: 0.5rem;
+  color: #856404;
+}
+
+.reasonsList {
+  margin: 0;
+  padding-left: 1rem;
+  color: #856404;
+}
+
+.reasonsList li {
+  margin-bottom: 0.25rem;
+}
+
+.countdownSection {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.timeDisplay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+
+.clockIcon {
+  color: #007bff;
+  font-size: 1.125rem;
+}
+
+.timeText {
+  font-weight: 500;
+  color: #495057;
+}
+
+.timeValue {
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  font-size: 1.25rem;
+  color: #007bff;
+  background: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  border: 2px solid #007bff;
+}
+
+.progressBar {
+  height: 8px;
+  margin-bottom: 0.75rem;
+  background-color: #e9ecef;
+  border-radius: 4px;
+}
+
+.progressText {
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin: 0;
+}
+
+.migrationAlert {
+  margin-top: 1rem;
+  border: none;
+  background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+  border-left: 4px solid #17a2b8;
+  text-align: center;
+}
+
+.unblockButton {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.instructionsSection {
+  margin-bottom: 1.5rem;
+}
+
+.instructionsTitle {
+  color: #495057;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.instructionsList {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: #6c757d;
+}
+
+.instructionsList li {
+  margin-bottom: 0.5rem;
+}
+
+.debugSection {
+  border-top: 1px solid #e9ecef;
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+.debugButton {
+  margin-bottom: 1rem;
+}
+
+.statsSection {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid #e9ecef;
+}
+
+.statsSection h6 {
+  color: #495057;
+  margin-bottom: 0.75rem;
+}
+
+.statsList {
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  color: #495057;
+}
+
+.statsList li {
+  margin-bottom: 0.25rem;
+}
+
+.resetButton {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.modalFooter {
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+  padding: 1rem 1.5rem;
+}
+
+.footerText {
+  width: 100%;
+  text-align: center;
+}
+
+.supportText {
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Animation for the modal */
+.rateLimitModal .modal-content {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Pulsing animation for the time value */
+.timeValue {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .rateLimitModal .modal-dialog {
+    margin: 1rem;
+    max-width: calc(100% - 2rem);
+  }
+
+  .modalHeader {
+    padding: 1rem;
+  }
+
+  .modalBody {
+    padding: 1.5rem;
+  }
+
+  .timeDisplay {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .timeValue {
+    font-size: 1.125rem;
+  }
+}

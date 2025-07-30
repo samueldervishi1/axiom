@@ -343,8 +343,8 @@
 
 .commentInfo {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  gap: 8px;
 }
 
 .commentTime {
@@ -357,6 +357,12 @@
   color: #1a1a1a;
   font-size: 0.9375rem;
   margin: 0;
+}
+
+.bullet {
+  color: #65676b;
+  font-weight: bold;
+  font-size: 0.75rem;
 }
 
 .commentContent {

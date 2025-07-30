@@ -7,7 +7,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 const PostList = ({ onPostRefresh }) => {
   const [posts, setPosts] = useState([]);
-  const [error, setError] = useState(null);
+  const [error] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [delayOver, setDelayOver] = useState(false);
 
@@ -69,6 +69,7 @@ const PostList = ({ onPostRefresh }) => {
 
       setPosts(postsWithUsernames);
     } catch (err) {
+      console.error('❌ Error fetching posts:', err);
       return (
         <div
           style={{
@@ -88,7 +89,6 @@ const PostList = ({ onPostRefresh }) => {
       setIsLoading(false);
     }
   };
-
   if (error) {
     return null;
   }
@@ -119,27 +119,43 @@ const PostList = ({ onPostRefresh }) => {
 
   return (
     <div className='post-list' style={{ marginBottom: 15 }}>
-      {posts.map((post) => (
-        <div key={post.id} className='post-card-wrapper'>
-          <PostCard
-            id={post.id}
-            content={post.content}
-            commentsList={post.commentsList}
-            postDate={new Date(post.createdAt).toLocaleDateString()}
-            postTime={new Date(post.createdAt).toLocaleTimeString()}
-            userId={post.userId}
-            username={post.username}
-            imageUrl={post.imageUrl}
-            onPostRefresh={onPostRefresh}
-            savedUserIds={post.savedUserIds || []}
-            onPostDeleted={(deletedId) => {
-              setPosts((prevPosts) =>
-                prevPosts.filter((p) => p.id !== deletedId)
-              );
-            }}
-          />
-        </div>
-      ))}
+      {posts.map((post) => {
+        return (
+          <div key={post.id} className='post-card-wrapper'>
+            <div
+              style={{
+                fontSize: '10px',
+                color: 'blue',
+                padding: '2px',
+                backgroundColor: '#e0f0ff',
+                margin: '2px',
+              }}
+            >
+              PostList DEBUG: Post ID={post.id} | Author ID={post.userId} |
+              Username={post.username}
+            </div>
+
+            <PostCard
+              id={post.id}
+              content={post.content}
+              commentsList={post.commentsList}
+              postDate={new Date(post.createdAt).toLocaleDateString()}
+              postTime={new Date(post.createdAt).toLocaleTimeString()}
+              userId={post.userId}
+              username={post.username}
+              imageUrl={post.imageUrl}
+              onPostRefresh={onPostRefresh}
+              savedUserIds={post.savedUserIds || []}
+              onPostDeleted={(deletedId) => {
+                console.log(`🗑️ Deleting post with ID: ${deletedId}`);
+                setPosts((prevPosts) =>
+                  prevPosts.filter((p) => p.id !== deletedId)
+                );
+              }}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 };

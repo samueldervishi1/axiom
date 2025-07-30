@@ -65,12 +65,6 @@ public class ProfileController {
         return ResponseEntity.ok("Password updated successfully");
     }
 
-    @DeleteMapping("/{userId}/delete")
-    public ResponseEntity<String> deleteUser(@PathVariable Long userId) {
-        profileService.softDeleteUser(userId);
-        return ResponseEntity.ok("User deleted successfully");
-    }
-
     @PutMapping("/{userId}/deactivate")
     public ResponseEntity<String> deactivateUser(@PathVariable Long userId) {
         profileService.deactivateUser(userId);
@@ -81,5 +75,11 @@ public class ProfileController {
     public ResponseEntity<String> reactivateUser(@PathVariable Long userId) {
         profileService.activateUser(userId);
         return ResponseEntity.ok("User reactivated successfully");
+    }
+
+    @DeleteMapping("/{userId}/delete")
+    public ResponseEntity<String> deleteUser(@PathVariable Long userId) {
+        profileService.softDeleteUser(userId);
+        return ResponseEntity.ok("User deleted successfully");
     }
 }

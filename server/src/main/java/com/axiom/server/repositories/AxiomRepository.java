@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface AxiomRepository extends JpaRepository<Axiom, Long> {
     List<Axiom> findByConversationIdOrderByCreatedAtAsc(String conversationId);
+    List<Axiom> findByUserIdOrderByConversationIdAscCreatedAtAsc(String userId);
 }

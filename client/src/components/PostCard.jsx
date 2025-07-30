@@ -21,6 +21,7 @@ import { Button, Form, Modal } from 'react-bootstrap';
 import { reportReasons } from '../constants/reportReasons';
 import styles from '../styles/postCard.module.css';
 import { useSocialShare } from '../hooks/useSocialShare.js';
+import { usePostInteractions } from '../hooks/usePostInteractions.js';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -35,8 +36,6 @@ const PostCard = ({
   imageUrl,
   onPostDeleted,
   onPostRefresh,
-  isLiked: initialIsLiked = false,
-  likesCount: initialLikesCount = 0,
   savedUserIds = [],
 }) => {
   const [loggedInUsername, setLoggedInUsername] = useState(null);
@@ -45,16 +44,14 @@ const PostCard = ({
   const [reportReason, setReportReason] = useState('');
   const [customReason, setCustomReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLiked, setIsLiked] = useState(initialIsLiked);
-  const [likesCount, setLikesCount] = useState(initialLikesCount);
-  const [isLikeAnimating, setIsLikeAnimating] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
-  const [commentCount, setCommentCount] = useState(0);
   const shareMenuRef = useRef(null);
   const navigate = useNavigate();
   const { handleSocialShare, showShareMenu, setShowShareMenu } =
     useSocialShare();
+  const { isLiked, likesCount, commentCount, isLikeAnimating, handleLike } =
+    usePostInteractions(id, loggedInUserId);
 
   const formatDateTime = () => {
     const date = postDate || 'Unknown date';
@@ -145,34 +142,21 @@ const PostCard = ({
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const [username, userId] = await Promise.all([
+        const [loggedUsername, loggedUserId] = await Promise.all([
           getUsernameFromServer(),
           getUserIdFromServer(),
         ]);
-        setLoggedInUsername(username);
-        setLoggedInUserId(userId);
 
-        if (userId) {
-          setIsSaved(savedUserIds.includes(userId));
-          const postCountResponse = await axios.get(
-            `${API_URL}posts/count/${id}`,
-            {
-              withCredentials: true,
-            }
-          );
+        setLoggedInUsername(loggedUsername);
+        setLoggedInUserId(loggedUserId);
 
-          const postData = postCountResponse.data;
-
-          const userLiked = postData.likedUsers?.some(
-            (user) => user.userId === userId
-          );
-
-          setIsLiked(userLiked);
-          setLikesCount(postData.likesCount);
-          setCommentCount(commentsList?.length || 0);
+        if (loggedUserId) {
+          setIsSaved(savedUserIds.includes(loggedUserId));
+        } else {
+          console.error(`No user logged in for post ${id}`);
         }
       } catch (error) {
-        console.error('Error fetching post data:', error);
+        console.error(`Error fetching data for post ${id}:`, error);
       }
     };
 
@@ -192,45 +176,6 @@ const PostCard = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const handleLike = async () => {
-    try {
-      if (!loggedInUserId) return;
-
-      setIsLikeAnimating(true);
-      setIsLiked((prev) => !prev);
-
-      const response = await axios.post(
-        `${API_URL}posts/like/${id}`,
-        {
-          userId: loggedInUserId,
-          postId: id,
-        },
-        {
-          withCredentials: true,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        const countResponse = await axios.get(`${API_URL}posts/count/${id}`, {
-          withCredentials: true,
-        });
-        setLikesCount(countResponse.data.likesCount);
-      } else {
-        setIsLiked((prev) => !prev);
-      }
-    } catch (error) {
-      console.error('Error liking post:', error);
-      setIsLiked((prev) => !prev);
-    } finally {
-      setTimeout(() => {
-        setIsLikeAnimating(false);
-      }, 450);
-    }
-  };
 
   const handleShare = (e) => {
     e.stopPropagation();

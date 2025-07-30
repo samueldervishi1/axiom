@@ -19,15 +19,6 @@ public class StoryController {
         this.storyService = storyService;
     }
 
-    @PostMapping("/upload")
-    public ResponseEntity<String> uploadStory(@RequestParam("files") MultipartFile[] files,
-            @RequestParam("userId") String userId, @RequestParam("username") String username,
-            @RequestParam(value = "caption", required = false) String caption) {
-
-        storyService.createStory(userId, username, files, caption);
-        return ResponseEntity.ok("Story uploaded successfully.");
-    }
-
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Story>> getUserStories(@PathVariable String userId) {
         List<Story> stories = storyService.getUserStories(userId);
@@ -50,6 +41,15 @@ public class StoryController {
     public ResponseEntity<Map<String, Integer>> getStoryViewCount(@PathVariable Long storyId) {
         Map<String, Integer> viewCount = storyService.getStoryViewCount(storyId);
         return ResponseEntity.ok(viewCount);
+    }
+
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadStory(@RequestParam("files") MultipartFile[] files,
+            @RequestParam("userId") String userId, @RequestParam("username") String username,
+            @RequestParam(value = "caption", required = false) String caption) {
+
+        storyService.createStory(userId, username, files, caption);
+        return ResponseEntity.ok("Story uploaded successfully.");
     }
 
     @PostMapping("/{storyId}/view")

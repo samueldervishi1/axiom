@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, memo, Suspense } from 'react';
+import React, { useState, useCallback, memo, Suspense } from 'react';
 import styles from '../styles/home.module.css';
 import CreatePost from './CreatePost';
 
@@ -6,9 +6,6 @@ const PostList = React.lazy(() => import('./PostList'));
 const PopularHashtags = React.lazy(() => import('./PopularHashtags'));
 const AnimatedCard = React.lazy(() => import('./AnimatedCard'));
 const ScheduledPostsCard = React.lazy(() => import('./ScheduledPostsCard'));
-
-const POST_REFRESH_INTERVAL = 300000;
-
 const LoadingFallback = memo(() => (
   <div className={styles.loading_container}>Loading...</div>
 ));
@@ -20,15 +17,6 @@ const Home = () => {
   const handlePostRefresh = useCallback(() => {
     setRefreshTrigger((prev) => prev + 1);
   }, []);
-
-  useEffect(() => {
-    const postIntervalId = setInterval(
-      handlePostRefresh,
-      POST_REFRESH_INTERVAL
-    );
-
-    return () => clearInterval(postIntervalId);
-  }, [handlePostRefresh]);
 
   return (
     <div className={styles.home_container}>

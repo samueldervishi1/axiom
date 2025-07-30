@@ -8,6 +8,9 @@ import {
 import './index.css';
 import { useAuth } from './auth/AuthContext';
 import Navbar from './components/Navbar';
+import RateLimitBlocker from './components/RateLimitBlocker';
+import { useRateLimit } from './hooks/useRateLimit';
+import { usePageTracker } from './hooks/usePageTracker';
 
 const Login = lazy(() => import('./components/Login'));
 const Register = lazy(() => import('./components/Register'));
@@ -28,75 +31,103 @@ const UserSettings = lazy(() => import('./components/SettingsProfile'));
 const PostDetails = lazy(() => import('./components/PostDetails'));
 const FollowerScreen = lazy(() => import('./components/FollowerScreen'));
 
-const App = () => {
+// Inner component that uses Router context
+const AppContent = () => {
   const { isAuthenticated, isDeactivated } = useAuth();
+  const {
+    isBlocked,
+    remainingTime,
+    formattedRemainingTime,
+    checkRateLimit,
+    resetRateLimit,
+    forceUnblock,
+    getRequestStats,
+  } = useRateLimit();
+
+  // Enhanced page tracking (now inside Router context)
+  const { getVisitStats } = usePageTracker(checkRateLimit);
+
   const ProtectedRoute = ({ element }) => {
+    if (isBlocked) {
+      return null; // Rate limit blocker will handle the display
+    }
     if (!isAuthenticated) return <Login />;
     if (isDeactivated) return <Navigate to='/account-deactivated' replace />;
     return element;
   };
 
   return (
+    <div className='App'>
+      {/* Rate Limit Blocker Modal */}
+      <RateLimitBlocker
+        isBlocked={isBlocked}
+        remainingTime={remainingTime}
+        formattedRemainingTime={formattedRemainingTime}
+        onReset={resetRateLimit} // Only for development/debug
+        onForceUnblock={forceUnblock} // For migrating old blocks
+        getRequestStats={getRequestStats}
+        getVisitStats={getVisitStats}
+      />
+
+      {!isBlocked && isAuthenticated && !isDeactivated && <Navbar />}
+
+      <Suspense
+        fallback={<div style={{ textAlign: 'center' }}>Loading...</div>}
+      >
+        <Routes>
+          {/* Public Routes */}
+          <Route path='/login' element={<Login />} />
+          <Route path='/register' element={<Register />} />
+          <Route path='/terms' element={<TermsAndServices />} />
+          <Route path='/about' element={<About />} />
+          <Route path='/contact' element={<Contact />} />
+          <Route path='/faq' element={<FAQ />} />
+          <Route path='/account-deactivated' element={<DeactivatedAccount />} />
+
+          {/* Protected Routes */}
+          <Route path='/home' element={<ProtectedRoute element={<Home />} />} />
+          <Route
+            path='/chat'
+            element={<ProtectedRoute element={<ChatAI />} />}
+          />
+          <Route
+            path='/settings'
+            element={<ProtectedRoute element={<Settings />} />}
+          />
+          <Route
+            path='/profile'
+            element={<ProtectedRoute element={<Profile />} />}
+          />
+          <Route
+            path='/settings/profile/:username'
+            element={<ProtectedRoute element={<UserSettings />} />}
+          />
+          <Route
+            path='/post/:postId'
+            element={<ProtectedRoute element={<PostDetails />} />}
+          />
+          <Route
+            path='/list/:type/:username'
+            element={<ProtectedRoute element={<FollowerScreen />} />}
+          />
+          <Route
+            path='/explore'
+            element={<ProtectedRoute element={<ExplorePage />} />}
+          />
+
+          {/* Fallback Routes */}
+          <Route path='/' element={<Navigate to='/home' replace />} />
+          <Route path='*' element={<NotFound />} />
+        </Routes>
+      </Suspense>
+    </div>
+  );
+};
+
+const App = () => {
+  return (
     <Router>
-      <div className='App'>
-        {isAuthenticated && !isDeactivated && <Navbar />}
-
-        <Suspense
-          fallback={<div style={{ textAlign: 'center' }}>Loading...</div>}
-        >
-          <Routes>
-            {/* Public Routes */}
-            <Route path='/login' element={<Login />} />
-            <Route path='/register' element={<Register />} />
-            <Route path='/terms' element={<TermsAndServices />} />
-            <Route path='/about' element={<About />} />
-            <Route path='/contact' element={<Contact />} />
-            <Route path='/faq' element={<FAQ />} />
-            <Route
-              path='/account-deactivated'
-              element={<DeactivatedAccount />}
-            />
-
-            {/* Protected Routes */}
-            <Route
-              path='/home'
-              element={<ProtectedRoute element={<Home />} />}
-            />
-            <Route
-              path='/chat'
-              element={<ProtectedRoute element={<ChatAI />} />}
-            />
-            <Route
-              path='/settings'
-              element={<ProtectedRoute element={<Settings />} />}
-            />
-            <Route
-              path='/profile'
-              element={<ProtectedRoute element={<Profile />} />}
-            />
-            <Route
-              path='/settings/profile/:username'
-              element={<ProtectedRoute element={<UserSettings />} />}
-            />
-            <Route
-              path='/post/:postId'
-              element={<ProtectedRoute element={<PostDetails />} />}
-            />
-            <Route
-              path='/list/:type/:username'
-              element={<ProtectedRoute element={<FollowerScreen />} />}
-            />
-            <Route
-              path='/explore'
-              element={<ProtectedRoute element={<ExplorePage />} />}
-            />
-
-            {/* Fallback Routes */}
-            <Route path='/' element={<Navigate to='/home' replace />} />
-            <Route path='*' element={<NotFound />} />
-          </Routes>
-        </Suspense>
-      </div>
+      <AppContent />
     </Router>
   );
 };

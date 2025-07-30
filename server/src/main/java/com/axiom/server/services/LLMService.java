@@ -5,7 +5,6 @@ import com.axiom.server.repositories.LLMRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class LLMService {
@@ -22,13 +21,5 @@ public class LLMService {
 
     public List<LLM> findAll() {
         return llmRepository.findAll();
-    }
-
-    public Optional<LLM> findById(Long id) {
-        return llmRepository.findById(id);
-    }
-
-    public long count() {
-        return llmRepository.count();
     }
 }

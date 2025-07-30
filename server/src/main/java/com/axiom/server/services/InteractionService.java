@@ -1,9 +1,6 @@
 package com.axiom.server.services;
 
-import com.axiom.server.models.ChatRequest;
-import com.axiom.server.models.Axiom;
-import com.axiom.server.models.ModelRequest;
-import com.axiom.server.models.ModelResponse;
+import com.axiom.server.models.*;
 import com.axiom.server.repositories.AxiomRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -13,17 +10,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 @Transactional
-public class AxiomService {
+public class InteractionService {
 
     private final AxiomRepository axiomRepository;
     private final RestTemplate restTemplate;
     private final LoggingService loggingService;
 
-    public AxiomService(AxiomRepository axiomRepository, LoggingService loggingService) {
+    public InteractionService(AxiomRepository axiomRepository, LoggingService loggingService) {
         this.axiomRepository = axiomRepository;
         this.restTemplate = new RestTemplate();
         this.loggingService = loggingService;
@@ -36,13 +35,13 @@ public class AxiomService {
         conversation.setUserId(chatRequest.getUserId());
 
         try {
-            String chattrAnswer = callModelApi(chatRequest.getQuestion());
-            conversation.setChattrAnswer(chattrAnswer);
+            String answer = callModelApi(chatRequest.getQuestion());
+            conversation.setChattrAnswer(answer);
             conversation.setSuccess(true);
         } catch (Exception e) {
             log.error("Error calling API", e);
-            loggingService.logError("ChattrUltraService", "sendQuestionToModel", e.getMessage(), e);
-            conversation.setChattrAnswer("Sorry, I encountered an error while processing your question.");
+            loggingService.logError("InteractionService", "sendQuestionToModel", e.getMessage(), e);
+            conversation.setChattrAnswer(e.getMessage() != null ? e.getMessage() : "API call failed");
             conversation.setSuccess(false);
             conversation.setErrorMessage(e.getMessage());
         }
@@ -55,6 +54,28 @@ public class AxiomService {
 
     public List<Axiom> getConversationHistory(String conversationId) {
         return axiomRepository.findByConversationIdOrderByCreatedAtAsc(conversationId);
+    }
+
+    public List<ConversationGroup> getUserHistoryGrouped(String userId) {
+        List<Axiom> allMessages = axiomRepository.findByUserIdOrderByConversationIdAscCreatedAtAsc(userId);
+
+        Map<String, List<Axiom>> groupedByConversation = allMessages.stream()
+                .collect(Collectors.groupingBy(Axiom::getConversationId));
+
+        return groupedByConversation.entrySet().stream().map(entry -> {
+            String conversationId = entry.getKey();
+            List<Axiom> messages = entry.getValue();
+
+            ConversationGroup group = new ConversationGroup();
+            group.setConversationId(conversationId);
+            group.setUserId(userId);
+            group.setMessages(messages);
+            group.setMessageCount(messages.size());
+            group.setStartedAt(messages.get(0).getCreatedAt());
+            group.setLastMessageAt(messages.get(messages.size() - 1).getCreatedAt());
+
+            return group;
+        }).collect(Collectors.toList());
     }
 
     private String callModelApi(String question) {
@@ -79,7 +100,7 @@ public class AxiomService {
             }
         } catch (Exception e) {
             log.error("Error calling API: {}", e.getMessage());
-            loggingService.logError("ChattrUltraService", "getConversationHistory", e.getMessage(), e);
+            loggingService.logError("InteractionService", "getConversationHistory", e.getMessage(), e);
             throw new RuntimeException("Failed to get response", e);
         }
     }
