@@ -78,10 +78,33 @@ const ScheduledPostsCard = () => {
   if (loading && scheduledPosts.length === 0) {
     return (
       <div className={styles.card}>
-        <div className={styles.header}>
-          <MdSchedule className={styles.icon} />
-          <h3>Scheduled Posts</h3>
+        {/* Background layers */}
+        <div className={styles.background_layer}>
+          <div className={styles.gradient_orb}></div>
+          <div className={styles.gradient_orb_secondary}></div>
         </div>
+
+        <div className={styles.wave_background}>
+          <div className={styles.particles}></div>
+        </div>
+
+        {/* Floating particles */}
+        <div className={styles.floating_particles}>
+          {[...Array(4)].map((_, i) => (
+            <div
+              key={i}
+              className={`${styles.particle} ${styles[`particle_${i + 1}`]}`}
+            ></div>
+          ))}
+        </div>
+
+        <div className={styles.header}>
+          <div className={styles.title_section}>
+            <MdSchedule className={styles.icon} />
+            <h3>Scheduled Posts</h3>
+          </div>
+        </div>
+
         <div className={styles.loading}>
           <div className={styles.spinner}></div>
           <span>Loading...</span>
@@ -92,11 +115,36 @@ const ScheduledPostsCard = () => {
 
   return (
     <div className={styles.card}>
+      {/* Background layers */}
+      <div className={styles.background_layer}>
+        <div className={styles.gradient_orb}></div>
+        <div className={styles.gradient_orb_secondary}></div>
+      </div>
+
+      <div className={styles.wave_background}>
+        <div className={styles.particles}></div>
+      </div>
+
+      {/* Floating particles */}
+      <div className={styles.floating_particles}>
+        {[...Array(4)].map((_, i) => (
+          <div
+            key={i}
+            className={`${styles.particle} ${styles[`particle_${i + 1}`]}`}
+          ></div>
+        ))}
+      </div>
+
+      {/* Glow effect */}
+      <div className={styles.glow_effect}></div>
+
       <div className={styles.header}>
         <div className={styles.title_section}>
           <MdSchedule className={styles.icon} />
           <h3>Scheduled Posts</h3>
-          <span className={styles.count}>{scheduledPosts.length}</span>
+          {scheduledPosts.length > 0 && (
+            <span className={styles.count}>{scheduledPosts.length}</span>
+          )}
         </div>
         <button
           className={styles.refresh_btn}
@@ -107,6 +155,7 @@ const ScheduledPostsCard = () => {
           <MdRefresh
             className={`${styles.refresh_icon} ${loading ? styles.spinning : ''}`}
           />
+          <div className={styles.button_shine}></div>
         </button>
       </div>
 

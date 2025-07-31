@@ -45,6 +45,7 @@ const ChatAI = () => {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const fileInputRef = useRef(null);
   const imageInputRef = useRef(null);
+  const textareaRef = useRef(null);
   const [activeCategory, setActiveCategory] = useState(null);
   const [showChatHistory, setShowChatHistory] = useState(false);
   const [currentConversationId, setCurrentConversationId] = useState(null);
@@ -93,6 +94,10 @@ const ChatAI = () => {
     setUserInput('');
     setHideHeading(false);
     setShowChatHistory(false);
+    // Scroll to top when starting new chat
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = 0;
+    }
   };
 
   const loadChatHistory = async (conversationId) => {
@@ -418,6 +423,12 @@ const ChatAI = () => {
             setIsTypingFinished(true);
             setIsProcessingResponse(false);
             scrollToBottom();
+            // Auto-focus the textarea after response is complete
+            setTimeout(() => {
+              if (textareaRef.current) {
+                textareaRef.current.focus();
+              }
+            }, 100);
           }
         },
         interval * (i / batchSize)
@@ -605,158 +616,165 @@ const ChatAI = () => {
         </div>
 
         <div className={styles.chat_input_area}>
-          <div className={styles.category_cards_container}>
-            <div className={styles.category_cards}>
-              <div
-                className={`${styles.category_card} ${activeCategory === 'write' ? styles.active : ''}`}
-                onClick={() =>
-                  setActiveCategory(activeCategory === 'write' ? null : 'write')
-                }
-              >
-                <svg
-                  className={styles.category_icon}
-                  viewBox='0 0 24 24'
-                  fill='none'
-                  stroke='currentColor'
+          {chatMessages.length === 0 && (
+            <div className={styles.category_cards_container}>
+              <div className={styles.category_cards}>
+                <div
+                  className={`${styles.category_card} ${activeCategory === 'write' ? styles.active : ''}`}
+                  onClick={() =>
+                    setActiveCategory(
+                      activeCategory === 'write' ? null : 'write'
+                    )
+                  }
                 >
-                  <path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z' />
-                  <polyline points='14,2 14,8 20,8' />
-                  <line x1='16' y1='13' x2='8' y2='13' />
-                  <line x1='16' y1='17' x2='8' y2='17' />
-                  <polyline points='10,9 9,9 8,9' />
-                </svg>
-                <span>Write</span>
-              </div>
+                  <svg
+                    className={styles.category_icon}
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='currentColor'
+                  >
+                    <path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z' />
+                    <polyline points='14,2 14,8 20,8' />
+                    <line x1='16' y1='13' x2='8' y2='13' />
+                    <line x1='16' y1='17' x2='8' y2='17' />
+                    <polyline points='10,9 9,9 8,9' />
+                  </svg>
+                  <span>Write</span>
+                </div>
 
-              <div
-                className={`${styles.category_card} ${activeCategory === 'learn' ? styles.active : ''}`}
-                onClick={() =>
-                  setActiveCategory(activeCategory === 'learn' ? null : 'learn')
-                }
-              >
-                <svg
-                  className={styles.category_icon}
-                  viewBox='0 0 24 24'
-                  fill='none'
-                  stroke='currentColor'
+                <div
+                  className={`${styles.category_card} ${activeCategory === 'learn' ? styles.active : ''}`}
+                  onClick={() =>
+                    setActiveCategory(
+                      activeCategory === 'learn' ? null : 'learn'
+                    )
+                  }
                 >
-                  <path d='M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z' />
-                  <path d='M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z' />
-                </svg>
-                <span>Learn</span>
-              </div>
+                  <svg
+                    className={styles.category_icon}
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='currentColor'
+                  >
+                    <path d='M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z' />
+                    <path d='M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z' />
+                  </svg>
+                  <span>Learn</span>
+                </div>
 
-              <div
-                className={`${styles.category_card} ${activeCategory === 'code' ? styles.active : ''}`}
-                onClick={() =>
-                  setActiveCategory(activeCategory === 'code' ? null : 'code')
-                }
-              >
-                <svg
-                  className={styles.category_icon}
-                  viewBox='0 0 24 24'
-                  fill='none'
-                  stroke='currentColor'
+                <div
+                  className={`${styles.category_card} ${activeCategory === 'code' ? styles.active : ''}`}
+                  onClick={() =>
+                    setActiveCategory(activeCategory === 'code' ? null : 'code')
+                  }
                 >
-                  <polyline points='16,18 22,12 16,6' />
-                  <polyline points='8,6 2,12 8,18' />
-                </svg>
-                <span>Code</span>
-              </div>
+                  <svg
+                    className={styles.category_icon}
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='currentColor'
+                  >
+                    <polyline points='16,18 22,12 16,6' />
+                    <polyline points='8,6 2,12 8,18' />
+                  </svg>
+                  <span>Code</span>
+                </div>
 
-              <div
-                className={`${styles.category_card} ${activeCategory === 'life' ? styles.active : ''}`}
-                onClick={() =>
-                  setActiveCategory(activeCategory === 'life' ? null : 'life')
-                }
-              >
-                <svg
-                  className={styles.category_icon}
-                  viewBox='0 0 24 24'
-                  fill='none'
-                  stroke='currentColor'
+                <div
+                  className={`${styles.category_card} ${activeCategory === 'life' ? styles.active : ''}`}
+                  onClick={() =>
+                    setActiveCategory(activeCategory === 'life' ? null : 'life')
+                  }
                 >
-                  <path d='M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z' />
-                </svg>
-                <span>Life</span>
-              </div>
-            </div>
-
-            {activeCategory && (
-              <div className={styles.prompts_dropup}>
-                <div className={styles.prompts_list}>
-                  {activeCategory === 'write' && (
-                    <>
-                      {writePrompts.map((prompt) => (
-                        <div
-                          key={prompt.id}
-                          className={styles.prompt_item}
-                          onClick={() => {
-                            setUserInput(prompt.text);
-                            setActiveCategory(null);
-                          }}
-                        >
-                          {prompt.text}
-                        </div>
-                      ))}
-                    </>
-                  )}
-                  {activeCategory === 'learn' && (
-                    <>
-                      {learnPrompts.map((prompt) => (
-                        <div
-                          key={prompt.id}
-                          className={styles.prompt_item}
-                          onClick={() => {
-                            setUserInput(prompt.text);
-                            setActiveCategory(null);
-                          }}
-                        >
-                          {prompt.text}
-                        </div>
-                      ))}
-                    </>
-                  )}
-                  {activeCategory === 'code' && (
-                    <>
-                      {codePrompts.map((prompt) => (
-                        <div
-                          key={prompt.id}
-                          className={styles.prompt_item}
-                          onClick={() => {
-                            setUserInput(prompt.text);
-                            setActiveCategory(null);
-                          }}
-                        >
-                          {prompt.text}
-                        </div>
-                      ))}
-                    </>
-                  )}
-                  {activeCategory === 'life' && (
-                    <>
-                      {lifePrompts.map((prompt) => (
-                        <div
-                          key={prompt.id}
-                          className={styles.prompt_item}
-                          onClick={() => {
-                            setUserInput(prompt.text);
-                            setActiveCategory(null);
-                          }}
-                        >
-                          {prompt.text}
-                        </div>
-                      ))}
-                    </>
-                  )}
+                  <svg
+                    className={styles.category_icon}
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='currentColor'
+                  >
+                    <path d='M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z' />
+                  </svg>
+                  <span>Life</span>
                 </div>
               </div>
-            )}
-          </div>
+
+              {activeCategory && (
+                <div className={styles.prompts_dropup}>
+                  <div className={styles.prompts_list}>
+                    {activeCategory === 'write' && (
+                      <>
+                        {writePrompts.map((prompt) => (
+                          <div
+                            key={prompt.id}
+                            className={styles.prompt_item}
+                            onClick={() => {
+                              setUserInput(prompt.text);
+                              setActiveCategory(null);
+                            }}
+                          >
+                            {prompt.text}
+                          </div>
+                        ))}
+                      </>
+                    )}
+                    {activeCategory === 'learn' && (
+                      <>
+                        {learnPrompts.map((prompt) => (
+                          <div
+                            key={prompt.id}
+                            className={styles.prompt_item}
+                            onClick={() => {
+                              setUserInput(prompt.text);
+                              setActiveCategory(null);
+                            }}
+                          >
+                            {prompt.text}
+                          </div>
+                        ))}
+                      </>
+                    )}
+                    {activeCategory === 'code' && (
+                      <>
+                        {codePrompts.map((prompt) => (
+                          <div
+                            key={prompt.id}
+                            className={styles.prompt_item}
+                            onClick={() => {
+                              setUserInput(prompt.text);
+                              setActiveCategory(null);
+                            }}
+                          >
+                            {prompt.text}
+                          </div>
+                        ))}
+                      </>
+                    )}
+                    {activeCategory === 'life' && (
+                      <>
+                        {lifePrompts.map((prompt) => (
+                          <div
+                            key={prompt.id}
+                            className={styles.prompt_item}
+                            onClick={() => {
+                              setUserInput(prompt.text);
+                              setActiveCategory(null);
+                            }}
+                          >
+                            {prompt.text}
+                          </div>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           <form className={styles.ai_form} onSubmit={handleSubmit}>
             <div className={styles.input_field_container}>
               <textarea
+                ref={textareaRef}
                 className={styles.ai_textArea}
                 name='message'
                 rows='1'
@@ -840,7 +858,7 @@ const ChatAI = () => {
 
               <div className={styles.right_controls}>
                 <div className={styles.model_selector}>
-                  <span>Sophia Supreme</span>
+                  <span>Sophia Ultimate</span>
                   <small>Smart, efficient model</small>
                 </div>
 

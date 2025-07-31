@@ -6,10 +6,14 @@ import { getUserIdFromServer, getUsernameFromServer } from '../auth/authUtils';
 import {
   FaBookmark,
   FaComment,
+  FaEllipsisH,
   FaFacebook,
   FaFlag,
   FaHeart,
   FaLink,
+  FaLinkedin,
+  FaQuora,
+  FaReddit,
   FaRegBookmark,
   FaRegHeart,
   FaShare,
@@ -48,8 +52,13 @@ const PostCard = ({
   const [isSaved, setIsSaved] = useState(false);
   const shareMenuRef = useRef(null);
   const navigate = useNavigate();
-  const { handleSocialShare, showShareMenu, setShowShareMenu } =
-    useSocialShare();
+  const {
+    handleSocialShare,
+    showShareMenu,
+    setShowShareMenu,
+    showAllPlatforms,
+    setShowAllPlatforms,
+  } = useSocialShare();
   const { isLiked, likesCount, commentCount, isLikeAnimating, handleLike } =
     usePostInteractions(id, loggedInUserId);
 
@@ -170,6 +179,7 @@ const PostCard = ({
         !shareMenuRef.current.contains(event.target)
       ) {
         setShowShareMenu(false);
+        setShowAllPlatforms(false);
       }
     };
 
@@ -205,6 +215,7 @@ const PostCard = ({
       setTimeout(() => {
         setCopySuccess(false);
         setShowShareMenu(false);
+        setShowAllPlatforms(false);
       }, 2000);
     } catch (err) {
       console.error('Failed to copy link:', err);
@@ -353,29 +364,89 @@ const PostCard = ({
             <div ref={shareMenuRef} className={styles.shareDropdown}>
               <button
                 className={styles.shareOption}
-                onClick={() => handleSocialShare('twitter')}
+                onClick={() =>
+                  handleSocialShare(
+                    'twitter',
+                    content,
+                    () => `${window.location.origin}/post/${id}`
+                  )
+                }
               >
                 <FaTwitter />
                 Share on Twitter
               </button>
               <button
                 className={styles.shareOption}
-                onClick={() => handleSocialShare('facebook')}
+                onClick={() =>
+                  handleSocialShare(
+                    'facebook',
+                    content,
+                    () => `${window.location.origin}/post/${id}`
+                  )
+                }
               >
                 <FaFacebook />
                 Share on Facebook
               </button>
               <button
                 className={styles.shareOption}
-                onClick={() => handleSocialShare('whatsapp')}
+                onClick={() =>
+                  handleSocialShare(
+                    'whatsapp',
+                    content,
+                    () => `${window.location.origin}/post/${id}`
+                  )
+                }
               >
                 <FaWhatsapp />
                 Share on WhatsApp
               </button>
-              <button className={styles.shareOption} onClick={handleCopyLink}>
-                <FaLink />
-                Copy Link
-              </button>
+              {showAllPlatforms && (
+                <>
+                  <button
+                    className={styles.shareOption}
+                    onClick={() =>
+                      handleSocialShare(
+                        'reddit',
+                        content,
+                        () => `${window.location.origin}/post/${id}`
+                      )
+                    }
+                  >
+                    <FaReddit />
+                    Share on Reddit
+                  </button>
+                  <button
+                    className={styles.shareOption}
+                    onClick={() =>
+                      handleSocialShare(
+                        'linkedin',
+                        content,
+                        () => `${window.location.origin}/post/${id}`
+                      )
+                    }
+                  >
+                    <FaLinkedin />
+                    Share on LinkedIn
+                  </button>
+                  <button
+                    className={styles.shareOption}
+                    onClick={handleCopyLink}
+                  >
+                    <FaLink />
+                    Copy Link
+                  </button>
+                </>
+              )}
+              {!showAllPlatforms && (
+                <button
+                  className={styles.shareOption}
+                  onClick={() => setShowAllPlatforms(true)}
+                >
+                  <FaEllipsisH />
+                  Show More
+                </button>
+              )}
               {copySuccess && (
                 <div className={styles.copySuccess}>
                   Link copied to clipboard!

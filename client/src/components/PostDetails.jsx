@@ -4,8 +4,6 @@ import axios from 'axios';
 import { FaArrowLeft } from 'react-icons/fa';
 import userIcon from '../assets/user.webp';
 import styles from '../styles/postDetails.module.css';
-import { useSocialShare } from '../hooks/useSocialShare.js';
-import { usePostInteractions } from '../hooks/usePostInteractions.js';
 import { usePostComments } from '../hooks/usePostComments.js';
 
 const API_URL = import.meta.env.VITE_API_URL;

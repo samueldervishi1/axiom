@@ -325,7 +325,7 @@ const Navbar = () => {
                 onClick={() => navigate('/chat')}
               >
                 <GiArtificialHive className={styles.icon_p} />
-                <span className={styles.nav_text}>Sophia Supreme</span>
+                <span className={styles.nav_text}>Sophia Ultimate</span>
               </button>
 
               <button

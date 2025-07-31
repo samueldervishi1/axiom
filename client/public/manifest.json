@@ -1,19 +1,19 @@
 {
-  "short_name": "Chattr",
-  "name": "Chattr",
+  "short_name": "Axiom",
+  "name": "Axiom",
   "description": "A social media app for the future",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#42259b",
+  "theme_color": "#4facfe",
   "icons": [
     {
-      "src": "/new_logo1.png",
+      "src": "/logo_app.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/new_logo1.png",
+      "src": "/logo_app.png",
       "sizes": "512x512",
       "type": "image/png"
     }

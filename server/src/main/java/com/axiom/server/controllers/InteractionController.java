@@ -50,4 +50,16 @@ public class InteractionController {
 
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/delete/{conversationId}")
+    public ResponseEntity<Axiom> deleteConversation(@PathVariable String conversationId) {
+        log.info("Deleting conversation: {}", conversationId);
+
+        if (conversationId == null || conversationId.trim().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        interactionService.deleteConversation(conversationId);
+        return ResponseEntity.ok().build();
+    }
 }

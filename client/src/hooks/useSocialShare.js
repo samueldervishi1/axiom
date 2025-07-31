@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 export const useSocialShare = () => {
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [showAllPlatforms, setShowAllPlatforms] = useState(false);
 
   const handleSocialShare = (platform, content, getShareUrl) => {
     const url = getShareUrl();
@@ -26,17 +27,30 @@ export const useSocialShare = () => {
           text + ' ' + url
         )}`;
         break;
+      case 'reddit':
+        shareUrl = `https://www.reddit.com/submit?url=${encodeURIComponent(
+          url
+        )}&title=${encodeURIComponent(text)}`;
+        break;
+      case 'linkedin':
+        shareUrl = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(
+          text + ' ' + url
+        )}`;
+        break;
       default:
         return;
     }
 
     window.open(shareUrl, '_blank', 'noopener,noreferrer');
     setShowShareMenu(false);
+    setShowAllPlatforms(false);
   };
 
   return {
     handleSocialShare,
     showShareMenu,
     setShowShareMenu,
+    showAllPlatforms,
+    setShowAllPlatforms,
   };
 };

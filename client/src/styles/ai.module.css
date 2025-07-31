@@ -10,6 +10,7 @@
   max-height: calc(100vh - 80px);
   position: relative;
   background-color: #f8f9fa;
+  margin-left: 60px;
 }
 
 .sidebar1_container {

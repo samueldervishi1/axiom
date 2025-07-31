@@ -78,6 +78,17 @@ public class InteractionService {
         }).collect(Collectors.toList());
     }
 
+    public void deleteConversation(String conversationId) {
+        try {
+            axiomRepository.deleteByConversationId(conversationId);
+            log.info("Successfully deleted conversation with ID: {}", conversationId);
+        } catch (Exception e) {
+            log.error("Error deleting conversation with ID: {}", conversationId, e);
+            loggingService.logError("InteractionService", "deleteConversation", e.getMessage(), e);
+            throw new RuntimeException("Failed to delete conversation", e);
+        }
+    }
+
     private String callModelApi(String question) {
         String url = apiURL;
 

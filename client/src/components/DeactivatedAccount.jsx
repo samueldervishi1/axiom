@@ -73,7 +73,7 @@ const DeactivatedAccount = () => {
         <h2>Account Deactivated</h2>
         <p>
           Your account has been deactivated. To reactivate your account and
-          continue using Chattr, please fill in the form below.
+          continue using Axiom, please fill in the form below.
         </p>
 
         {formState.error && (

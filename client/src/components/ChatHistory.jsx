@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { MdClose, MdChat } from 'react-icons/md';
+import { MdClose, MdChat, MdDelete } from 'react-icons/md';
 import styles from '../styles/chatHistory.module.css';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -34,7 +34,6 @@ const ChatHistory = ({
       );
 
       if (response.status === 200 && response.data) {
-        // Sort conversations by lastMessageAt (most recent first)
         const sortedConversations = response.data.sort(
           (a, b) => new Date(b.lastMessageAt) - new Date(a.lastMessageAt)
         );
@@ -59,6 +58,33 @@ const ChatHistory = ({
     onClose();
   };
 
+  const handleDeleteConversation = async (conversationId, event) => {
+    event.stopPropagation();
+
+    try {
+      const response = await axios.delete(
+        `${API_URL}mindstream/delete/${conversationId}`,
+        {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setConversations((prevConversations) =>
+          prevConversations.filter(
+            (conv) => conv.conversationId !== conversationId
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error deleting conversation:', error);
+      setError('Failed to delete conversation');
+    }
+  };
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -70,7 +96,6 @@ const ChatHistory = ({
         minute: '2-digit',
       });
     } else if (diffInHours < 168) {
-      // Less than a week
       return date.toLocaleDateString([], { weekday: 'short' });
     } else {
       return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
@@ -139,9 +164,23 @@ const ChatHistory = ({
                     <h4 className={styles.conversationTitle}>
                       {getConversationTitle(conversation.messages)}
                     </h4>
-                    <span className={styles.conversationDate}>
-                      {formatDate(conversation.lastMessageAt)}
-                    </span>
+                    <div className={styles.conversationActions}>
+                      <span className={styles.conversationDate}>
+                        {formatDate(conversation.lastMessageAt)}
+                      </span>
+                      <button
+                        className={styles.deleteButton}
+                        onClick={(e) =>
+                          handleDeleteConversation(
+                            conversation.conversationId,
+                            e
+                          )
+                        }
+                        title='Delete conversation'
+                      >
+                        <MdDelete />
+                      </button>
+                    </div>
                   </div>
 
                   <p className={styles.conversationPreview}>
