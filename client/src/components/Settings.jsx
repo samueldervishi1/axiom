@@ -25,7 +25,7 @@ const About = lazy(() => import('./About'));
 const TermsAndServices = lazy(() => import('./Terms'));
 const Contact = lazy(() => import('./Contact'));
 const FAQ = lazy(() => import('./FAQ'));
-const ModelUpdates = lazy(() => import('./ModelUpdates'));
+const ModelDocs = lazy(() => import('./ModelDocs'));
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -198,7 +198,7 @@ const Settings = () => {
       { id: 'terms', icon: FaFileContract, label: 'Terms of Service' },
       { id: 'contact', icon: FaEnvelope, label: 'Contact Us' },
       { id: 'help', icon: FaQuestionCircle, label: 'Help & Support' },
-      { id: 'models', icon: FaRobot, label: 'Model Updates' },
+      { id: 'models', icon: FaRobot, label: 'AI Models' },
       { id: 'deactivate', icon: FaPauseCircle, label: 'Deactivate Account' },
       { id: 'delete', icon: FaTrash, label: 'Delete Account' },
     ],
@@ -246,9 +246,8 @@ const Settings = () => {
       case 'models':
         return (
           <div className={styles.content_section}>
-            <h2>AI Model Updates</h2>
             <Suspense fallback={<LoadingFallback />}>
-              <ModelUpdates />
+              <ModelDocs />
             </Suspense>
           </div>
         );

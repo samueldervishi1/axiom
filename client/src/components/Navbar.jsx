@@ -287,7 +287,7 @@ const Navbar = () => {
                   }}
                 >
                   <GiArtificialHive className={styles.icon_p} />
-                  <span>Cattr Ultra</span>
+                  <span>Sophia Ultra</span>
                 </button>
 
                 <button
