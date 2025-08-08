@@ -67,12 +67,6 @@ const ModelDocs = () => {
 
     return (
       <div className={styles.models_content}>
-        <h2 style={{ textAlign: 'center' }}>Available Models</h2>
-        <p style={{ textAlign: 'center' }}>
-          All AI models available on the Axiom platform with their current
-          status and capabilities.
-        </p>
-
         <div className={styles.models_grid}>
           {sortedModels.map((model) => (
             <div
@@ -97,6 +91,29 @@ const ModelDocs = () => {
                 </small>
                 <small>ID: {model.modelId}</small>
               </div>
+              
+              {(model.parameters || model.maxTokens || model.architecture) && (
+                <div className={styles.model_specs}>
+                  {model.parameters && (
+                    <div className={styles.spec_item}>
+                      <span className={styles.spec_label}>Parameters:</span>
+                      <span className={styles.spec_value}>{model.parameters}</span>
+                    </div>
+                  )}
+                  {model.maxTokens && (
+                    <div className={styles.spec_item}>
+                      <span className={styles.spec_label}>Max Tokens:</span>
+                      <span className={styles.spec_value}>{model.maxTokens.toLocaleString()}</span>
+                    </div>
+                  )}
+                  {model.architecture && (
+                    <div className={styles.spec_item}>
+                      <span className={styles.spec_label}>Architecture:</span>
+                      <span className={styles.spec_value}>{model.architecture}</span>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className={styles.model_description}>
                 <div
@@ -148,6 +165,31 @@ const ModelDocs = () => {
                       <strong>Last Updated:</strong>{' '}
                       {new Date(model.dateTime).toLocaleString()}
                     </div>
+                    {model.parameters && (
+                      <div className={styles.info_item}>
+                        <strong>Parameters:</strong> {model.parameters}
+                      </div>
+                    )}
+                    {model.maxTokens && (
+                      <div className={styles.info_item}>
+                        <strong>Max Tokens:</strong> {model.maxTokens.toLocaleString()}
+                      </div>
+                    )}
+                    {model.architecture && (
+                      <div className={styles.info_item}>
+                        <strong>Architecture:</strong> {model.architecture}
+                      </div>
+                    )}
+                    {model.trainingData && (
+                      <div className={styles.info_item}>
+                        <strong>Training Data:</strong> {model.trainingData}
+                      </div>
+                    )}
+                    {model.capabilities && (
+                      <div className={styles.info_item}>
+                        <strong>Capabilities:</strong> {model.capabilities}
+                      </div>
+                    )}
                   </div>
 
                   <div className={styles.capabilities_section}>

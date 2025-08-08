@@ -60,38 +60,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('lastAuthCheck');
   }, []);
 
-  // Fixed: Added proper dependency array and moved interceptor setup
-  useEffect(() => {
-    if (!isInitialCheck) {
-      const interceptorId = axios.interceptors.response.use(
-        (response) => response,
-        async (error) => {
-          if (
-            error.response &&
-            error.response.status === 401 &&
-            !isInitialCheck
-          ) {
-            console.log('401 error caught - attempting token refresh');
-
-            const refreshSuccess = await refreshToken();
-
-            if (refreshSuccess) {
-              console.log('Token refreshed, retrying original request');
-              return axios.request(error.config);
-            } else {
-              console.log('Token refresh failed - redirecting to login');
-              logout();
-              window.location.href = '/login';
-            }
-          }
-          return Promise.reject(error);
-        }
-      );
-      return () => {
-        axios.interceptors.response.eject(interceptorId);
-      };
-    }
-  }, [isInitialCheck, logout, refreshToken]);
+  // Removed duplicate interceptor - TokenManager in authUtils.js handles 401 responses
 
   // Fixed: Moved checkSession out of useEffect to prevent recreating it
   const checkSession = useCallback(async () => {

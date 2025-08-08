@@ -142,26 +142,57 @@ const ModelUpdates = () => {
             <div className={styles.cardDate}>{formatDate(update.dateTime)}</div>
 
             <div className={styles.cardContent}>
-              <div
-                className={
-                  expandedCards[update._id?.$oid || update.id || index]
-                    ? styles.expandedText
-                    : styles.truncatedText
-                }
-                dangerouslySetInnerHTML={{ __html: update.changes }}
-              />
-              {update.changes.length > 150 && (
-                <button
-                  className={styles.readMoreButton}
-                  onClick={() =>
-                    toggleCardExpansion(update._id?.$oid || update.id || index)
+              <div className={styles.modelSpecs}>
+                {update.parameters && (
+                  <div className={styles.specItem}>
+                    <strong>Parameters:</strong> {update.parameters}
+                  </div>
+                )}
+                {update.maxTokens && (
+                  <div className={styles.specItem}>
+                    <strong>Max Tokens:</strong> {update.maxTokens.toLocaleString()}
+                  </div>
+                )}
+                {update.architecture && (
+                  <div className={styles.specItem}>
+                    <strong>Architecture:</strong> {update.architecture}
+                  </div>
+                )}
+                {update.trainingData && (
+                  <div className={styles.specItem}>
+                    <strong>Training Data:</strong> {update.trainingData}
+                  </div>
+                )}
+                {update.capabilities && (
+                  <div className={styles.specItem}>
+                    <strong>Capabilities:</strong> {update.capabilities}
+                  </div>
+                )}
+              </div>
+              
+              <div className={styles.changesSection}>
+                <h4>Changes & Description</h4>
+                <div
+                  className={
+                    expandedCards[update._id?.$oid || update.id || index]
+                      ? styles.expandedText
+                      : styles.truncatedText
                   }
-                >
-                  {expandedCards[update._id?.$oid || update.id || index]
-                    ? 'Show Less'
-                    : 'Read More'}
-                </button>
-              )}
+                  dangerouslySetInnerHTML={{ __html: update.changes }}
+                />
+                {update.changes.length > 150 && (
+                  <button
+                    className={styles.readMoreButton}
+                    onClick={() =>
+                      toggleCardExpansion(update._id?.$oid || update.id || index)
+                    }
+                  >
+                    {expandedCards[update._id?.$oid || update.id || index]
+                      ? 'Show Less'
+                      : 'Read More'}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         ))}

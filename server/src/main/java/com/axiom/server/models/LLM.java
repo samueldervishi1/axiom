@@ -34,6 +34,21 @@ public class LLM {
     @Column(name = "MODEL_ID")
     private String modelId;
 
+    @Column(name = "PARAMETERS")
+    private String parameters;
+
+    @Column(name = "MAX_TOKENS")
+    private Integer maxTokens;
+
+    @Column(name = "TRAINING_DATA")
+    private String trainingData;
+
+    @Column(name = "ARCHITECTURE")
+    private String architecture;
+
+    @Column(name = "CAPABILITIES")
+    private String capabilities;
+
     public LLM() {
         this.dateTime = LocalDateTime.now();
     }
