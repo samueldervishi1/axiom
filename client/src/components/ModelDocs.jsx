@@ -91,25 +91,31 @@ const ModelDocs = () => {
                 </small>
                 <small>ID: {model.modelId}</small>
               </div>
-              
+
               {(model.parameters || model.maxTokens || model.architecture) && (
                 <div className={styles.model_specs}>
                   {model.parameters && (
                     <div className={styles.spec_item}>
                       <span className={styles.spec_label}>Parameters:</span>
-                      <span className={styles.spec_value}>{model.parameters}</span>
+                      <span className={styles.spec_value}>
+                        {model.parameters}
+                      </span>
                     </div>
                   )}
                   {model.maxTokens && (
                     <div className={styles.spec_item}>
                       <span className={styles.spec_label}>Max Tokens:</span>
-                      <span className={styles.spec_value}>{model.maxTokens.toLocaleString()}</span>
+                      <span className={styles.spec_value}>
+                        {model.maxTokens.toLocaleString()}
+                      </span>
                     </div>
                   )}
                   {model.architecture && (
                     <div className={styles.spec_item}>
                       <span className={styles.spec_label}>Architecture:</span>
-                      <span className={styles.spec_value}>{model.architecture}</span>
+                      <span className={styles.spec_value}>
+                        {model.architecture}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -172,7 +178,8 @@ const ModelDocs = () => {
                     )}
                     {model.maxTokens && (
                       <div className={styles.info_item}>
-                        <strong>Max Tokens:</strong> {model.maxTokens.toLocaleString()}
+                        <strong>Max Tokens:</strong>{' '}
+                        {model.maxTokens.toLocaleString()}
                       </div>
                     )}
                     {model.architecture && (

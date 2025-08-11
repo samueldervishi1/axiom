@@ -26,6 +26,7 @@ const TermsAndServices = lazy(() => import('./Terms'));
 const Contact = lazy(() => import('./Contact'));
 const FAQ = lazy(() => import('./FAQ'));
 const ModelDocs = lazy(() => import('./ModelDocs'));
+const DevApiEasterEgg = lazy(() => import('./EasterEggDoodle'));
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -60,6 +61,7 @@ const Settings = () => {
   });
 
   const [userId, setUserId] = useState(null);
+  const [showEasterEgg, setShowEasterEgg] = useState(false);
   const { logout } = useAuth();
 
   React.useEffect(() => {
@@ -96,6 +98,10 @@ const Settings = () => {
     const url = new URL(window.location);
     url.searchParams.set('section', section);
     window.history.pushState({}, '', url);
+  }, []);
+
+  const closeEasterEgg = useCallback(() => {
+    setShowEasterEgg(false);
   }, []);
 
   const clearCookies = useCallback(() => {
@@ -462,12 +468,28 @@ const Settings = () => {
             </li>
           ))}
         </ul>
+
+        <div className={styles.version_footer}>
+          <span
+            className={styles.version_link}
+            onClick={() => setShowEasterEgg(true)}
+            title='Click for a surprise!'
+          >
+            Version 2.6.0
+          </span>
+        </div>
       </div>
       <div className={styles.settings_content}>
         <div className={`${styles.content_panel} ${styles.slide_in}`}>
           {renderContent()}
         </div>
       </div>
+
+      {showEasterEgg && (
+        <Suspense fallback={<div>Loading dev APIs...</div>}>
+          <DevApiEasterEgg onClose={closeEasterEgg} />
+        </Suspense>
+      )}
     </div>
   );
 };

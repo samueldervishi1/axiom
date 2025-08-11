@@ -1,0 +1,422 @@
+/* Developer API Easter Egg Styles */
+.easter_egg_overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.api_container {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 20px;
+  width: 90%;
+  max-width: 900px;
+  height: 80%;
+  max-height: 700px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  border: 2px solid #333;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 25px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.title {
+  color: #00d4aa;
+  font-size: 1.5rem;
+  margin: 0;
+  text-shadow: 0 0 10px rgba(0, 212, 170, 0.3);
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+.fetch_button {
+  background: linear-gradient(45deg, #00d4aa, #007acc);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: 'Monaco', 'Menlo', monospace;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 212, 170, 0.3);
+}
+
+.fetch_button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 212, 170, 0.4);
+  background: linear-gradient(45deg, #00e6c0, #0088ff);
+}
+
+.close_button {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ff6b6b;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  width: 35px;
+  height: 35px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.close_button:hover {
+  background: rgba(255, 107, 107, 0.2);
+  transform: scale(1.05);
+}
+
+.content_area {
+  padding: 30px;
+  height: calc(100% - 140px);
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome_container {
+  text-align: center;
+  color: white;
+}
+
+.welcome_container h3 {
+  color: #00d4aa;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+}
+
+.welcome_container p {
+  color: #ccc;
+  font-size: 1.1rem;
+  margin-bottom: 25px;
+}
+
+.api_options {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  align-items: center;
+}
+
+.horoscope_section {
+  text-align: center;
+  width: 100%;
+  max-width: 500px;
+}
+
+.horoscope_label {
+  color: #00d4aa;
+  font-size: 1rem;
+  margin-bottom: 15px !important;
+  font-weight: 500;
+}
+
+.horoscope_input_group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.zodiac_input {
+  background: rgba(0, 0, 0, 0.6);
+  border: 2px solid #333;
+  color: white;
+  padding: 12px 15px;
+  border-radius: 8px;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.9rem;
+  flex: 1;
+  min-width: 250px;
+  max-width: 300px;
+  transition: border-color 0.3s ease;
+}
+
+.zodiac_input:focus {
+  outline: none;
+  border-color: #00d4aa;
+  box-shadow: 0 0 10px rgba(0, 212, 170, 0.3);
+}
+
+.zodiac_input::placeholder {
+  color: #777;
+}
+
+.horoscope_button {
+  background: linear-gradient(45deg, #8b5cf6, #a855f7);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: 'Monaco', 'Menlo', monospace;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+}
+
+.horoscope_button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+  background: linear-gradient(45deg, #9f67ff, #c084fc);
+}
+
+.horoscope_button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.1);
+}
+
+.zodiac_hint {
+  color: #888;
+  font-size: 0.8rem;
+  margin-bottom: 0 !important;
+  line-height: 1.4;
+}
+
+.loading_container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  color: #ccc;
+}
+
+.loading_spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(0, 212, 170, 0.3);
+  border-top: 3px solid #00d4aa;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.api_response {
+  width: 100%;
+  max-width: 800px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid #333;
+  border-radius: 12px;
+  overflow: hidden;
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+.api_header {
+  background: #1a1a1a;
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border-bottom: 1px solid #333;
+}
+
+.method {
+  background: #00d4aa;
+  color: #000;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.85rem;
+}
+
+.endpoint {
+  color: #00d4aa;
+  font-weight: bold;
+  flex: 1;
+}
+
+.status {
+  background: #4caf50;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.response_body {
+  background: #0f1419;
+  padding: 20px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.response_body pre {
+  color: #e6e6e6;
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  line-height: 1.5;
+  font-size: 0.9rem;
+}
+
+.api_actions {
+  padding: 15px 20px;
+  background: rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  padding: 15px 25px;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer p {
+  color: #ccc;
+  margin: 5px 0;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.9rem;
+}
+
+.hint {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  color: #888;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .api_container {
+    width: 95%;
+    height: 90%;
+    max-height: none;
+  }
+
+  .header {
+    padding: 15px 20px;
+  }
+
+  .title {
+    font-size: 1.3rem;
+  }
+
+  .content_area {
+    padding: 20px;
+  }
+
+  .welcome_container h3 {
+    font-size: 1.5rem;
+  }
+
+  .api_response {
+    max-width: 100%;
+  }
+
+  .response_body pre {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .api_container {
+    width: 98%;
+    height: 95%;
+  }
+
+  .header {
+    padding: 10px 15px;
+  }
+
+  .title {
+    font-size: 1.1rem;
+  }
+
+  .content_area {
+    padding: 15px;
+  }
+
+  .welcome_container h3 {
+    font-size: 1.3rem;
+  }
+
+  .welcome_container p {
+    font-size: 1rem;
+  }
+
+  .fetch_button {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+  }
+
+  .horoscope_input_group {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .zodiac_input {
+    min-width: 200px;
+    max-width: 280px;
+  }
+
+  .horoscope_button {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+  }
+
+  .zodiac_hint {
+    font-size: 0.75rem;
+    padding: 0 10px;
+  }
+
+  .api_header {
+    padding: 10px 15px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .response_body {
+    padding: 15px;
+  }
+
+  .response_body pre {
+    font-size: 0.75rem;
+  }
+}

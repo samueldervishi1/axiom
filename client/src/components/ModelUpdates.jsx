@@ -150,7 +150,8 @@ const ModelUpdates = () => {
                 )}
                 {update.maxTokens && (
                   <div className={styles.specItem}>
-                    <strong>Max Tokens:</strong> {update.maxTokens.toLocaleString()}
+                    <strong>Max Tokens:</strong>{' '}
+                    {update.maxTokens.toLocaleString()}
                   </div>
                 )}
                 {update.architecture && (
@@ -169,7 +170,7 @@ const ModelUpdates = () => {
                   </div>
                 )}
               </div>
-              
+
               <div className={styles.changesSection}>
                 <h4>Changes & Description</h4>
                 <div
@@ -184,7 +185,9 @@ const ModelUpdates = () => {
                   <button
                     className={styles.readMoreButton}
                     onClick={() =>
-                      toggleCardExpansion(update._id?.$oid || update.id || index)
+                      toggleCardExpansion(
+                        update._id?.$oid || update.id || index
+                      )
                     }
                   >
                     {expandedCards[update._id?.$oid || update.id || index]

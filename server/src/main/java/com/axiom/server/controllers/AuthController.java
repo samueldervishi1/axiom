@@ -63,15 +63,7 @@ public class AuthController {
             UserInfo userInfo = new UserInfo();
             userInfo.setUsername(claims.getSubject());
 
-            Object userIdObj = claims.get("userId");
-            long userId;
-            if (userIdObj instanceof Integer) {
-                userId = ((Integer) userIdObj).longValue();
-            } else if (userIdObj instanceof Long) {
-                userId = (Long) userIdObj;
-            } else {
-                throw new IllegalArgumentException("Invalid userId type: " + userIdObj.getClass());
-            }
+            long userId = extractUserIdFromClaims(claims);
 
             userInfo.setUserId(userId);
             userInfo.setStatus("SUCCESS");
@@ -162,15 +154,7 @@ public class AuthController {
             }
 
             String username = claims.getSubject();
-            Object userIdObj = claims.get("userId");
-            long userId;
-            if (userIdObj instanceof Integer) {
-                userId = ((Integer) userIdObj).longValue();
-            } else if (userIdObj instanceof Long) {
-                userId = (Long) userIdObj;
-            } else {
-                throw new IllegalArgumentException("Invalid userId type: " + userIdObj.getClass());
-            }
+            long userId = extractUserIdFromClaims(claims);
 
             String sessionId = claims.get("sessionId", String.class);
 
@@ -283,6 +267,17 @@ public class AuthController {
             default -> Error.custom(String.valueOf(e.getCode()), e.getMessage(), "error");
         };
         return ResponseEntity.status(e.getCode()).body(error);
+    }
+
+    private long extractUserIdFromClaims(Claims claims) {
+        Object userIdObj = claims.get("userId");
+        if (userIdObj instanceof Integer) {
+            return ((Integer) userIdObj).longValue();
+        } else if (userIdObj instanceof Long) {
+            return (Long) userIdObj;
+        } else {
+            throw new IllegalArgumentException("Invalid userId type: " + userIdObj.getClass());
+        }
     }
 
     private void validateSessionAndServer(Map<String, Object> requestBody, String expectedSessionType,
