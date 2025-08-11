@@ -201,7 +201,7 @@ const DevApiEasterEgg = ({ onClose }) => {
         <div className={styles.footer}>
           <p>Discovered hidden developer endpoints!</p>
           <p className={styles.hint}>
-            Built with ☕ and late-night coding sessions
+            Built with ☕ and late-night coding sessions | v3.0.0
           </p>
         </div>
       </div>

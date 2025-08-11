@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -7,12 +7,12 @@
     <meta http-equiv="content-type" content="no-store" />
     <title>𝒜𝓍𝒾𝑜𝓂</title>
     <link rel="icon" href="data:," />
-    <link rel="icon" type="image/png" href="/logo_app.png" />
+    <link rel="icon" type="image/png" href="/logo.png" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="manifest" href="/manifest.json" />
-    <link rel="stylesheet" href="./src/index.css">
+    <link rel="stylesheet" href="./src/index.css" />
 
     <link
       rel="preload"
@@ -38,11 +38,14 @@
     <div id="root"></div>
     <script>
       // Prevent duplicate custom element registration errors
-      window.addEventListener('error', function(e) {
+      window.addEventListener('error', function (e) {
         if (e.message && e.message.includes('already been defined')) {
           e.stopPropagation();
           e.preventDefault();
-          console.warn('Ignored duplicate custom element definition:', e.message);
+          console.warn(
+            'Ignored duplicate custom element definition:',
+            e.message
+          );
           return false;
         }
       });

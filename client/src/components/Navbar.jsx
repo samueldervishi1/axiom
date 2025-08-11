@@ -4,12 +4,18 @@ import { useAuth } from '../auth/AuthContext';
 import axios from 'axios';
 import { getUserIdFromServer, getUsernameFromServer } from '../auth/authUtils';
 import { GoHome } from 'react-icons/go';
-import { IoSearchOutline, IoSettingsOutline } from 'react-icons/io5';
+import {
+  IoSearchOutline,
+  IoSettingsOutline,
+  IoHelpCircleOutline,
+  IoShieldCheckmarkOutline,
+} from 'react-icons/io5';
 import { CiLogout } from 'react-icons/ci';
 import { GiArtificialHive } from 'react-icons/gi';
 import { CgProfile } from 'react-icons/cg';
 import loaderImage from '../assets/377.gif';
 import { MdOutlineExplore } from 'react-icons/md';
+import logo from '../../public/logo.png';
 import styles from '../styles/navbar.module.css';
 
 const Navbar = () => {
@@ -57,9 +63,36 @@ const Navbar = () => {
   const userSettings = [
     {
       name: 'Profile',
-      icon: <CgProfile className={styles.icon_p} />,
+      icon: <CgProfile className={styles.dropdown_icon} />,
+      type: 'item',
     },
-    { name: 'Logout', icon: <CiLogout className={styles.icon_p} /> },
+    {
+      name: 'Account',
+      type: 'title',
+    },
+    {
+      name: 'Settings',
+      icon: <IoSettingsOutline className={styles.dropdown_icon} />,
+      type: 'item',
+    },
+    {
+      name: 'Privacy',
+      icon: <IoShieldCheckmarkOutline className={styles.dropdown_icon} />,
+      type: 'item',
+    },
+    {
+      name: 'Help',
+      icon: <IoHelpCircleOutline className={styles.dropdown_icon} />,
+      type: 'item',
+    },
+    {
+      type: 'divider',
+    },
+    {
+      name: 'Sign out',
+      icon: <CiLogout className={styles.dropdown_icon} />,
+      type: 'item',
+    },
   ];
 
   useEffect(() => {
@@ -92,7 +125,11 @@ const Navbar = () => {
         navigate('/home');
       } else if (settingName === 'Profile') {
         navigate('/profile');
-      } else if (settingName === 'Logout') {
+      } else if (settingName === 'Settings' || settingName === 'Privacy') {
+        navigate('/settings');
+      } else if (settingName === 'Help') {
+        navigate('/settings?section=help');
+      } else if (settingName === 'Sign out') {
         handleLogout();
       }
       setIsDropdownOpen(false);
@@ -161,12 +198,78 @@ const Navbar = () => {
       <div className={styles.chat_history1}>
         <div className={styles.history_div_2}>
           <div className={styles.navbar_left}>
+            <a style={{ textDecoration: 'none', color: 'black' }} href='/home'>
+              <img src={logo} className={styles.logo_image} alt='Axiom Logo' />
+            </a>
+
+            <div className={styles.search_container} ref={searchRef}>
+              <div className={styles.search_wrapper}>
+                <IoSearchOutline className={styles.search_icon} />
+                <input
+                  type='text'
+                  className={styles.search_input}
+                  placeholder='Search users...'
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              {showSearchResults && (
+                <div className={styles.search_results}>
+                  {isSearching ? (
+                    <div className={styles.search_loading}>Searching...</div>
+                  ) : searchResults.length > 0 ? (
+                    searchResults.map((user, index) => (
+                      <div
+                        key={index}
+                        className={styles.search_result_item}
+                        onClick={() => handleUserClick(user.username)}
+                      >
+                        <div className={styles.username}>{user.username}</div>
+                        <div className={styles.fullname}>{user.fullName}</div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className={styles.no_results}>No users found</div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className={styles.navbar_right}>
+            <div className={styles.history_links}>
+              <button
+                className={styles.nav_item}
+                onClick={() => navigate('/home')}
+              >
+                <GoHome className={styles.icon_p} />
+                <span className={styles.nav_text}>Home</span>
+              </button>
+
+              <button
+                className={styles.nav_item}
+                onClick={() => navigate('/explore')}
+              >
+                <MdOutlineExplore className={styles.icon_p} />
+                <span className={styles.nav_text}>Explore</span>
+              </button>
+
+              <button
+                className={styles.nav_item}
+                onClick={() => navigate('/chat')}
+              >
+                <GiArtificialHive className={styles.icon_p} />
+                <span className={styles.nav_text}>Sophia Ultimate</span>
+              </button>
+            </div>
+
             <div className={styles.profile_menu} ref={menuRef}>
               <button
                 onClick={toggleDropdown}
                 className={styles.profile_button}
               >
                 <div className={styles.custom_avatar}>{userInitial || '?'}</div>
+                <span className={styles.nav_text}>Me</span>
               </button>
 
               <div
@@ -174,70 +277,36 @@ const Navbar = () => {
                   isDropdownOpen ? styles.show : ''
                 }`}
               >
-                {userSettings.map((setting, index) => (
-                  <button
-                    key={index}
-                    className={styles.dropdown_item}
-                    onClick={() => {
-                      handleSettingAction(setting.name);
-                      setIsDropdownOpen(false);
-                    }}
-                  >
-                    {setting.icon}
-                    {setting.name}
-                  </button>
-                ))}
+                {userSettings.map((setting, index) => {
+                  if (setting.type === 'title') {
+                    return (
+                      <div key={index} className={styles.dropdown_title}>
+                        {setting.name}
+                      </div>
+                    );
+                  } else if (setting.type === 'divider') {
+                    return (
+                      <hr key={index} className={styles.dropdown_divider} />
+                    );
+                  } else {
+                    return (
+                      <button
+                        key={index}
+                        className={styles.dropdown_item}
+                        onClick={() => {
+                          handleSettingAction(setting.name);
+                          setIsDropdownOpen(false);
+                        }}
+                      >
+                        {setting.icon}
+                        {setting.name}
+                      </button>
+                    );
+                  }
+                })}
               </div>
             </div>
 
-            <a style={{ textDecoration: 'none', color: 'black' }} href='/home'>
-              <p
-                style={{
-                  fontSize: 25,
-                  position: 'relative',
-                  right: 0,
-                  top: 4,
-                }}
-              >
-                𝒜𝓍𝒾𝑜𝓂
-              </p>
-            </a>
-          </div>
-
-          <div className={styles.search_container} ref={searchRef}>
-            <div className={styles.search_wrapper}>
-              <IoSearchOutline className={styles.search_icon} />
-              <input
-                type='text'
-                className={styles.search_input}
-                placeholder='Search users...'
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            {showSearchResults && (
-              <div className={styles.search_results}>
-                {isSearching ? (
-                  <div className={styles.search_loading}>Searching...</div>
-                ) : searchResults.length > 0 ? (
-                  searchResults.map((user, index) => (
-                    <div
-                      key={index}
-                      className={styles.search_result_item}
-                      onClick={() => handleUserClick(user.username)}
-                    >
-                      <div className={styles.username}>{user.username}</div>
-                      <div className={styles.fullname}>{user.fullName}</div>
-                    </div>
-                  ))
-                ) : (
-                  <div className={styles.no_results}>No users found</div>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className={styles.navbar_right}>
             <div
               className={styles.hamburger}
               onClick={() => {
@@ -289,53 +358,8 @@ const Navbar = () => {
                   <GiArtificialHive className={styles.icon_p} />
                   <span>Sophia Ultra</span>
                 </button>
-
-                <button
-                  className={styles.mobile_item}
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    navigate('/settings');
-                  }}
-                >
-                  <IoSettingsOutline className={styles.icon_p} />
-                  <span>Settings</span>
-                </button>
               </div>
             )}
-
-            <div className={styles.history_links}>
-              <button
-                className={styles.nav_item}
-                onClick={() => navigate('/home')}
-              >
-                <GoHome className={styles.icon_p} />
-                <span className={styles.nav_text}>Home</span>
-              </button>
-
-              <button
-                className={styles.nav_item}
-                onClick={() => navigate('/explore')}
-              >
-                <MdOutlineExplore className={styles.icon_p} />
-                <span className={styles.nav_text}>Explore</span>
-              </button>
-
-              <button
-                className={styles.nav_item}
-                onClick={() => navigate('/chat')}
-              >
-                <GiArtificialHive className={styles.icon_p} />
-                <span className={styles.nav_text}>Sophia Ultimate</span>
-              </button>
-
-              <button
-                className={styles.nav_item}
-                onClick={() => navigate('/settings')}
-              >
-                <IoSettingsOutline className={styles.icon_p} />
-                <span className={styles.nav_text}>Settings</span>
-              </button>
-            </div>
           </div>
         </div>
       </div>

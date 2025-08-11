@@ -475,7 +475,7 @@ const Settings = () => {
             onClick={() => setShowEasterEgg(true)}
             title='Click for a surprise!'
           >
-            Version 2.6.0
+            Version 3.0.0
           </span>
         </div>
       </div>

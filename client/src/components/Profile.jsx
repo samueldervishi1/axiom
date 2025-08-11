@@ -10,6 +10,8 @@ import {
   FaRegEyeSlash,
   FaRegThumbsUp,
 } from 'react-icons/fa';
+import { LuSquareArrowOutUpRight } from 'react-icons/lu';
+import { FaPen } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import styles from '../styles/profile.module.css';
 import profileAvatar from '../assets/user.webp';
@@ -99,21 +101,25 @@ const Profile = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const getLinkIcon = (link) => {
+  const getLinkName = (link) => {
     try {
       const url = new URL(link);
       const hostname = url.hostname.replace(/^www\./, '');
 
       if (hostname === 'github.com') {
-        return <FaGithub className={styles.socialIcon} />;
+        return 'GitHub';
       } else if (hostname === 'instagram.com') {
-        return <FaInstagram className={styles.socialIcon} />;
+        return 'Instagram';
+      } else if (hostname === 'linkedin.com') {
+        return 'LinkedIn';
+      } else if (hostname === 'twitter.com' || hostname === 'x.com') {
+        return 'Twitter';
       } else {
-        return <FaLink className={styles.socialIcon} />;
+        return hostname;
       }
     } catch (error) {
-      console.error('Error getting link icon:', error);
-      return <FaLink className={styles.socialIcon} />;
+      console.error('Error getting link name:', error);
+      return 'Website';
     }
   };
 
@@ -317,283 +323,286 @@ const Profile = () => {
     >
       <div className={styles.mainContent}>
         <div className={styles.leftColumn}>
-          <div className={styles.profileHeader}>
-            <div className={styles.avatarSection}>
+          <div className={styles.profileCard}>
+            {/* Banner Section */}
+            <div className={styles.profileBanner}>
               <img
-                src={profileAvatar}
-                alt=''
-                className={styles.avatar}
-                style={dynamicStyles.avatar}
+                src={backgroundImage}
+                alt='Profile Banner'
+                className={styles.bannerImg}
               />
-              <div className={styles.nameSection}>
-                <h1 className={styles.displayName}>{profile.displayName}</h1>
-                <div className={styles.usernameRow}>
-                  <h2
-                    className={styles.username}
-                    style={dynamicStyles.username}
-                  >
-                    u/{profile.username}
-                  </h2>
-                  <span
-                    className={styles.karmaDisplay}
-                    style={dynamicStyles.statHighlight}
-                  >
-                    • {profile.karma} karma
-                  </span>
+            </div>
+
+            {/* Profile Content */}
+            <div className={styles.profileContent}>
+              {/* Avatar */}
+              <div className={styles.avatarContainer}>
+                <img
+                  src={profileAvatar}
+                  alt='Profile'
+                  className={styles.profileAvatar}
+                />
+              </div>
+
+              {/* User Info */}
+              <div className={styles.userInfo}>
+                <h1 className={styles.displayName}>
+                  {profile.fullName || profile.displayName || profile.username}
+                </h1>
+
+                {/* Bio and Profession */}
+                {(profile.bio || profile.profession) && (
+                  <p className={styles.bioText}>
+                    {profile.bio && profile.profession
+                      ? `${profile.bio} - ${profile.profession}`
+                      : profile.bio || profile.profession}
+                  </p>
+                )}
+
+                {/* Links */}
+                {profile.links && profile.links.length > 0 && (
+                  <div className={styles.linksSection}>
+                    {profile.links.map((link, index) => (
+                      <a
+                        key={index}
+                        href={link}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className={styles.userLink}
+                      >
+                        {getLinkName(link)}
+                        <LuSquareArrowOutUpRight className={styles.arrowIcon} />
+                      </a>
+                    ))}
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className={styles.actionButtons}>
+                  <button className={styles.actionBtn}>Resources</button>
+                  <button className={styles.actionBtn}>App</button>
+                  <button className={styles.actionBtn}>Profile</button>
+                  <button className={styles.actionBtn}>Visit</button>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className={styles.navigationTabs}>
-            <button
-              className={`${styles.tab} ${
-                activeTab === 'overview' ? styles.activeTab : ''
-              }`}
-              style={activeTab === 'overview' ? dynamicStyles.activeTab : {}}
-              onClick={() => setActiveTab('overview')}
-            >
-              OVERVIEW
-            </button>
-            <button
-              className={`${styles.tab} ${
-                activeTab === 'posts' ? styles.activeTab : ''
-              }`}
-              style={activeTab === 'posts' ? dynamicStyles.activeTab : {}}
-              onClick={() => setActiveTab('posts')}
-            >
-              POSTS
-            </button>
-            <button
-              className={`${styles.tab} ${
-                activeTab === 'comments' ? styles.activeTab : ''
-              }`}
-              style={activeTab === 'comments' ? dynamicStyles.activeTab : {}}
-              onClick={() => setActiveTab('comments')}
-            >
-              <FaRegCommentAlt /> COMMENTS
-            </button>
-            <button
-              className={`${styles.tab} ${
-                activeTab === 'saved' ? styles.activeTab : ''
-              }`}
-              style={activeTab === 'saved' ? dynamicStyles.activeTab : {}}
-              onClick={() => setActiveTab('saved')}
-            >
-              <FaRegBookmark /> SAVED
-            </button>
-            <button
-              className={`${styles.tab} ${
-                activeTab === 'hidden' ? styles.activeTab : ''
-              }`}
-              style={activeTab === 'hidden' ? dynamicStyles.activeTab : {}}
-              onClick={() => setActiveTab('hidden')}
-            >
-              <FaRegEyeSlash /> HIDDEN
-            </button>
-            <button
-              className={`${styles.tab} ${
-                activeTab === 'upvoted' ? styles.activeTab : ''
-              }`}
-              style={activeTab === 'upvoted' ? dynamicStyles.activeTab : {}}
-              onClick={() => setActiveTab('upvoted')}
-            >
-              <FaRegThumbsUp /> UPVOTED
-            </button>
+          {/* About Card */}
+          <div className={styles.aboutCard}>
+            <div className={styles.aboutHeader}>
+              <h3 className={styles.aboutTitle}>About</h3>
+              <button
+                className={styles.editBtn}
+                onClick={() => console.log('Edit about clicked')}
+              >
+                <FaPen className={styles.penIcon} />
+              </button>
+            </div>
+            <div className={styles.aboutContent}>
+              {profile.bio ? (
+                <p className={styles.aboutText}>{profile.bio}</p>
+              ) : (
+                <p className={styles.aboutPlaceholder}>
+                  Tell us about yourself...
+                </p>
+              )}
+            </div>
           </div>
 
-          <div className={styles.contentArea}>
-            {activeTab === 'posts' && userPosts.length > 0 ? (
-              <div className={styles.postsGrid}>
-                {userPosts.map((post) => (
-                  <div
-                    key={post.id}
-                    className={styles.postCard}
-                    style={dynamicStyles.postCard}
-                  >
-                    <p>{post.content}</p>
-                    {post.image && (
-                      <img
-                        src={post.image}
-                        alt=''
-                        className={styles.postImage}
-                      />
+          {/* Experience Card */}
+          <div className={styles.sectionCard}>
+            <div className={styles.sectionHeader}>
+              <h3 className={styles.sectionTitle}>Experience</h3>
+              <button
+                className={styles.editBtn}
+                onClick={() => console.log('Edit experience clicked')}
+              >
+                <FaPen className={styles.penIcon} />
+              </button>
+            </div>
+            <div className={styles.sectionContent}>
+              {profile.experiences && profile.experiences.length > 0 ? (
+                profile.experiences.map((exp, index) => (
+                  <div key={index} className={styles.experienceItem}>
+                    <h4 className={styles.expPosition}>{exp.position}</h4>
+                    <p className={styles.expCompany}>
+                      {exp.company} • {exp.employmentType}
+                    </p>
+                    <p className={styles.expDate}>
+                      {new Date(exp.startDate).toLocaleDateString('en-US', {
+                        month: 'short',
+                        year: 'numeric',
+                      })}{' '}
+                      -
+                      {exp.endDate
+                        ? new Date(exp.endDate).toLocaleDateString('en-US', {
+                            month: 'short',
+                            year: 'numeric',
+                          })
+                        : 'Present'}
+                    </p>
+                    <p className={styles.expLocation}>{exp.location}</p>
+                    {exp.description && (
+                      <p className={styles.expDescription}>{exp.description}</p>
                     )}
                   </div>
-                ))}
-              </div>
-            ) : activeTab === 'upvoted' && likedPostsContent.length > 0 ? (
-              <div className={styles.postsGrid}>
-                {likedPostsContent.map((post) => (
-                  <div
-                    key={post.id}
-                    className={styles.postCard}
-                    style={dynamicStyles.postCard}
-                  >
-                    <p>{post.content}</p>
-                    {post.image && (
-                      <img
-                        src={post.image}
-                        alt=''
-                        className={styles.postImage}
-                      />
+                ))
+              ) : (
+                <p className={styles.sectionPlaceholder}>
+                  Add your work experience
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Education Card */}
+          <div className={styles.sectionCard}>
+            <div className={styles.sectionHeader}>
+              <h3 className={styles.sectionTitle}>Education</h3>
+              <button
+                className={styles.editBtn}
+                onClick={() => console.log('Edit education clicked')}
+              >
+                <FaPen className={styles.penIcon} />
+              </button>
+            </div>
+            <div className={styles.sectionContent}>
+              {profile.education && profile.education.length > 0 ? (
+                profile.education.map((edu, index) => (
+                  <div key={index} className={styles.educationItem}>
+                    <h4 className={styles.eduInstitution}>{edu.institution}</h4>
+                    <p className={styles.eduDegree}>
+                      {edu.degree} in {edu.fieldOfStudy}
+                    </p>
+                    <p className={styles.eduDate}>
+                      {new Date(edu.startDate).getFullYear()} -{' '}
+                      {new Date(edu.endDate).getFullYear()}
+                    </p>
+                    {edu.grade && (
+                      <p className={styles.eduGrade}>Grade: {edu.grade}</p>
+                    )}
+                    {edu.description && (
+                      <p className={styles.eduDescription}>{edu.description}</p>
                     )}
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className={styles.emptyState}>
-                <p>No {activeTab} to show yet</p>
-              </div>
-            )}
+                ))
+              ) : (
+                <p className={styles.sectionPlaceholder}>Add your education</p>
+              )}
+            </div>
+          </div>
+
+          {/* Skills Card */}
+          <div className={styles.sectionCard}>
+            <div className={styles.sectionHeader}>
+              <h3 className={styles.sectionTitle}>Skills</h3>
+              <button
+                className={styles.editBtn}
+                onClick={() => console.log('Edit skills clicked')}
+              >
+                <FaPen className={styles.penIcon} />
+              </button>
+            </div>
+            <div className={styles.sectionContent}>
+              {profile.skills && profile.skills.length > 0 ? (
+                <div className={styles.skillsGrid}>
+                  {profile.skills.map((skill, index) => (
+                    <div key={index} className={styles.skillItem}>
+                      <span className={styles.skillName}>
+                        {skill.skillName}
+                      </span>
+                      <span className={styles.skillLevel}>
+                        {skill.proficiencyLevel}
+                      </span>
+                      {skill.endorsementCount > 0 && (
+                        <span className={styles.skillEndorsements}>
+                          {skill.endorsementCount} endorsements
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className={styles.sectionPlaceholder}>Add your skills</p>
+              )}
+            </div>
+          </div>
+
+          {/* Certifications Card */}
+          <div className={styles.sectionCard}>
+            <div className={styles.sectionHeader}>
+              <h3 className={styles.sectionTitle}>Licenses & Certifications</h3>
+              <button
+                className={styles.editBtn}
+                onClick={() => console.log('Edit certifications clicked')}
+              >
+                <FaPen className={styles.penIcon} />
+              </button>
+            </div>
+            <div className={styles.sectionContent}>
+              {profile.certificates && profile.certificates.length > 0 ? (
+                profile.certificates.map((cert, index) => (
+                  <div key={index} className={styles.certificationItem}>
+                    <h4 className={styles.certName}>{cert.name}</h4>
+                    <p className={styles.certOrganization}>
+                      {cert.issuingOrganization}
+                    </p>
+                    <p className={styles.certDate}>
+                      Issued{' '}
+                      {new Date(cert.issueDate).toLocaleDateString('en-US', {
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                      {cert.expirationDate &&
+                        !cert.doesNotExpire &&
+                        ` • Expires ${new Date(cert.expirationDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`}
+                    </p>
+                    {cert.credentialId && (
+                      <p className={styles.certCredential}>
+                        Credential ID: {cert.credentialId}
+                      </p>
+                    )}
+                    {cert.description && (
+                      <p className={styles.certDescription}>
+                        {cert.description}
+                      </p>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p className={styles.sectionPlaceholder}>
+                  Add your certifications
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
         <div className={styles.rightColumn}>
-          <div className={styles.aboutCard} style={dynamicStyles.aboutCard}>
-            <div
-              className={styles.bannerImage}
-              style={{
-                backgroundImage: `url(${backgroundImage})`,
-                position: 'relative',
-              }}
-            >
-              <div
-                style={{
-                  ...dynamicStyles.bannerOverlay,
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                }}
-              />
+          {/* Public Profile Card */}
+          <div className={styles.publicProfileCard}>
+            <div className={styles.publicProfileHeader}>
+              <h3 className={styles.publicProfileTitle}>
+                Public profile & URL
+              </h3>
             </div>
-
-            <div className={styles.aboutContent}>
-              <div className={styles.userHeader}>
-                <h3
-                  className={styles.headerUsername}
-                  style={dynamicStyles.username}
+            <div className={styles.publicProfileContent}>
+              <div className={styles.profileUrl}>
+                <span className={styles.urlLabel}>Your profile URL:</span>
+                <a
+                  href={`${window.location.origin}/${profile.username}`}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className={styles.urlLink}
                 >
-                  {profile.username}
-                </h3>
-                {profile.bio && (
-                  <>
-                    <span className={styles.separator}>-</span>
-                    <p className={styles.headerBio}>{profile.bio}</p>
-                  </>
-                )}
-                <div className={styles.followStats}>
-                  <div className={styles.followItem}>
-                    <span
-                      className={styles.followCount}
-                      style={dynamicStyles.statHighlight}
-                    >
-                      <a
-                        href={`/list/followers/${profile.username}`}
-                        style={{ textDecoration: 'none', color: 'inherit' }}
-                      >
-                        {getFollowersCount()}
-                      </a>
-                    </span>
-                    <span className={styles.followLabel}>
-                      <a
-                        href={`/list/followers/${profile.username}`}
-                        style={{ textDecoration: 'none' }}
-                      >
-                        {getFollowersCount() === 1 ? 'follower' : 'followers'}
-                      </a>
-                    </span>
-                  </div>
-                  <div className={styles.followItem}>
-                    <span
-                      className={styles.followCount}
-                      style={dynamicStyles.statHighlight}
-                    >
-                      <a
-                        href={`/list/following/${profile.username}`}
-                        style={{ textDecoration: 'none', color: 'inherit' }}
-                      >
-                        {getFollowingCount()}
-                      </a>
-                    </span>
-                    <span className={styles.followLabel}>
-                      <a
-                        href={`/list/following/${profile.username}`}
-                        style={{ textDecoration: 'none' }}
-                      >
-                        following
-                      </a>
-                    </span>
-                  </div>
-                </div>
+                  {window.location.origin}/{profile.username}
+                </a>
               </div>
-
-              <hr className={styles.divider} />
-
-              {profile.links && profile.links.length > 0 && (
-                <>
-                  <div className={styles.socialLinks}>
-                    <div className={styles.linksScroll}>
-                      {profile.links.map((link, index) => (
-                        <a
-                          key={index}
-                          href={link}
-                          target='_blank'
-                          rel='noopener noreferrer'
-                          className={styles.socialLink}
-                          style={{ borderColor: colorVariations.primary }}
-                        >
-                          {getLinkIcon(link)}
-                          {link.split('/').pop()}
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                  <hr className={styles.divider} />
-                </>
-              )}
-
-              <div className={styles.userStats}>
-                <div className={styles.stat}>
-                  <span className={styles.statLabel}>Cake Day</span>
-                  <span className={styles.statValue}>
-                    {new Date(profile.accountCreationDate).toLocaleDateString(
-                      'en-US',
-                      {
-                        month: 'long',
-                        day: 'numeric',
-                        year: 'numeric',
-                      }
-                    )}
-                  </span>
-                </div>
-              </div>
-
-              <hr className={styles.divider} />
-
-              <div className={styles.settingsSection}>
-                <h4>Settings</h4>
-                <div className={styles.settingRow}>
-                  <span
-                    className={styles.settingLabel}
-                    style={dynamicStyles.username}
-                  >
-                    u/{profile.username}
-                  </span>
-                  <Link
-                    to={`/settings/profile/${profile.username}`}
-                    className={styles.settingsButton}
-                    style={{
-                      borderColor: colorVariations.primary,
-                      color: colorVariations.primary,
-                    }}
-                  >
-                    <FaCog /> Settings
-                  </Link>
-                </div>
-              </div>
+              <p className={styles.profileDescription}>
+                Customize your public profile URL to make it easier for others
+                to find and remember.
+              </p>
             </div>
           </div>
         </div>
