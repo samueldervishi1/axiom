@@ -24,7 +24,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isInitialCheck, setIsInitialCheck] = useState(true);
+  const [, setIsInitialCheck] = useState(true);
   const [isDeactivated, setIsDeactivated] = useState(false);
   const [userId, setUserId] = useState(null);
   const [username, setUsername] = useState(null);

@@ -19,6 +19,7 @@ const PostDetails = () => {
   const [error, setError] = useState(null);
   const [newComment, setNewComment] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [, setCommentCount] = useState(0);
 
   const {
     comments,

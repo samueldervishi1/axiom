@@ -3,18 +3,17 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import axios from 'axios';
 import { getUserIdFromServer, getUsernameFromServer } from '../auth/authUtils';
-import { GoHome } from 'react-icons/go';
 import {
   IoSearchOutline,
   IoSettingsOutline,
   IoHelpCircleOutline,
-  IoShieldCheckmarkOutline,
 } from 'react-icons/io5';
 import { CiLogout } from 'react-icons/ci';
-import { GiArtificialHive } from 'react-icons/gi';
+import { SiPoe } from 'react-icons/si';
 import { CgProfile } from 'react-icons/cg';
 import loaderImage from '../assets/377.gif';
-import { MdOutlineExplore } from 'react-icons/md';
+import { IoIosPeople } from 'react-icons/io';
+import { TiHome } from 'react-icons/ti';
 import logo from '../../public/logo.png';
 import styles from '../styles/navbar.module.css';
 
@@ -76,11 +75,6 @@ const Navbar = () => {
       type: 'item',
     },
     {
-      name: 'Privacy',
-      icon: <IoShieldCheckmarkOutline className={styles.dropdown_icon} />,
-      type: 'item',
-    },
-    {
       name: 'Help',
       icon: <IoHelpCircleOutline className={styles.dropdown_icon} />,
       type: 'item',
@@ -125,8 +119,6 @@ const Navbar = () => {
         navigate('/home');
       } else if (settingName === 'Profile') {
         navigate('/profile');
-      } else if (settingName === 'Settings' || settingName === 'Privacy') {
-        navigate('/settings');
       } else if (settingName === 'Help') {
         navigate('/settings?section=help');
       } else if (settingName === 'Sign out') {
@@ -242,23 +234,23 @@ const Navbar = () => {
                 className={styles.nav_item}
                 onClick={() => navigate('/home')}
               >
-                <GoHome className={styles.icon_p} />
+                <TiHome className={styles.icon_p} />
                 <span className={styles.nav_text}>Home</span>
               </button>
 
               <button
                 className={styles.nav_item}
-                onClick={() => navigate('/explore')}
+                onClick={() => navigate('/connect')}
               >
-                <MdOutlineExplore className={styles.icon_p} />
-                <span className={styles.nav_text}>Explore</span>
+                <IoIosPeople className={styles.icon_p} />
+                <span className={styles.nav_text}>Connect</span>
               </button>
 
               <button
                 className={styles.nav_item}
                 onClick={() => navigate('/chat')}
               >
-                <GiArtificialHive className={styles.icon_p} />
+                <SiPoe className={styles.icon_p} />
                 <span className={styles.nav_text}>Sophia Ultimate</span>
               </button>
             </div>
@@ -333,7 +325,7 @@ const Navbar = () => {
                     navigate('/home');
                   }}
                 >
-                  <GoHome className={styles.icon_p} />
+                  <TiHome className={styles.icon_p} />
                   <span>Home</span>
                 </button>
 
@@ -344,8 +336,8 @@ const Navbar = () => {
                     navigate('/explore');
                   }}
                 >
-                  <MdOutlineExplore className={styles.icon_p} />
-                  <span>Explore</span>
+                  <IoIosPeople className={styles.icon_p} />
+                  <span>Connect</span>
                 </button>
 
                 <button
@@ -355,7 +347,7 @@ const Navbar = () => {
                     navigate('/chat');
                   }}
                 >
-                  <GiArtificialHive className={styles.icon_p} />
+                  <SiPoe className={styles.icon_p} />
                   <span>Sophia Ultra</span>
                 </button>
               </div>

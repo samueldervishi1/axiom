@@ -1,13 +1,9 @@
 package com.axiom.server.controllers;
 
-import com.axiom.server.models.User;
-import com.axiom.server.models.UserLiteDTO;
+import com.axiom.server.models.*;
 import com.axiom.server.services.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -45,5 +41,29 @@ public class UserController {
     @GetMapping("/{userId}/following")
     public ResponseEntity<List<UserLiteDTO>> getFollowing(@PathVariable Long userId) {
         return ResponseEntity.ok(userService.getFollowing(userId));
+    }
+
+    @PostMapping("/{userId}/experience")
+    public ResponseEntity<Experience> addExperience(@PathVariable Long userId, @RequestBody Experience experience) {
+        experience.setUserId(userId);
+        return ResponseEntity.ok(userService.addExperience(experience));
+    }
+
+    @PostMapping("/{userId}/education")
+    public ResponseEntity<Education> addEducation(@PathVariable Long userId, @RequestBody Education education) {
+        education.setUserId(userId);
+        return ResponseEntity.ok(userService.addEducation(education));
+    }
+
+    @PostMapping("/{userId}/skill")
+    public ResponseEntity<Skill> addSkill(@PathVariable Long userId, @RequestBody Skill skill) {
+        skill.setUserId(userId);
+        return ResponseEntity.ok(userService.addSkill(skill));
+    }
+
+    @PostMapping("/{userId}/certificate")
+    public ResponseEntity<Certificate> addCertificate(@PathVariable Long userId, @RequestBody Certificate certificate) {
+        certificate.setUserId(userId);
+        return ResponseEntity.ok(userService.addCertificate(certificate));
     }
 }

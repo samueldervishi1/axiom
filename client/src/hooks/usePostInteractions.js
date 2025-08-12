@@ -32,7 +32,7 @@ export const usePostInteractions = (postId, userId) => {
       }
       return false;
     } catch (error) {
-      return false;
+      throw new Error('Error checking if user liked post:', error);
     }
   };
 

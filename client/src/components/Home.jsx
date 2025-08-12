@@ -2,6 +2,7 @@ import React, { useState, useCallback, memo, Suspense, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styles from '../styles/home.module.css';
 import CreatePost from './CreatePost';
+import AddToYourFeed from './AddToYourFeed';
 import { getUsernameFromServer } from '../auth/authUtils';
 import axios from 'axios';
 import backgroundImage from '../assets/background.jpg';
@@ -51,10 +52,8 @@ const Home = () => {
 
   return (
     <div className={styles.home_container}>
-      {/* Left Sidebar - User Profile */}
       <div className={styles.left_sidebar}>
         <div className={styles.profile_card}>
-          {/* Banner section - top portion only */}
           <div className={styles.profile_banner}>
             <img
               src={backgroundImage}
@@ -63,7 +62,6 @@ const Home = () => {
             />
           </div>
 
-          {/* Profile content section below banner */}
           <div className={styles.profile_content}>
             <div className={styles.profile_avatar}>
               {isLoadingProfile
@@ -90,24 +88,14 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Main Content - Posts */}
       <div className={styles.main_content}>
         <CreatePost onPostCreated={handlePostRefresh} />
         <Suspense fallback={<LoadingFallback />}>
           <PostList key={refreshTrigger} onPostRefresh={handlePostRefresh} />
         </Suspense>
       </div>
-
-      {/* Right Sidebar - Info and Links */}
       <div className={styles.right_sidebar}>
-        <div className={styles.info_card}>
-          <h4>Trending Topics</h4>
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation.
-          </p>
-        </div>
+        <AddToYourFeed />
 
         <div className={styles.footer_links}>
           <div className={styles.link_group}>
@@ -123,7 +111,7 @@ const Home = () => {
             <a href='/settings?section=terms' className={styles.footer_link}>
               Terms
             </a>
-            <a href='/settings?section=privacy' className={styles.footer_link}>
+            <a href='/settings?section=terms' className={styles.footer_link}>
               Privacy
             </a>
           </div>

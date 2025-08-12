@@ -1,0 +1,495 @@
+/* Modal Overlay */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 60px;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  overflow-y: auto;
+}
+
+/* Modal Content */
+.modalContent {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  position: relative;
+  margin-bottom: 60px;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Modal Header */
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeButton:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+/* Modal Form */
+.modalForm {
+  padding: 24px;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #374151;
+  font-size: 14px;
+}
+
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.formGroup input:disabled {
+  background: #f9fafb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.formGroup textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Form Row for side-by-side inputs */
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .formRow {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+/* Checkbox Group */
+.checkboxGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.checkboxGroup input[type='checkbox'] {
+  width: auto;
+  margin: 0;
+}
+
+.checkboxGroup label {
+  margin: 0;
+  font-weight: normal;
+  color: #4b5563;
+  cursor: pointer;
+}
+
+/* Field Help Text */
+.fieldHelp {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Error Message */
+.errorMessage {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+/* Modal Actions */
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.cancelButton,
+.submitButton {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.cancelButton {
+  background: #f9fafb;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.cancelButton:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.submitButton {
+  background: #3b82f6;
+  color: white;
+}
+
+.submitButton:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.submitButton:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .modalContent {
+    background: #1f2937;
+    color: #f9fafb;
+  }
+
+  .modalHeader {
+    border-bottom-color: #374151;
+  }
+
+  .modalHeader h2 {
+    color: #f9fafb;
+  }
+
+  .closeButton {
+    color: #9ca3af;
+  }
+
+  .closeButton:hover {
+    background: #374151;
+    color: #d1d5db;
+  }
+
+  .formGroup label {
+    color: #d1d5db;
+  }
+
+  .formGroup input,
+  .formGroup select,
+  .formGroup textarea {
+    background: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+
+  .formGroup input:focus,
+  .formGroup select:focus,
+  .formGroup textarea:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+  }
+
+  .formGroup input:disabled {
+    background: #2d3748;
+    color: #6b7280;
+  }
+
+  .checkboxGroup label {
+    color: #9ca3af;
+  }
+
+  .fieldHelp {
+    color: #9ca3af;
+  }
+
+  .errorMessage {
+    background: #451a1a;
+    border-color: #991b1b;
+    color: #f87171;
+  }
+
+  .modalActions {
+    border-top-color: #374151;
+  }
+
+  .cancelButton {
+    background: #374151;
+    color: #d1d5db;
+    border-color: #4b5563;
+  }
+
+  .cancelButton:hover {
+    background: #4b5563;
+    border-color: #6b7280;
+  }
+}
+
+/* Links Section Styles */
+.linksHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.addLinkBtn {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.addLinkBtn:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+.linkInputGroup {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.linkInput {
+  flex: 1;
+  margin-bottom: 0 !important;
+}
+
+.removeLinkBtn {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.removeLinkBtn:hover {
+  background: #fecaca;
+  border-color: #f87171;
+}
+
+/* Profile Image Edit Styles */
+.profileImageContainer {
+  position: relative;
+  display: inline-block;
+}
+
+.profileEditBtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #e5e7eb;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.profileEditBtn:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+  transform: scale(1.05);
+}
+
+.profileEditBtn .penIcon {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Dark mode support for new styles */
+@media (prefers-color-scheme: dark) {
+  .addLinkBtn {
+    background: #374151;
+    color: #d1d5db;
+    border-color: #4b5563;
+  }
+
+  .addLinkBtn:hover {
+    background: #4b5563;
+    border-color: #6b7280;
+  }
+
+  .removeLinkBtn {
+    background: #451a1a;
+    color: #f87171;
+    border-color: #991b1b;
+  }
+
+  .removeLinkBtn:hover {
+    background: #991b1b;
+    border-color: #dc2626;
+  }
+
+  .profileEditBtn {
+    background: rgba(31, 41, 55, 0.9);
+    border-color: #4b5563;
+  }
+
+  .profileEditBtn:hover {
+    background: #374151;
+    border-color: #6b7280;
+  }
+
+  .profileEditBtn .penIcon {
+    color: #9ca3af;
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  .modalOverlay {
+    padding-top: 20px;
+  }
+
+  .modalContent {
+    width: 95%;
+    margin: 0 auto 20px;
+    max-height: calc(100vh - 40px);
+  }
+
+  .modalHeader {
+    padding: 16px 20px 12px;
+  }
+
+  .modalHeader h2 {
+    font-size: 20px;
+  }
+
+  .modalForm {
+    padding: 20px;
+  }
+
+  .modalActions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .cancelButton,
+  .submitButton {
+    width: 100%;
+  }
+
+  .linksHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .addLinkBtn {
+    align-self: flex-end;
+  }
+
+  .linkInputGroup {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .removeLinkBtn {
+    align-self: flex-end;
+    padding: 8px 12px;
+  }
+}

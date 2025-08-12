@@ -331,13 +331,6 @@ content-type: application/json`}
     if (loading) return <div className={styles.loading}>Loading models...</div>;
     if (error) return <div className={styles.error}>{error}</div>;
 
-    const deprecatedModels = models.filter(
-      (m) =>
-        m.status === 'deprecated' ||
-        m.status === 'end-of-life' ||
-        m.status === 'legacy'
-    );
-
     return (
       <div className={styles.migration_content}>
         <h2 style={{ textAlign: 'center' }}>Migration Guide</h2>

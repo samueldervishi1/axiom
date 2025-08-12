@@ -1,9 +1,8 @@
 package com.axiom.server.services;
 
 import com.axiom.server.exceptions.CustomException;
-import com.axiom.server.models.User;
-import com.axiom.server.models.UserLiteDTO;
-import com.axiom.server.repositories.UserRepository;
+import com.axiom.server.models.*;
+import com.axiom.server.repositories.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -16,9 +15,19 @@ import static com.axiom.server.models.Messages.*;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final ExperienceRepository experienceRepository;
+    private final EducationRepository educationRepository;
+    private final SkillRepository skillRepository;
+    private final CertificateRepository certificateRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, ExperienceRepository experienceRepository,
+            EducationRepository educationRepository, SkillRepository skillRepository,
+            CertificateRepository certificateRepository) {
         this.userRepository = userRepository;
+        this.experienceRepository = experienceRepository;
+        this.educationRepository = educationRepository;
+        this.skillRepository = skillRepository;
+        this.certificateRepository = certificateRepository;
     }
 
     public User getUserInfo(String username) {
@@ -67,5 +76,21 @@ public class UserService {
         List<Long> followingLongIds = followingIds.stream().map(Long::parseLong).collect(Collectors.toList());
 
         return userRepository.findUserLiteByIdIn(followingLongIds);
+    }
+
+    public Experience addExperience(Experience experience) {
+        return experienceRepository.save(experience);
+    }
+
+    public Education addEducation(Education education) {
+        return educationRepository.save(education);
+    }
+
+    public Skill addSkill(Skill skill) {
+        return skillRepository.save(skill);
+    }
+
+    public Certificate addCertificate(Certificate certificate) {
+        return certificateRepository.save(certificate);
     }
 }

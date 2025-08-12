@@ -25,7 +25,6 @@ const Settings = lazy(() => import('./components/Settings'));
 const DeactivatedAccount = lazy(
   () => import('./components/DeactivatedAccount')
 );
-const ExplorePage = lazy(() => import('./components/ExplorePage'));
 const Profile = lazy(() => import('./components/Profile'));
 const UserSettings = lazy(() => import('./components/SettingsProfile'));
 const PostDetails = lazy(() => import('./components/PostDetails'));
@@ -109,10 +108,6 @@ const AppContent = () => {
           <Route
             path='/list/:type/:username'
             element={<ProtectedRoute element={<FollowerScreen />} />}
-          />
-          <Route
-            path='/explore'
-            element={<ProtectedRoute element={<ExplorePage />} />}
           />
 
           {/* Fallback Routes */}

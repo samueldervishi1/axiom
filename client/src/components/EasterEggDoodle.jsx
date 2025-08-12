@@ -42,6 +42,8 @@ const ZodiacInput = memo(({ value, onChange, onSubmit, disabled }) => (
   />
 ));
 
+ZodiacInput.displayName = 'ZodiacInput';
+
 const DevApiEasterEgg = ({ onClose }) => {
   const [currentApi, setCurrentApi] = useState(null);
   const [isLoading, setIsLoading] = useState(false);

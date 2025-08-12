@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import { openDB } from 'idb';
-import { getUsernameFromServer } from '../auth/authUtils';
+import { useAuth } from '../auth/AuthContext';
 import { MdDelete, MdSchedule, MdPublish } from 'react-icons/md';
 import { LuSendHorizontal } from 'react-icons/lu';
 import { BiCalendar } from 'react-icons/bi';
@@ -10,11 +10,9 @@ import styles from '../styles/post.module.css';
 const API_URL = import.meta.env.VITE_API_URL;
 
 const PostForm = ({ onPostCreated }) => {
+  const { userId, username } = useAuth();
   const [postContent, setPostContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [username, setUsername] = useState('');
-  const [userId, setUserId] = useState('');
-  const [loadingUsername, setLoadingUsername] = useState(true);
   const [isScheduled, setIsScheduled] = useState(false);
   const [scheduledDateTime, setScheduledDateTime] = useState('');
   const [showScheduleInput, setShowScheduleInput] = useState(false);
@@ -65,7 +63,6 @@ const PostForm = ({ onPostCreated }) => {
     async (content, isOffline = false) => {
       if (
         isSubmitting ||
-        loadingUsername ||
         !username ||
         !userId ||
         !content?.trim() ||
@@ -173,7 +170,6 @@ const PostForm = ({ onPostCreated }) => {
     },
     [
       isSubmitting,
-      loadingUsername,
       username,
       userId,
       isScheduled,
@@ -200,27 +196,11 @@ const PostForm = ({ onPostCreated }) => {
     return () => window.removeEventListener('online', sendOfflinePosts);
   }, [sendOfflinePosts]);
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const result = await getUsernameFromServer();
-      if (result && typeof result === 'object') {
-        setUsername(result.username || result.name || '');
-        setUserId(result.id || result.userId || '');
-      } else {
-        setUsername(result || '');
-        setUserId('1');
-      }
-      setLoadingUsername(false);
-    };
-
-    fetchUserData();
-  }, []);
-
   const placeholderText = useMemo(() => {
-    return loadingUsername
-      ? "What's on your mind today..."
-      : `What's on your mind today, ${username}?`;
-  }, [loadingUsername, username]);
+    return username
+      ? `What's on your mind today, ${username}?`
+      : "What's on your mind today...";
+  }, [username]);
 
   const handleClearInput = () => {
     setPostContent('');
@@ -259,11 +239,6 @@ const PostForm = ({ onPostCreated }) => {
             e.target.style.height = `${e.target.scrollHeight}px`;
           }}
         />
-        {loadingUsername && (
-          <span className={styles.animatedDots} aria-label='loading username'>
-            ...
-          </span>
-        )}
 
         {showScheduleInput && (
           <div className={styles.schedule_container}>
@@ -307,11 +282,7 @@ const PostForm = ({ onPostCreated }) => {
             type='submit'
             className={styles.post_the_post}
             disabled={
-              isSubmitting ||
-              loadingUsername ||
-              !username ||
-              !userId ||
-              !postContent.trim()
+              isSubmitting || !username || !userId || !postContent.trim()
             }
             title={isScheduled ? 'Schedule your post' : 'Share your post'}
           >

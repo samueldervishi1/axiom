@@ -120,6 +120,25 @@ public class User {
     @Column(name = "PROFILE_COLOR_HEX")
     private String profileColorHex;
 
+    @Column(name = "ABOUT", length = 4000)
+    private String about;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "USER_ID")
+    private List<Experience> experiences = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "USER_ID")
+    private List<Education> education = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "USER_ID")
+    private List<Skill> skills = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "USER_ID")
+    private List<Certificate> certificates = new ArrayList<>();
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

@@ -1,54 +1,46 @@
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import {
-  FaCog,
-  FaGithub,
-  FaInstagram,
-  FaLink,
-  FaRegBookmark,
-  FaRegCommentAlt,
-  FaRegEyeSlash,
-  FaRegThumbsUp,
-} from 'react-icons/fa';
 import { LuSquareArrowOutUpRight } from 'react-icons/lu';
-import { FaPen } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import {
+  FaPen,
+  FaChevronDown,
+  FaBook,
+  FaVideo,
+  FaFileAlt,
+  FaQuestionCircle,
+} from 'react-icons/fa';
 import styles from '../styles/profile.module.css';
 import profileAvatar from '../assets/user.webp';
 import backgroundImage from '../assets/background.jpg';
 import { getUserIdFromServer, getUsernameFromServer } from '../auth/authUtils';
+import ExperienceModal from './ExperienceModal';
+import EducationModal from './EducationModal';
+import SkillModal from './SkillModal';
+import CertificateModal from './CertificateModal';
+import AboutModal from './AboutModal';
+import ProfileEditModal from './ProfileEditModal';
+import AddToYourFeed from './AddToYourFeed';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
-  const [userPosts, setUserPosts] = useState([]);
+  const [, setUserPosts] = useState([]);
   const [, setLikedPosts] = useState([]);
-  const [likedPostsContent, setLikedPostsContent] = useState([]);
-  const [activeTab, setActiveTab] = useState('posts');
+  const [, setLikedPostsContent] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Helper function to generate color variations
-  const generateColorVariations = (hexColor) => {
-    if (!hexColor) return {};
-
-    // Convert hex to RGB
-    const hex = hexColor.replace('#', '');
-    const r = parseInt(hex.substring(0, 2), 16);
-    const g = parseInt(hex.substring(2, 4), 16);
-    const b = parseInt(hex.substring(4, 6), 16);
-
-    return {
-      primary: hexColor,
-      light: `rgba(${r}, ${g}, ${b}, 0.1)`,
-      medium: `rgba(${r}, ${g}, ${b}, 0.3)`,
-      gradient: `linear-gradient(135deg, ${hexColor}40, ${hexColor}10)`,
-      shadow: `0 4px 20px rgba(${r}, ${g}, ${b}, 0.3)`,
-      border: `2px solid ${hexColor}40`,
-    };
-  };
+  const [showExperienceModal, setShowExperienceModal] = useState(false);
+  const [showEducationModal, setShowEducationModal] = useState(false);
+  const [showSkillModal, setShowSkillModal] = useState(false);
+  const [showCertificateModal, setShowCertificateModal] = useState(false);
+  const [showAboutModal, setShowAboutModal] = useState(false);
+  const [showProfileEditModal, setShowProfileEditModal] = useState(false);
+  const [showResourcesDropdown, setShowResourcesDropdown] = useState(false);
+  const [showVisitDropdown, setShowVisitDropdown] = useState(false);
+  const [showMoreLinks, setShowMoreLinks] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -94,12 +86,35 @@ const Profile = () => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setShowDropdown(false);
+        setShowResourcesDropdown(false);
+        setShowVisitDropdown(false);
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const refreshProfileData = async () => {
+    try {
+      const username = await getUsernameFromServer();
+      const profileResponse = await axios.get(
+        `${API_URL}users/lookup/${username}`,
+        {
+          withCredentials: true,
+        }
+      );
+      setProfile(profileResponse.data);
+    } catch (error) {
+      console.error('Error refreshing profile data:', error);
+    }
+  };
+  const scrollToTopAndOpenModal = (setModalFunction) => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => {
+      setModalFunction(true);
+    }, 300);
+  };
 
   const getLinkName = (link) => {
     try {
@@ -127,9 +142,9 @@ const Profile = () => {
     return profile?.followers?.length || 0;
   };
 
-  const getFollowingCount = () => {
-    return profile?.following?.length || 0;
-  };
+  // const getFollowingCount = () => {
+  //   return profile?.following?.length || 0;
+  // };
 
   if (isLoading) {
     return (
@@ -147,56 +162,8 @@ const Profile = () => {
     );
   }
 
-  const colorVariations = generateColorVariations(profile.profileColorHex);
-
-  // const dynamicStyles = {
-  //   profileContainer: {
-  //     background: colorVariations.gradient,
-  //     minHeight: '100vh',
-  //     borderRadius: '30px',
-  //     marginTop: '10px',
-  //     marginBottom: '10px',
-  //   },
-  //   activeTab: {
-  //     borderBottom: `3px solid ${colorVariations.primary}`,
-  //     color: colorVariations.primary,
-  //   },
-  //   avatar: {
-  //     border: colorVariations.border,
-  //     boxShadow: colorVariations.shadow,
-  //   },
-  //   aboutCard: {
-  //     background: colorVariations.light,
-  //     border: `1px solid ${colorVariations.primary}20`,
-  //   },
-  //   bannerOverlay: {
-  //     background: `linear-gradient(45deg, ${colorVariations.primary}60, transparent)`,
-  //   },
-  //   username: {
-  //     color: colorVariations.primary,
-  //     fontWeight: 'bold',
-  //   },
-  //   statHighlight: {
-  //     color: colorVariations.primary,
-  //   },
-  //   postCard: {
-  //     borderLeft: `4px solid ${colorVariations.primary}`,
-  //     background: colorVariations.light,
-  //   },
-  // };
-
   const dynamicStyles = {
     profileContainer: {
-      background: `
-      ${colorVariations.gradient},
-      linear-gradient(135deg, 
-        rgba(255, 255, 255, 0.05) 0%,
-        transparent 50%,
-        rgba(255, 255, 255, 0.05) 100%
-      ),
-      radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.08) 0%, transparent 50%)
-    `,
       minHeight: '100vh',
       borderRadius: '12px',
       marginTop: '10px',
@@ -227,91 +194,9 @@ const Profile = () => {
         left: 0,
         right: 0,
         bottom: 0,
-        background: `
-        radial-gradient(circle at 20% 50%, ${colorVariations.primary}30 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, ${colorVariations.primary}20 0%, transparent 50%),
-        radial-gradient(circle at 40% 80%, ${colorVariations.primary}25 0%, transparent 50%)
-      `,
         opacity: 0.4,
         pointerEvents: 'none',
         zIndex: -1,
-      },
-    },
-
-    activeTab: {
-      borderBottom: `3px solid ${colorVariations.primary}`,
-      color: colorVariations.primary,
-      boxShadow: `0 4px 8px ${colorVariations.primary}20`,
-      transition: 'all 0.2s ease',
-    },
-
-    avatar: {
-      border: colorVariations.border,
-      boxShadow: `
-      ${colorVariations.shadow},
-      0 0 20px ${colorVariations.primary}30
-    `,
-      transition: 'all 0.3s ease',
-      '&:hover': {
-        transform: 'scale(1.05)',
-        boxShadow: `
-        ${colorVariations.shadow},
-        0 0 30px ${colorVariations.primary}50
-      `,
-      },
-    },
-
-    aboutCard: {
-      background: `
-      ${colorVariations.light},
-      linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%)
-    `,
-      border: `1px solid ${colorVariations.primary}20`,
-      backdropFilter: 'blur(10px)',
-      WebkitBackdropFilter: 'blur(10px)',
-      borderRadius: '15px',
-      transition: 'all 0.3s ease',
-      '&:hover': {
-        border: `1px solid ${colorVariations.primary}40`,
-        transform: 'translateY(-2px)',
-        boxShadow: `0 10px 25px rgba(0, 0, 0, 0.1)`,
-      },
-    },
-
-    bannerOverlay: {
-      background: `
-      linear-gradient(45deg, ${colorVariations.primary}60, transparent),
-      linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%)
-    `,
-      backdropFilter: 'blur(5px)',
-      WebkitBackdropFilter: 'blur(5px)',
-    },
-
-    username: {
-      color: colorVariations.primary,
-      fontWeight: 'bold',
-      textShadow: `0 2px 4px ${colorVariations.primary}20`,
-      transition: 'all 0.2s ease',
-    },
-
-    statHighlight: {
-      color: colorVariations.primary,
-      textShadow: `0 1px 2px ${colorVariations.primary}30`,
-      transition: 'all 0.2s ease',
-    },
-
-    postCard: {
-      borderLeft: `4px solid ${colorVariations.primary}`,
-      background: `
-      ${colorVariations.light},
-      linear-gradient(90deg, ${colorVariations.primary}05 0%, transparent 100%)
-    `,
-      borderRadius: '12px',
-      transition: 'all 0.3s ease',
-      '&:hover': {
-        borderLeft: `6px solid ${colorVariations.primary}`,
-        transform: 'translateX(4px)',
-        boxShadow: `0 8px 25px rgba(0, 0, 0, 0.1)`,
       },
     },
   };
@@ -324,7 +209,6 @@ const Profile = () => {
       <div className={styles.mainContent}>
         <div className={styles.leftColumn}>
           <div className={styles.profileCard}>
-            {/* Banner Section */}
             <div className={styles.profileBanner}>
               <img
                 src={backgroundImage}
@@ -333,33 +217,41 @@ const Profile = () => {
               />
             </div>
 
-            {/* Profile Content */}
             <div className={styles.profileContent}>
-              {/* Avatar */}
               <div className={styles.avatarContainer}>
-                <img
-                  src={profileAvatar}
-                  alt='Profile'
-                  className={styles.profileAvatar}
-                />
+                <div className={styles.profileImageContainer}>
+                  <img
+                    src={profileAvatar}
+                    alt='Profile'
+                    className={styles.profileAvatar}
+                  />
+                </div>
               </div>
+              <button
+                className={styles.profileEditBtn}
+                onClick={() => scrollToTopAndOpenModal(setShowProfileEditModal)}
+                title='Edit Profile'
+              >
+                <FaPen className={styles.penIcon} />
+              </button>
 
-              {/* User Info */}
               <div className={styles.userInfo}>
                 <h1 className={styles.displayName}>
                   {profile.fullName || profile.displayName || profile.username}
                 </h1>
 
-                {/* Bio and Profession */}
                 {(profile.bio || profile.profession) && (
                   <p className={styles.bioText}>
-                    {profile.bio && profile.profession
-                      ? `${profile.bio} - ${profile.profession}`
-                      : profile.bio || profile.profession}
+                    {profile.bio && profile.title
+                      ? `${profile.bio} - ${profile.title}`
+                      : profile.bio || profile.title}
                   </p>
                 )}
 
-                {/* Links */}
+                <div className={styles.followers}>
+                  {getFollowersCount()} - connections
+                </div>
+
                 {profile.links && profile.links.length > 0 && (
                   <div className={styles.linksSection}>
                     {profile.links.map((link, index) => (
@@ -377,31 +269,104 @@ const Profile = () => {
                   </div>
                 )}
 
-                {/* Action Buttons */}
                 <div className={styles.actionButtons}>
-                  <button className={styles.actionBtn}>Resources</button>
-                  <button className={styles.actionBtn}>App</button>
-                  <button className={styles.actionBtn}>Profile</button>
-                  <button className={styles.actionBtn}>Visit</button>
+                  <div className={styles.dropdownContainer}>
+                    <button
+                      className={styles.actionBtn}
+                      onClick={() => {
+                        setShowResourcesDropdown(!showResourcesDropdown);
+                        setShowVisitDropdown(false);
+                      }}
+                    >
+                      Resources
+                      <FaChevronDown className={styles.dropdownIcon} />
+                    </button>
+                    {showResourcesDropdown && (
+                      <div className={styles.dropdownMenu}>
+                        <div className={styles.dropdownItem}>
+                          <span>Documentation</span>
+                          <FaBook className={styles.menuIcon} />
+                        </div>
+                        <div className={styles.dropdownItem}>
+                          <span>Video Tutorials</span>
+                          <FaVideo className={styles.menuIcon} />
+                        </div>
+                        <div className={styles.dropdownItem}>
+                          <span>Blog Posts</span>
+                          <FaFileAlt className={styles.menuIcon} />
+                        </div>
+                        <div className={styles.dropdownItem}>
+                          <span>Help Center</span>.
+                          <FaQuestionCircle className={styles.menuIcon} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {profile.links && profile.links.length > 0 && (
+                    <div className={styles.dropdownContainer}>
+                      <button
+                        className={styles.actionBtn}
+                        onClick={() => {
+                          setShowVisitDropdown(!showVisitDropdown);
+                          setShowResourcesDropdown(false);
+                        }}
+                      >
+                        Visit
+                        <FaChevronDown className={styles.dropdownIcon} />
+                      </button>
+                      {showVisitDropdown && (
+                        <div className={styles.dropdownMenu}>
+                          {profile.links
+                            .slice(0, showMoreLinks ? profile.links.length : 3)
+                            .map((link, index) => (
+                              <a
+                                key={index}
+                                href={link}
+                                target='_blank'
+                                rel='noopener noreferrer'
+                                className={styles.dropdownLinkItem}
+                              >
+                                {getLinkName(link)}
+                                <LuSquareArrowOutUpRight
+                                  className={styles.menuIcon}
+                                />
+                              </a>
+                            ))}
+                          {profile.links.length > 3 && (
+                            <div
+                              className={styles.dropdownItem}
+                              onClick={() => setShowMoreLinks(!showMoreLinks)}
+                            >
+                              <span>
+                                {showMoreLinks
+                                  ? 'Show less'
+                                  : `Show ${profile.links.length - 3} more`}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* About Card */}
           <div className={styles.aboutCard}>
             <div className={styles.aboutHeader}>
               <h3 className={styles.aboutTitle}>About</h3>
               <button
                 className={styles.editBtn}
-                onClick={() => console.log('Edit about clicked')}
+                onClick={() => scrollToTopAndOpenModal(setShowAboutModal)}
               >
                 <FaPen className={styles.penIcon} />
               </button>
             </div>
             <div className={styles.aboutContent}>
-              {profile.bio ? (
-                <p className={styles.aboutText}>{profile.bio}</p>
+              {profile.about ? (
+                <p className={styles.aboutText}>{profile.about}</p>
               ) : (
                 <p className={styles.aboutPlaceholder}>
                   Tell us about yourself...
@@ -410,13 +375,12 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Experience Card */}
           <div className={styles.sectionCard}>
             <div className={styles.sectionHeader}>
               <h3 className={styles.sectionTitle}>Experience</h3>
               <button
                 className={styles.editBtn}
-                onClick={() => console.log('Edit experience clicked')}
+                onClick={() => scrollToTopAndOpenModal(setShowExperienceModal)}
               >
                 <FaPen className={styles.penIcon} />
               </button>
@@ -456,13 +420,12 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Education Card */}
           <div className={styles.sectionCard}>
             <div className={styles.sectionHeader}>
               <h3 className={styles.sectionTitle}>Education</h3>
               <button
                 className={styles.editBtn}
-                onClick={() => console.log('Edit education clicked')}
+                onClick={() => scrollToTopAndOpenModal(setShowEducationModal)}
               >
                 <FaPen className={styles.penIcon} />
               </button>
@@ -493,13 +456,12 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Skills Card */}
           <div className={styles.sectionCard}>
             <div className={styles.sectionHeader}>
               <h3 className={styles.sectionTitle}>Skills</h3>
               <button
                 className={styles.editBtn}
-                onClick={() => console.log('Edit skills clicked')}
+                onClick={() => scrollToTopAndOpenModal(setShowSkillModal)}
               >
                 <FaPen className={styles.penIcon} />
               </button>
@@ -529,13 +491,12 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Certifications Card */}
           <div className={styles.sectionCard}>
             <div className={styles.sectionHeader}>
               <h3 className={styles.sectionTitle}>Licenses & Certifications</h3>
               <button
                 className={styles.editBtn}
-                onClick={() => console.log('Edit certifications clicked')}
+                onClick={() => scrollToTopAndOpenModal(setShowCertificateModal)}
               >
                 <FaPen className={styles.penIcon} />
               </button>
@@ -580,7 +541,6 @@ const Profile = () => {
         </div>
 
         <div className={styles.rightColumn}>
-          {/* Public Profile Card */}
           <div className={styles.publicProfileCard}>
             <div className={styles.publicProfileHeader}>
               <h3 className={styles.publicProfileTitle}>
@@ -605,8 +565,48 @@ const Profile = () => {
               </p>
             </div>
           </div>
+
+          <AddToYourFeed />
         </div>
       </div>
+
+      <ExperienceModal
+        isOpen={showExperienceModal}
+        onClose={() => setShowExperienceModal(false)}
+        onSuccess={refreshProfileData}
+      />
+
+      <EducationModal
+        isOpen={showEducationModal}
+        onClose={() => setShowEducationModal(false)}
+        onSuccess={refreshProfileData}
+      />
+
+      <SkillModal
+        isOpen={showSkillModal}
+        onClose={() => setShowSkillModal(false)}
+        onSuccess={refreshProfileData}
+      />
+
+      <CertificateModal
+        isOpen={showCertificateModal}
+        onClose={() => setShowCertificateModal(false)}
+        onSuccess={refreshProfileData}
+      />
+
+      <AboutModal
+        isOpen={showAboutModal}
+        onClose={() => setShowAboutModal(false)}
+        onSuccess={refreshProfileData}
+        currentAbout={profile?.about}
+      />
+
+      <ProfileEditModal
+        isOpen={showProfileEditModal}
+        onClose={() => setShowProfileEditModal(false)}
+        onSuccess={refreshProfileData}
+        profile={profile}
+      />
     </div>
   );
 };

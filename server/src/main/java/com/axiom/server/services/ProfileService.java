@@ -147,6 +147,7 @@ public class ProfileService {
         Optional.ofNullable(updatedUser.getTitle()).ifPresent(user::setTitle);
         Optional.ofNullable(updatedUser.getEmail()).ifPresent(user::setEmail);
         Optional.ofNullable(updatedUser.getProfileColorHex()).ifPresent(user::setProfileColorHex);
+        Optional.ofNullable(updatedUser.getAbout()).ifPresent(user::setAbout);
         if (updatedUser.getLinks() != null) {
             List<String> newLinks = updatedUser.getLinks();
             List<String> mergedLinks = new ArrayList<>(newLinks);

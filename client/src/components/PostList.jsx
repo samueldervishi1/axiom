@@ -35,7 +35,7 @@ const PostList = ({ onPostRefresh }) => {
       );
 
       const postsWithUsernames = await Promise.all(
-        filteredPosts.map(async (post, index) => {
+        filteredPosts.map(async (post) => {
           if (post.authorName) {
             return { ...post, username: post.authorName };
           }
@@ -52,6 +52,7 @@ const PostList = ({ onPostRefresh }) => {
             );
             return { ...post, username: usernameResponse.data };
           } catch (err) {
+            console.error('Error fetching username:', err);
             return { ...post, username: 'User Deleted' };
           }
         })

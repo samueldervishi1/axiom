@@ -12,7 +12,6 @@ import {
   FaHeart,
   FaLink,
   FaLinkedin,
-  FaQuora,
   FaReddit,
   FaRegBookmark,
   FaRegHeart,

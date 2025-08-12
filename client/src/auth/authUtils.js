@@ -38,6 +38,7 @@ class TokenManager {
       const response = await axios.get(`${API_URL}auth/me`, {
         withCredentials: true,
       });
+      console.log('Token is valid, no refresh needed', response.data);
       return true;
     } catch (error) {
       if (error.response?.status === 401) {
