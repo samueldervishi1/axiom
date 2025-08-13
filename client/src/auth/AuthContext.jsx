@@ -94,7 +94,7 @@ export const AuthProvider = ({ children }) => {
                   window.location.href = '/account-deactivated';
                 }
               } else {
-                console.log('User account is active');
+                //do nothing
               }
             } catch (profileError) {
               console.error(

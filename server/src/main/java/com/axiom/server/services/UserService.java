@@ -40,6 +40,11 @@ public class UserService {
                 .orElseThrow(() -> new CustomException(404, String.format(USER_NOT_FOUND_BY_ID, userId)));
     }
 
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(404, String.format(USER_NOT_FOUND_BY_ID, userId)));
+    }
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }

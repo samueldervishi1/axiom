@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import styles from '../styles/modelDocs.module.css';
 
@@ -10,6 +10,7 @@ const ModelDocs = () => {
   const [models, setModels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const modelDetailsRef = useRef(null);
 
   const statusInfo = {
     current: { label: 'Current', color: '#10b981', priority: 1 },
@@ -51,6 +52,21 @@ const ModelDocs = () => {
     fetchModels();
   }, []);
 
+  const handleModelSelect = (modelId) => {
+    setSelectedModel(modelId);
+
+    // Smooth scroll to model details section
+    setTimeout(() => {
+      if (modelDetailsRef.current) {
+        modelDetailsRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+          inline: 'nearest',
+        });
+      }
+    }, 100); // Small delay to ensure the details section has rendered
+  };
+
   const tabs = [
     { id: 'models', label: 'Available Models' },
     { id: 'api', label: 'API Usage' },
@@ -72,7 +88,7 @@ const ModelDocs = () => {
             <div
               key={model.modelId}
               className={`${styles.model_card} ${selectedModel === model.modelId ? styles.selected : ''}`}
-              onClick={() => setSelectedModel(model.modelId)}
+              onClick={() => handleModelSelect(model.modelId)}
             >
               <div className={styles.model_header}>
                 <h4>{model.modelName}</h4>
@@ -148,7 +164,7 @@ const ModelDocs = () => {
         </div>
 
         {selectedModel && (
-          <div className={styles.model_details}>
+          <div className={styles.model_details} ref={modelDetailsRef}>
             {(() => {
               const model = models.find((m) => m.modelId === selectedModel);
               if (!model) return null;
@@ -211,7 +227,7 @@ const ModelDocs = () => {
                   <div className={styles.usage_code}>
                     <h4>Usage Example</h4>
                     <pre className={styles.code_block}>
-                      {`POST http://localhost:8080/axiom/api/core/v16-loom/mindstream/generate
+                      {`POST http://localhost:8080/axiom/api/core/v4.0.0/loom/mindstream/generate
 
 {
   "model": "${model.modelId}",

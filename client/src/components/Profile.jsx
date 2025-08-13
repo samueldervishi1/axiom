@@ -5,10 +5,13 @@ import {
   FaPen,
   FaChevronDown,
   FaBook,
-  FaVideo,
-  FaFileAlt,
-  FaQuestionCircle,
+  FaTrophy,
+  FaCloudDownloadAlt,
 } from 'react-icons/fa';
+import {
+  BsFillInfoSquareFill,
+  BsFillFileEarmarkPostFill,
+} from 'react-icons/bs';
 import styles from '../styles/profile.module.css';
 import profileAvatar from '../assets/user.webp';
 import backgroundImage from '../assets/background.jpg';
@@ -18,7 +21,9 @@ import EducationModal from './EducationModal';
 import SkillModal from './SkillModal';
 import CertificateModal from './CertificateModal';
 import AboutModal from './AboutModal';
+import AboutProfileModal from './AboutProfileModal';
 import ProfileEditModal from './ProfileEditModal';
+import UserPostsModal from './UserPostsModal';
 import AddToYourFeed from './AddToYourFeed';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -37,7 +42,9 @@ const Profile = () => {
   const [showSkillModal, setShowSkillModal] = useState(false);
   const [showCertificateModal, setShowCertificateModal] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
+  const [showAboutProfileModal, setShowAboutProfileModal] = useState(false);
   const [showProfileEditModal, setShowProfileEditModal] = useState(false);
+  const [showUserPostsModal, setShowUserPostsModal] = useState(false);
   const [showResourcesDropdown, setShowResourcesDropdown] = useState(false);
   const [showVisitDropdown, setShowVisitDropdown] = useState(false);
   const [showMoreLinks, setShowMoreLinks] = useState(false);
@@ -116,6 +123,31 @@ const Profile = () => {
     }, 300);
   };
 
+  const downloadProfilePdf = async () => {
+    try {
+      const userId = await getUserIdFromServer();
+      const response = await axios.get(
+        `${API_URL}users/${userId}/download-pdf`,
+        {
+          withCredentials: true,
+          responseType: 'blob',
+        }
+      );
+
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${profile.username || 'profile'}_profile.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+    }
+  };
+
   const getLinkName = (link) => {
     try {
       const url = new URL(link);
@@ -140,6 +172,17 @@ const Profile = () => {
 
   const getFollowersCount = () => {
     return profile?.followers?.length || 0;
+  };
+
+  const getTopSkills = () => {
+    if (!profile?.skills || profile.skills.length === 0) {
+      return [];
+    }
+
+    return profile.skills
+      .filter((skill) => skill.endorsementCount > 0)
+      .sort((a, b) => b.endorsementCount - a.endorsementCount)
+      .slice(0, 3);
   };
 
   // const getFollowingCount = () => {
@@ -252,23 +295,6 @@ const Profile = () => {
                   {getFollowersCount()} - connections
                 </div>
 
-                {profile.links && profile.links.length > 0 && (
-                  <div className={styles.linksSection}>
-                    {profile.links.map((link, index) => (
-                      <a
-                        key={index}
-                        href={link}
-                        target='_blank'
-                        rel='noopener noreferrer'
-                        className={styles.userLink}
-                      >
-                        {getLinkName(link)}
-                        <LuSquareArrowOutUpRight className={styles.arrowIcon} />
-                      </a>
-                    ))}
-                  </div>
-                )}
-
                 <div className={styles.actionButtons}>
                   <div className={styles.dropdownContainer}>
                     <button
@@ -284,20 +310,45 @@ const Profile = () => {
                     {showResourcesDropdown && (
                       <div className={styles.dropdownMenu}>
                         <div className={styles.dropdownItem}>
-                          <span>Documentation</span>
                           <FaBook className={styles.menuIcon} />
+                          <a
+                            href='/settings?section=models'
+                            style={{ textDecoration: 'none', color: 'inherit' }}
+                          >
+                            <span>AI Documentation</span>
+                          </a>
                         </div>
-                        <div className={styles.dropdownItem}>
-                          <span>Video Tutorials</span>
-                          <FaVideo className={styles.menuIcon} />
+                        <div
+                          className={styles.dropdownItem}
+                          onClick={() => {
+                            setShowUserPostsModal(true);
+                            setShowResourcesDropdown(false);
+                          }}
+                        >
+                          <BsFillFileEarmarkPostFill
+                            className={styles.menuIcon}
+                          />
+                          <span>Your Posts</span>
                         </div>
-                        <div className={styles.dropdownItem}>
-                          <span>Blog Posts</span>
-                          <FaFileAlt className={styles.menuIcon} />
+                        <div
+                          className={styles.dropdownItem}
+                          onClick={() => {
+                            downloadProfilePdf();
+                            setShowResourcesDropdown(false);
+                          }}
+                        >
+                          <FaCloudDownloadAlt className={styles.menuIcon} />
+                          <span>Save to PDF</span>
                         </div>
-                        <div className={styles.dropdownItem}>
-                          <span>Help Center</span>.
-                          <FaQuestionCircle className={styles.menuIcon} />
+                        <div
+                          className={styles.dropdownItem}
+                          onClick={() => {
+                            setShowAboutProfileModal(true);
+                            setShowResourcesDropdown(false);
+                          }}
+                        >
+                          <BsFillInfoSquareFill className={styles.menuIcon} />
+                          <span>About this profile</span>
                         </div>
                       </div>
                     )}
@@ -371,6 +422,29 @@ const Profile = () => {
                 <p className={styles.aboutPlaceholder}>
                   Tell us about yourself...
                 </p>
+              )}
+
+              {getTopSkills().length > 0 ? (
+                <div className={styles.topSkillsSection}>
+                  <div className={styles.topSkillsHeader}>
+                    <FaTrophy className={styles.topSkillsIcon} />
+                    <span className={styles.topSkillsLabel}>Top skills:</span>
+                  </div>
+                  <div className={styles.topSkillsText}>
+                    {getTopSkills().map((skill, index) => (
+                      <span key={index}>
+                        {skill.skillName}
+                        {index < getTopSkills().length - 1 && ', '}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.topSkillsSection}>
+                  <p className={styles.noTopSkillsMessage}>
+                    Add skills to check your top skills
+                  </p>
+                </div>
               )}
             </div>
           </div>
@@ -601,11 +675,22 @@ const Profile = () => {
         currentAbout={profile?.about}
       />
 
+      <AboutProfileModal
+        isOpen={showAboutProfileModal}
+        onClose={() => setShowAboutProfileModal(false)}
+        profile={profile}
+      />
+
       <ProfileEditModal
         isOpen={showProfileEditModal}
         onClose={() => setShowProfileEditModal(false)}
         onSuccess={refreshProfileData}
         profile={profile}
+      />
+
+      <UserPostsModal
+        isOpen={showUserPostsModal}
+        onClose={() => setShowUserPostsModal(false)}
       />
     </div>
   );

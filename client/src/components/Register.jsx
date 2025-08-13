@@ -54,41 +54,17 @@ const Register = () => {
       setFormState((prev) => ({ ...prev, loading: true, error: null }));
       setErrorMessages({ email: '', username: '', password: '' });
 
-      const dynamicQueries = [
-        {
-          username: formState.username,
-          operator: 'A=1 | A=2 | A=3',
-        },
-        {
-          email: formState.email,
-          operator: 'A=1 | A=2 | A=3',
-        },
-        {
-          fullname: formState.fullName,
-          operator: 'A=1 | A=2 | A=3',
-        },
-        {
-          password: formState.password,
-          operator: 'A=1 | A=2 | A=3',
-        },
-      ];
-
       const fullRequestBody = {
-        queries: [
-          ...dynamicQueries,
-          { query: '$.channelId=onboard-ux', operator: null },
-          { query: 'A=1 | A=2 | A=3', operator: 'AND' },
-          { query: '$.category=qr', operator: null },
-        ],
-        queryOptions: {
-          fields: '',
-          filter: '',
-          pagination: {
-            count: 10,
-            limit: 0,
-          },
-          sorting: '',
+        sessionType: 'persistent_session',
+        server: 'byte_code',
+        queries: {
+          username: formState.username,
+          email: formState.email,
+          fullname: formState.fullName,
+          password: formState.password,
+          channelId: 'bytecode_portal',
         },
+        filter: 'A=1 | A=2 | A=3',
       };
 
       try {

@@ -28,7 +28,6 @@ const Home = () => {
     const fetchUserProfile = async () => {
       try {
         const username = await getUsernameFromServer();
-        console.log('Username:', username);
         if (username) {
           const profileResponse = await axios.get(
             `${API_URL}users/lookup/${username}`,
@@ -36,12 +35,12 @@ const Home = () => {
               withCredentials: true,
             }
           );
-          console.log('Profile data:', profileResponse.data);
           setProfile(profileResponse.data);
         }
       } catch (err) {
         console.error('Failed to get user profile', err);
         console.error('Error details:', err.response?.data);
+        throw err;
       } finally {
         setIsLoadingProfile(false);
       }
@@ -76,11 +75,11 @@ const Home = () => {
                     : profile?.fullName || profile?.displayName || 'User'}
                 </h3>
               </Link>
-              {!isLoadingProfile && (profile?.bio || profile?.profession) && (
+              {!isLoadingProfile && (profile?.bio || profile?.title) && (
                 <p className={styles.profile_subtitle}>
-                  {profile?.bio && profile?.profession
-                    ? `${profile.bio} - ${profile.profession}`
-                    : profile?.bio || profile?.profession}
+                  {profile?.bio && profile?.title
+                    ? `${profile.bio} - ${profile.title}`
+                    : profile?.bio || profile?.title}
                 </p>
               )}
             </div>

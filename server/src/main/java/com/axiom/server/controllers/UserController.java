@@ -1,10 +1,14 @@
 package com.axiom.server.controllers;
 
 import com.axiom.server.models.*;
+import com.axiom.server.services.PdfService;
 import com.axiom.server.services.UserService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -12,9 +16,11 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final PdfService pdfService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, PdfService pdfService) {
         this.userService = userService;
+        this.pdfService = pdfService;
     }
 
     @GetMapping
@@ -65,5 +71,28 @@ public class UserController {
     public ResponseEntity<Certificate> addCertificate(@PathVariable Long userId, @RequestBody Certificate certificate) {
         certificate.setUserId(userId);
         return ResponseEntity.ok(userService.addCertificate(certificate));
+    }
+
+    @GetMapping("/{userId}/download-pdf")
+    public ResponseEntity<byte[]> downloadUserProfilePdf(@PathVariable Long userId) throws IOException {
+        User user = userService.getUserById(userId);
+
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        byte[] pdfBytes = pdfService.generateUserProfilePdf(user);
+
+        String filename = "profile_" + user.getUsername() + ".pdf";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("attachment", filename);
+        headers.setContentLength(pdfBytes.length);
+        headers.setCacheControl("no-cache, no-store, must-revalidate");
+        headers.setPragma("no-cache");
+        headers.setExpires(0);
+
+        return ResponseEntity.ok().headers(headers).body(pdfBytes);
     }
 }

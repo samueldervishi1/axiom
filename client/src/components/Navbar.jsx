@@ -121,6 +121,8 @@ const Navbar = () => {
         navigate('/profile');
       } else if (settingName === 'Help') {
         navigate('/settings?section=help');
+      } else if (settingName === 'Settings') {
+        navigate('/settings');
       } else if (settingName === 'Sign out') {
         handleLogout();
       }

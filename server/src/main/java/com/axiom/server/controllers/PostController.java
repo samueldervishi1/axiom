@@ -73,14 +73,24 @@ public class PostController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Map<String, Object>>> listUserPosts(@PathVariable String userId) {
+    public ResponseEntity<Map<String, Object>> listUserPosts(@PathVariable String userId,
+            @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
         try {
             Map<String, Object> request = new HashMap<>();
             request.put("action", "GET_USER_POSTS");
             request.put("userId", userId);
+            request.put("page", page);
+            request.put("size", size);
 
             List<Map<String, Object>> result = dbService.executeQuery(request);
-            return ResponseEntity.ok(result);
+
+            if (!result.isEmpty()) {
+                return ResponseEntity.ok(result.get(0));
+            } else {
+                return ResponseEntity
+                        .ok(Map.of("content", List.of(), "totalElements", 0, "totalPages", 0, "currentPage", page,
+                                "pageSize", size, "first", true, "last", true, "hasNext", false, "hasPrevious", false));
+            }
         } catch (SQLException | IOException e) {
             throw new CustomException(500, "Database error: " + e.getMessage());
         }

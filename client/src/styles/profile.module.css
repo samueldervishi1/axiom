@@ -1506,9 +1506,47 @@
 .dropdownItem .menuIcon {
   margin-left: 0;
   margin-right: 0;
-  color: #20b6ff;
 }
 
 .dropdownItem:hover {
   color: #0073b1;
+}
+
+/* Top Skills in About Section */
+.topSkillsSection {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.topSkillsHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.topSkillsIcon {
+  color: #f59e0b;
+  font-size: 14px;
+}
+
+.topSkillsLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.topSkillsText {
+  font-size: 14px;
+  color: #4b5563;
+  line-height: 1.4;
+}
+
+.noTopSkillsMessage {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0;
+  padding: 8px 0;
+  font-style: italic;
 }
