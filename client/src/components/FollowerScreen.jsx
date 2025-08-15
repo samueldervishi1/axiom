@@ -27,8 +27,10 @@ const FollowerScreen = () => {
         );
         setUsers(response.data);
       } catch (err) {
-        console.error('Error fetching users:', err);
         setError('Failed to load ' + type);
+        throw new Error(
+          `Failed to fetch users: ${err?.message || 'Unknown error'}`
+        );
       } finally {
         setIsLoading(false);
       }

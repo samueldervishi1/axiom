@@ -35,6 +35,7 @@ const Profile = () => {
   const [, setLikedPostsContent] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [, setShowDropdown] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState(null);
   const dropdownRef = useRef(null);
 
   const [showExperienceModal, setShowExperienceModal] = useState(false);
@@ -55,29 +56,85 @@ const Profile = () => {
         const username = await getUsernameFromServer();
         const userId = await getUserIdFromServer();
 
-        const [profileResponse, userPostsResponse, likedResponse] =
-          await Promise.all([
-            axios.get(`${API_URL}users/lookup/${username}`, {
+        try {
+          const profileResponse = await axios.get(
+            `${API_URL}users/lookup/${username}`,
+            {
               withCredentials: true,
-            }),
-            axios.get(`${API_URL}posts/user/${userId}`, {
-              withCredentials: true,
-            }),
-            axios.get(`${API_URL}posts/likes/user/${userId}`, {
-              withCredentials: true,
-            }),
-          ]);
-
-        setProfile(profileResponse.data);
-        setUserPosts(userPostsResponse.data.filter((post) => !post.deleted));
-        setLikedPosts(likedResponse.data);
-
-        if (likedResponse.data && likedResponse.data.likedPosts) {
-          const likedPostsFiltered = likedResponse.data.likedPosts.filter(
-            (post) => !post.deleted
+            }
           );
-          setLikedPostsContent(likedPostsFiltered);
-        } else {
+          setProfile(profileResponse.data);
+        } catch (error) {
+          console.error('Error fetching profile:', error);
+        }
+
+        if (userId) {
+          try {
+            const imageResponse = await axios.get(
+              `${API_URL}profile/${userId}/image`,
+              {
+                responseType: 'blob',
+                withCredentials: true,
+              }
+            );
+
+            if (imageResponse.status === 200 && imageResponse.data.size > 0) {
+              const imageUrl = URL.createObjectURL(imageResponse.data);
+              setProfileImageUrl(imageUrl);
+            }
+          } catch (err) {
+            setProfileImageUrl(null);
+            throw new Error(
+              `Failed to load profile image: ${err?.message || 'Unknown error'}`
+            );
+          }
+        }
+
+        try {
+          const userPostsResponse = await axios.get(
+            `${API_URL}posts/user/${userId}`,
+            {
+              withCredentials: true,
+            }
+          );
+
+          if (userPostsResponse.data && Array.isArray(userPostsResponse.data)) {
+            setUserPosts(
+              userPostsResponse.data.filter((post) => !post.deleted)
+            );
+          } else {
+            setUserPosts([]);
+          }
+        } catch (error) {
+          console.error('Error fetching user posts:', error);
+          setUserPosts([]);
+        }
+
+        try {
+          const likedResponse = await axios.get(
+            `${API_URL}posts/likes/user/${userId}`,
+            {
+              withCredentials: true,
+            }
+          );
+
+          setLikedPosts(likedResponse.data);
+
+          if (
+            likedResponse.data &&
+            likedResponse.data.likedPosts &&
+            Array.isArray(likedResponse.data.likedPosts)
+          ) {
+            const likedPostsFiltered = likedResponse.data.likedPosts.filter(
+              (post) => !post.deleted
+            );
+            setLikedPostsContent(likedPostsFiltered);
+          } else {
+            setLikedPostsContent([]);
+          }
+        } catch (error) {
+          console.error('Error fetching liked posts:', error);
+          setLikedPosts([]);
           setLikedPostsContent([]);
         }
       } catch (error) {
@@ -99,12 +156,21 @@ const Profile = () => {
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      if (profileImageUrl) {
+        URL.revokeObjectURL(profileImageUrl);
+      }
+    };
   }, []);
 
   const refreshProfileData = async () => {
     try {
-      const username = await getUsernameFromServer();
+      const [username, userId] = await Promise.all([
+        getUsernameFromServer(),
+        getUserIdFromServer(),
+      ]);
+
       const profileResponse = await axios.get(
         `${API_URL}users/lookup/${username}`,
         {
@@ -112,6 +178,34 @@ const Profile = () => {
         }
       );
       setProfile(profileResponse.data);
+
+      if (userId) {
+        try {
+          const imageResponse = await axios.get(
+            `${API_URL}profile/${userId}/image`,
+            {
+              responseType: 'blob',
+              withCredentials: true,
+            }
+          );
+
+          if (imageResponse.status === 200 && imageResponse.data.size > 0) {
+            if (profileImageUrl) {
+              URL.revokeObjectURL(profileImageUrl);
+            }
+            const imageUrl = URL.createObjectURL(imageResponse.data);
+            setProfileImageUrl(imageUrl);
+          }
+        } catch (err) {
+          if (profileImageUrl) {
+            URL.revokeObjectURL(profileImageUrl);
+          }
+          setProfileImageUrl(null);
+          throw new Error(
+            `Failed to load profile image: ${err?.message || 'Unknown error'}`
+          );
+        }
+      }
     } catch (error) {
       console.error('Error refreshing profile data:', error);
     }
@@ -264,7 +358,7 @@ const Profile = () => {
               <div className={styles.avatarContainer}>
                 <div className={styles.profileImageContainer}>
                   <img
-                    src={profileAvatar}
+                    src={profileImageUrl || profileAvatar}
                     alt='Profile'
                     className={styles.profileAvatar}
                   />

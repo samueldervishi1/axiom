@@ -81,11 +81,12 @@ const Register = () => {
         if (response.status === 200) {
           setTimeout(() => navigate('/login'), 2000);
         } else {
-          console.log('Unexpected response status:', response);
+          setFormState((prev) => ({
+            ...prev,
+            error: 'Registration failed. Please try again.',
+          }));
         }
       } catch (error) {
-        console.error('Error registering user:', error);
-
         if (error.response && error.response.data) {
           const { message } = error.response.data;
 
@@ -118,6 +119,7 @@ const Register = () => {
             error: 'An unexpected error occurred. Please try again later.',
           }));
         }
+        throw new Error('Registration failed');
       } finally {
         setFormState((prev) => ({ ...prev, loading: false }));
       }

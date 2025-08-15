@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import styles from '../styles/home.module.css';
 import CreatePost from './CreatePost';
 import AddToYourFeed from './AddToYourFeed';
-import { getUsernameFromServer } from '../auth/authUtils';
+import { getUsernameFromServer, getUserIdFromServer } from '../auth/authUtils';
 import axios from 'axios';
 import backgroundImage from '../assets/background.jpg';
 
@@ -19,6 +19,7 @@ const Home = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [profile, setProfile] = useState(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [profileImageUrl, setProfileImageUrl] = useState(null);
 
   const handlePostRefresh = useCallback(() => {
     setRefreshTrigger((prev) => prev + 1);
@@ -27,7 +28,11 @@ const Home = () => {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const username = await getUsernameFromServer();
+        const [username, userId] = await Promise.all([
+          getUsernameFromServer(),
+          getUserIdFromServer(),
+        ]);
+
         if (username) {
           const profileResponse = await axios.get(
             `${API_URL}users/lookup/${username}`,
@@ -37,10 +42,32 @@ const Home = () => {
           );
           setProfile(profileResponse.data);
         }
+
+        // Fetch profile image
+        if (userId) {
+          try {
+            const imageResponse = await axios.get(
+              `${API_URL}profile/${userId}/image`,
+              {
+                responseType: 'blob',
+                withCredentials: true,
+              }
+            );
+
+            if (imageResponse.status === 200 && imageResponse.data.size > 0) {
+              const imageUrl = URL.createObjectURL(imageResponse.data);
+              setProfileImageUrl(imageUrl);
+            }
+          } catch (err) {
+            // No profile image - use default
+            setProfileImageUrl(null);
+            console.warn('Failed to fetch profile image:', err);
+          }
+        }
       } catch (err) {
-        console.error('Failed to get user profile', err);
-        console.error('Error details:', err.response?.data);
-        throw err;
+        throw new Error(
+          `Failed to get user profile: ${err?.message || 'Unknown error'}`
+        );
       } finally {
         setIsLoadingProfile(false);
       }
@@ -48,6 +75,15 @@ const Home = () => {
 
     fetchUserProfile();
   }, []);
+
+  // Cleanup effect for profile image URL
+  useEffect(() => {
+    return () => {
+      if (profileImageUrl) {
+        URL.revokeObjectURL(profileImageUrl);
+      }
+    };
+  }, [profileImageUrl]);
 
   return (
     <div className={styles.home_container}>
@@ -63,9 +99,17 @@ const Home = () => {
 
           <div className={styles.profile_content}>
             <div className={styles.profile_avatar}>
-              {isLoadingProfile
-                ? '?'
-                : profile?.username?.charAt(0).toUpperCase() || '?'}
+              {profileImageUrl ? (
+                <img
+                  src={profileImageUrl}
+                  alt='Profile'
+                  className={styles.profile_avatar_image}
+                />
+              ) : isLoadingProfile ? (
+                '?'
+              ) : (
+                profile?.username?.charAt(0).toUpperCase() || '?'
+              )}
             </div>
             <div className={styles.profile_info}>
               <Link to='/profile' className={styles.profile_name_link}>

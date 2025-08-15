@@ -42,8 +42,10 @@ const ModelDocs = () => {
 
         setError(null);
       } catch (err) {
-        console.error('Failed to fetch models:', err);
         setError('Failed to load AI models. Please try again later.');
+        throw new Error(
+          `Failed to fetch models: ${err?.message || 'Unknown error'}`
+        );
       } finally {
         setLoading(false);
       }

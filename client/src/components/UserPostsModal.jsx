@@ -57,7 +57,11 @@ const UserPostsModal = ({ isOpen, onClose }) => {
       setHasNext(data.hasNext === 'true' || data.hasNext === true);
       setTotalElements(data.totalElements);
     } catch (error) {
-      console.error('Error fetching user posts:', error);
+      this.reportError(
+        new Error(
+          `Failed to fetch user posts: ${error?.message || 'Unknown error'}`
+        )
+      );
     } finally {
       if (reset) {
         setIsLoading(false);

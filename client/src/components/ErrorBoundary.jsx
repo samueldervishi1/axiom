@@ -18,8 +18,9 @@ class ErrorBoundary extends Component {
     try {
       return parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
     } catch (error) {
-      console.error('Failed to read from localStorage:', error);
-      return 0;
+      throw new Error(
+        `Failed to read from localStorage: ${error?.message || 'Unknown error'}`
+      );
     }
   }
 
@@ -30,18 +31,10 @@ class ErrorBoundary extends Component {
     };
   }
 
-  componentDidCatch(error, errorInfo) {
-    console.error('Error captured in ErrorBoundary:', {
-      error,
-      errorInfo,
-      timestamp: new Date().toISOString(),
-      url: window.location.href,
-    });
-
-    // Call optional error handler if provided
-    if (this.props.onError) {
-      this.props.onError(error, errorInfo);
-    }
+  componentDidCatch(error) {
+    throw new Error(
+      `Error captured in ErrorBoundary: ${error?.message || 'Unknown error'}`
+    );
   }
 
   /**
@@ -60,9 +53,9 @@ class ErrorBoundary extends Component {
         window.location.reload();
       }
     } catch (error) {
-      console.error('Failed to handle reload:', error);
-      // Fallback to basic reload if localStorage fails
-      window.location.reload();
+      throw new Error(
+        `Failed to handle reload: ${error?.message || 'Unknown error'}`
+      );
     }
   };
 

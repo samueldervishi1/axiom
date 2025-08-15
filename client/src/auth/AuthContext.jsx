@@ -36,11 +36,12 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (response.status === 200) {
-        console.log('Token refreshed successfully');
         return true;
       }
     } catch (error) {
-      console.error('Token refresh failed:', error);
+      throw new Error(
+        `Token refresh failed: ${error?.message || 'Unknown error'}`
+      );
     }
     return false;
   }, []);
@@ -51,7 +52,7 @@ export const AuthProvider = ({ children }) => {
         withCredentials: true,
       });
     } catch (e) {
-      console.error('Logout failed', e);
+      throw new Error(`Logout failed: ${e?.message || 'Unknown error'}`);
     }
     setIsAuthenticated(false);
     setIsDeactivated(false);
@@ -59,8 +60,6 @@ export const AuthProvider = ({ children }) => {
     setUsername(null);
     localStorage.removeItem('lastAuthCheck');
   }, []);
-
-  // Removed duplicate interceptor - TokenManager in authUtils.js handles 401 responses
 
   // Fixed: Moved checkSession out of useEffect to prevent recreating it
   const checkSession = useCallback(async () => {
@@ -97,15 +96,14 @@ export const AuthProvider = ({ children }) => {
                 //do nothing
               }
             } catch (profileError) {
-              console.error(
-                'Error checking deactivation status:',
-                profileError
-              );
               setIsDeactivated(false);
+              throw new Error(
+                `Failed to check deactivation status: ${profileError?.message || 'Unknown error'}`
+              );
             }
           } else {
-            console.error('No username found in response');
             setIsDeactivated(false);
+            throw new Error('Username not found in response');
           }
         }
       } else {
@@ -115,12 +113,9 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       if (error.response?.status === 401) {
-        console.log('Session expired, attempting token refresh');
-
         const refreshSuccess = await refreshToken();
 
         if (refreshSuccess) {
-          console.log('Token refreshed successfully, rechecking session');
           try {
             const retryResponse = await axios.get(`${API_URL}auth/me`, {
               withCredentials: true,
@@ -143,11 +138,10 @@ export const AuthProvider = ({ children }) => {
                   );
                   setIsDeactivated(deactivated);
                 } catch (profileError) {
-                  console.error(
-                    'Error checking deactivation status:',
-                    profileError
-                  );
                   setIsDeactivated(false);
+                  throw new Error(
+                    `Failed to check deactivation status: ${profileError?.message || 'Unknown error'}`
+                  );
                 }
               }
             } else {
@@ -156,26 +150,27 @@ export const AuthProvider = ({ children }) => {
               setUsername(null);
             }
           } catch (retryError) {
-            console.error('Session recheck failed after refresh:', retryError);
             setIsAuthenticated(false);
             setIsDeactivated(false);
             setUsername(null);
+            throw new Error(
+              `Session recheck failed after refresh: ${retryError?.message || 'Unknown error'}`
+            );
           }
         } else {
-          console.log('Token refresh failed, user not authenticated');
           setIsAuthenticated(false);
           setIsDeactivated(false);
           setUsername(null);
         }
       } else {
-        console.error('Session check failed:', error);
         setIsAuthenticated(false);
         setIsDeactivated(false);
         setUsername(null);
+        throw new Error('User not authenticated');
       }
     } finally {
       setIsLoading(false);
-      setIsInitialCheck(false); // Fixed: Set this after the first check
+      setIsInitialCheck(false);
     }
   }, [refreshToken]);
 

@@ -53,8 +53,10 @@ const EducationModal = ({ isOpen, onClose, onSuccess }) => {
         activities: '',
       });
     } catch (error) {
-      console.error('Error adding education:', error);
       setError(error.response?.data?.message || 'Failed to add education');
+      throw new Error(
+        `Failed to add education: ${error?.message || 'Unknown error'}`
+      );
     } finally {
       setIsLoading(false);
     }

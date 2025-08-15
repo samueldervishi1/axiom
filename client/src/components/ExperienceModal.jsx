@@ -67,8 +67,10 @@ const ExperienceModal = ({ isOpen, onClose, onSuccess }) => {
         employmentType: 'Full-time',
       });
     } catch (error) {
-      console.error('Error adding experience:', error);
       setError(error.response?.data?.message || 'Failed to add experience');
+      throw new Error(
+        `Failed to add experience: ${error?.message || 'Unknown error'}`
+      );
     } finally {
       setIsLoading(false);
     }

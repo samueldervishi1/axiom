@@ -40,8 +40,10 @@ const ChatHistory = ({
         setConversations(sortedConversations);
       }
     } catch (error) {
-      console.error('Error fetching user history:', error);
       setError('Failed to load chat history');
+      throw new Error(
+        `Failed to load chat history: ${error?.message || 'Unknown error'}`
+      );
     } finally {
       setLoading(false);
     }
@@ -80,8 +82,10 @@ const ChatHistory = ({
         );
       }
     } catch (error) {
-      console.error('Error deleting conversation:', error);
       setError('Failed to delete conversation');
+      throw new Error(
+        `Failed to delete conversation: ${error?.message || 'Unknown error'}`
+      );
     }
   };
 

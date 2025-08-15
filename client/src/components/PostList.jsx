@@ -14,17 +14,48 @@ const PostList = ({ onPostRefresh }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [hasNext, setHasNext] = useState(true);
   const [, setTotalElements] = useState(0);
+  const [imageCache, setImageCache] = useState(new Map());
   const observer = useRef();
+
+  const preloadImages = async (postsWithImages) => {
+    if (postsWithImages.length === 0) return;
+    const newCache = new Map(imageCache);
+
+    const imagePromises = postsWithImages.map(async (post) => {
+      if (post.hasImage === 'true' || post.hasImage === true) {
+        try {
+          const response = await axios.get(`${API_URL}posts/${post.id}/image`, {
+            withCredentials: true,
+            responseType: 'blob',
+            timeout: 5000,
+          });
+
+          if (response.status === 200 && response.data.size > 0) {
+            const imageUrl = URL.createObjectURL(response.data);
+            newCache.set(post.id, imageUrl);
+            setImageCache(new Map(newCache));
+          }
+        } catch (error) {
+          console.warn(
+            `Failed to preload image for post ${post.id}: ${error.message}`
+          );
+        }
+      }
+    });
+    Promise.allSettled(imagePromises);
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setDelayOver(true);
-      setIsLoading(false);
     }, 1500);
 
     fetchPosts(0, true);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      imageCache.forEach((url) => URL.revokeObjectURL(url));
+    };
   }, []);
 
   const fetchPosts = async (page = 0, reset = false) => {
@@ -67,7 +98,12 @@ const PostList = ({ onPostRefresh }) => {
             );
             return { ...post, username: usernameResponse.data };
           } catch (err) {
-            console.error('Error fetching username:', err);
+            this.reportError(
+              new Error(
+                `Failed to fetch username for user ${post.userId}: ${err?.message || 'Unknown error'}`
+              )
+            );
+
             return { ...post, username: 'User Deleted' };
           }
         })
@@ -85,8 +121,10 @@ const PostList = ({ onPostRefresh }) => {
 
       if (reset) {
         setPosts(postsWithUsernames);
+        preloadImages(postsWithUsernames);
       } else {
         setPosts((prevPosts) => [...prevPosts, ...postsWithUsernames]);
+        preloadImages(postsWithUsernames);
       }
 
       setCurrentPage(data.currentPage || page);
@@ -97,7 +135,9 @@ const PostList = ({ onPostRefresh }) => {
       );
       setTotalElements(data.totalElements || 0);
     } catch (err) {
-      console.error('❌ Error fetching posts:', err);
+      this.reportError(
+        new Error(`Failed to fetch posts: ${err?.message || 'Unknown error'}`)
+      );
     } finally {
       if (reset) {
         setIsLoading(false);
@@ -115,7 +155,6 @@ const PostList = ({ onPostRefresh }) => {
       observer.current = new IntersectionObserver(
         (entries) => {
           if (entries[0].isIntersecting && hasNext && !isLoadingMore) {
-            console.log('Loading more posts...');
             fetchPosts(currentPage + 1, false);
           }
         },
@@ -175,6 +214,8 @@ const PostList = ({ onPostRefresh }) => {
             userId={post.userId}
             username={post.username}
             imageUrl={post.imageUrl}
+            hasImage={post.hasImage === 'true' || post.hasImage === true}
+            cachedImageUrl={imageCache.get(post.id)}
             onPostRefresh={onPostRefresh}
             savedUserIds={post.savedUserIds || []}
             onPostDeleted={(deletedId) => {

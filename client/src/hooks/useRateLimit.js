@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 
 const RATE_LIMIT_KEY = 'page_visit_tracker';
-const MAX_REQUESTS_PER_MINUTE = 50; // Maximum requests per minute (increased)
-const MAX_REQUESTS_PER_HOUR = 300; // Maximum requests per hour (increased)
-const BLOCK_DURATION = 2 * 60 * 1000; // 2 minutes in milliseconds (reduced)
+const MAX_REQUESTS_PER_MINUTE = 50;
+const MAX_REQUESTS_PER_HOUR = 300;
+const BLOCK_DURATION = 2 * 60 * 1000;
 
 export const useRateLimit = () => {
   const [isBlocked, setIsBlocked] = useState(false);
@@ -36,7 +36,9 @@ export const useRateLimit = () => {
     try {
       localStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(data));
     } catch (error) {
-      console.error('Error saving rate limit data:', error);
+      throw new Error(
+        `Failed to save rate limit data: ${error?.message || 'Unknown error'}`
+      );
     }
   };
 
@@ -49,14 +51,11 @@ export const useRateLimit = () => {
     const currentTime = getCurrentTimestamp();
     const data = getStoredData();
 
-    // Check if user is currently blocked
     if (data.blockedUntil && currentTime < data.blockedUntil) {
-      // Check if this is an old 10-minute block that should be converted to 2-minute
       const blockDuration =
         data.blockedUntil -
         (data.blockStartTime || data.blockedUntil - 10 * 60 * 1000);
       if (blockDuration > BLOCK_DURATION) {
-        // This is an old longer block, convert it to new duration
         const newBlockEnd = currentTime + BLOCK_DURATION;
         const newData = {
           ...data,
@@ -67,31 +66,26 @@ export const useRateLimit = () => {
         setIsBlocked(true);
         setBlockEndTime(newBlockEnd);
         setRemainingTime(Math.ceil(BLOCK_DURATION / 1000));
-        console.log('Converted old block to new 2-minute duration');
-        return false; // Blocked
+        return false;
       }
 
       setIsBlocked(true);
       setBlockEndTime(data.blockedUntil);
       setRemainingTime(Math.ceil((data.blockedUntil - currentTime) / 1000));
-      return false; // Blocked
+      return false;
     }
 
-    // Clean old requests (older than 1 hour)
     const cleanRequests = cleanOldRequests(data.requests, currentTime);
 
-    // Check requests in the last minute
     const oneMinuteAgo = currentTime - 60 * 1000;
     const recentRequests = cleanRequests.filter(
       (timestamp) => timestamp > oneMinuteAgo
     );
 
-    // Check if user exceeds rate limits
     const exceedsMinuteLimit = recentRequests.length >= MAX_REQUESTS_PER_MINUTE;
     const exceedsHourLimit = cleanRequests.length >= MAX_REQUESTS_PER_HOUR;
 
     if (exceedsMinuteLimit || exceedsHourLimit) {
-      // Block the user
       const blockedUntil = currentTime + BLOCK_DURATION;
       const newData = {
         requests: cleanRequests,
@@ -105,10 +99,9 @@ export const useRateLimit = () => {
       setRemainingTime(Math.ceil(BLOCK_DURATION / 1000));
 
       console.warn('Rate limit exceeded. User blocked for 2 minutes.');
-      return false; // Blocked
+      return false;
     }
 
-    // Add current request and save
     const newRequests = [...cleanRequests, currentTime];
     const newData = {
       requests: newRequests,
@@ -121,7 +114,7 @@ export const useRateLimit = () => {
     setBlockEndTime(null);
     setRemainingTime(0);
 
-    return true; // Allowed
+    return true;
   };
 
   const getRemainingBlockTime = () => {
@@ -141,14 +134,13 @@ export const useRateLimit = () => {
 
   const resetRateLimit = () => {
     localStorage.removeItem(RATE_LIMIT_KEY);
-    localStorage.removeItem('page_visits'); // Also clear page visits
+    localStorage.removeItem('page_visits');
     setIsBlocked(false);
     setBlockEndTime(null);
     setRemainingTime(0);
   };
 
   const forceUnblock = () => {
-    // Force immediate unblock - useful for migrating from old block duration
     resetRateLimit();
     console.log('Rate limit forcefully reset');
   };
@@ -171,7 +163,6 @@ export const useRateLimit = () => {
     };
   };
 
-  // Update remaining time every second when blocked
   useEffect(() => {
     let interval;
 
@@ -193,7 +184,6 @@ export const useRateLimit = () => {
     };
   }, [isBlocked, blockEndTime]);
 
-  // Check rate limit on component mount
   useEffect(() => {
     checkRateLimit();
   }, []);

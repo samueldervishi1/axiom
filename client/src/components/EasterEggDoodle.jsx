@@ -81,11 +81,13 @@ const DevApiEasterEgg = ({ onClose }) => {
         data: response.data,
       });
     } catch (error) {
-      console.error('Failed to fetch horoscope:', error);
       setCurrentApi({
         endpoint: `dev/horoscope/${normalizedSign}`,
         data: { error: 'Failed to fetch horoscope data' },
       });
+      throw new Error(
+        `Failed to fetch horoscope: ${error?.message || 'Unknown error'}`
+      );
     } finally {
       setIsLoading(false);
     }
@@ -105,11 +107,13 @@ const DevApiEasterEgg = ({ onClose }) => {
         data: response.data,
       });
     } catch (error) {
-      console.error('Failed to fetch dev API:', error);
       setCurrentApi({
         endpoint: `dev/${randomEndpoint}`,
         data: { error: 'Failed to fetch API data' },
       });
+      throw new Error(
+        `Failed to fetch API data: ${error?.message || 'Unknown error'}`
+      );
     } finally {
       setIsLoading(false);
     }

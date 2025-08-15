@@ -44,7 +44,11 @@ export const usePageTracker = (checkRateLimit) => {
 
       localStorage.setItem(key, JSON.stringify(updatedVisits));
     } catch (error) {
-      console.error('Error storing page visit:', error);
+      this.reportError(
+        new Error(
+          `Failed to store page visit: ${error?.message || 'Unknown error'}`
+        )
+      );
     }
   };
 

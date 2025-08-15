@@ -58,8 +58,10 @@ const CertificateModal = ({ isOpen, onClose, onSuccess }) => {
         doesNotExpire: false,
       });
     } catch (error) {
-      console.error('Error adding certificate:', error);
       setError(error.response?.data?.message || 'Failed to add certificate');
+      throw new Error(
+        `Failed to add certificate: ${error?.message || 'Unknown error'}`
+      );
     } finally {
       setIsLoading(false);
     }

@@ -14,7 +14,7 @@ import { CgProfile } from 'react-icons/cg';
 import loaderImage from '../assets/377.gif';
 import { IoIosPeople } from 'react-icons/io';
 import { TiHome } from 'react-icons/ti';
-import logo from '../../public/logo.png';
+import logo from '../assets/logo.png';
 import styles from '../styles/navbar.module.css';
 
 const Navbar = () => {
@@ -28,6 +28,7 @@ const Navbar = () => {
   const [currentUsername, setCurrentUsername] = useState(null);
   const [, setUserId] = useState(null);
   const [userInitial, setUserInitial] = useState('');
+  const [profileImageUrl, setProfileImageUrl] = useState(null);
   const searchRef = useRef(null);
   const menuRef = useRef(null);
   const navigate = useNavigate();
@@ -44,19 +45,50 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    const fetchUsername = async () => {
+    const fetchUserData = async () => {
       try {
-        const username = await getUsernameFromServer();
+        const [username, userId] = await Promise.all([
+          getUsernameFromServer(),
+          getUserIdFromServer(),
+        ]);
+
         setCurrentUsername(username);
+        setUserId(userId);
+
         if (username) {
           setUserInitial(username.charAt(0).toUpperCase());
         }
+
+        // Fetch profile image
+        if (userId) {
+          try {
+            const response = await axios.get(
+              `${import.meta.env.VITE_API_URL}profile/${userId}/image`,
+              {
+                responseType: 'blob',
+                withCredentials: true,
+              }
+            );
+
+            if (response.status === 200 && response.data.size > 0) {
+              const imageUrl = URL.createObjectURL(response.data);
+              setProfileImageUrl(imageUrl);
+            }
+          } catch (err) {
+            // No profile image - use initials
+            throw new Error(
+              `Failed to load profile image: ${err?.message || 'Unknown error'}`
+            );
+          }
+        }
       } catch (err) {
-        console.error('Failed to get current username', err);
+        throw new Error(
+          `Failed to fetch user data: ${err?.message || 'Unknown error'}`
+        );
       }
     };
 
-    fetchUsername();
+    fetchUserData();
   }, []);
 
   const userSettings = [
@@ -104,8 +136,8 @@ const Navbar = () => {
 
       await new Promise((resolve) => setTimeout(resolve, 2000));
     } catch (error) {
-      console.error('Logout failed:', error);
       setIsLoggingOut(false);
+      throw new Error(`Logout failed: ${error?.message || 'Unknown error'}`);
     } finally {
       setIsLoggingOut(false);
     }
@@ -148,8 +180,8 @@ const Navbar = () => {
       setSearchResults(data);
       setShowSearchResults(true);
     } catch (error) {
-      console.error('Search failed:', error);
       setSearchResults([]);
+      throw new Error(`Search failed: ${error?.message || 'Unknown error'}`);
     } finally {
       setIsSearching(false);
     }
@@ -262,7 +294,17 @@ const Navbar = () => {
                 onClick={toggleDropdown}
                 className={styles.profile_button}
               >
-                <div className={styles.custom_avatar}>{userInitial || '?'}</div>
+                {profileImageUrl ? (
+                  <img
+                    src={profileImageUrl}
+                    alt='Profile'
+                    className={styles.profile_image}
+                  />
+                ) : (
+                  <div className={styles.custom_avatar}>
+                    {userInitial || '?'}
+                  </div>
+                )}
                 <span className={styles.nav_text}>Me</span>
               </button>
 

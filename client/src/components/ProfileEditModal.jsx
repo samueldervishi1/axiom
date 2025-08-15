@@ -87,8 +87,12 @@ const ProfileEditModal = ({ isOpen, onClose, onSuccess, profile }) => {
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Error updating profile:', error);
       setError(error.response?.data?.message || 'Failed to update profile');
+      this.reportError(
+        new Error(
+          `Failed to update profile: ${error?.message || 'Unknown error'}`
+        )
+      );
     } finally {
       setIsLoading(false);
     }

@@ -3,8 +3,11 @@ package com.axiom.server.controllers;
 import com.axiom.server.models.PasswordUpdateRequest;
 import com.axiom.server.models.User;
 import com.axiom.server.services.ProfileService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
@@ -81,5 +84,42 @@ public class ProfileController {
     public ResponseEntity<String> deleteUser(@PathVariable Long userId) {
         profileService.softDeleteUser(userId);
         return ResponseEntity.ok("User deleted successfully");
+    }
+
+    @PostMapping("/{userId}/image")
+    public ResponseEntity<User> addProfileImage(@PathVariable Long userId, @RequestParam("file") MultipartFile file) {
+        User updatedUser = profileService.addProfileImage(userId, file);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    @DeleteMapping("/{userId}/image")
+    public ResponseEntity<String> removeProfileImage(@PathVariable Long userId) {
+        profileService.removeProfileImage(userId);
+        return ResponseEntity.ok("Profile image removed successfully");
+    }
+
+    @GetMapping("/{userId}/image")
+    public ResponseEntity<byte[]> getProfileImage(@PathVariable Long userId) {
+        byte[] imageData = profileService.getProfileImage(userId);
+        String contentType = profileService.getProfileImageContentType(userId);
+
+        if (imageData == null || imageData.length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        if (contentType != null) {
+            headers.setContentType(MediaType.parseMediaType(contentType));
+        } else {
+            headers.setContentType(MediaType.IMAGE_JPEG);
+        }
+
+        return ResponseEntity.ok().headers(headers).body(imageData);
+    }
+
+    @GetMapping("/{userId}/image/exists")
+    public ResponseEntity<Map<String, Boolean>> hasProfileImage(@PathVariable Long userId) {
+        boolean hasImage = profileService.hasProfileImage(userId);
+        return ResponseEntity.ok(Map.of("hasProfileImage", hasImage));
     }
 }

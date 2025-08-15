@@ -7,7 +7,9 @@ import com.axiom.server.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -179,5 +181,134 @@ public class ProfileService {
         if (userId == null) {
             throw new IllegalArgumentException(Messages.USER_ID_ERROR);
         }
+    }
+
+    public User addProfileImage(Long userId, MultipartFile file) {
+        String sessionId = loggingService.getCurrentSessionId();
+
+        try {
+            validateUserId(userId);
+            User user = findUserById(userId);
+
+            if (file.isEmpty()) {
+                throw new CustomException(400, "Profile image file cannot be empty");
+            }
+
+            String contentType = file.getContentType();
+            if (!isValidImageType(contentType)) {
+                throw new CustomException(400, "Invalid image format. Only JPEG, PNG, and GIF are allowed");
+            }
+
+            if (file.getSize() > 5 * 1024 * 1024) {
+                throw new CustomException(400, "Image size cannot exceed 5MB");
+            }
+
+            user.setProfileImageData(file.getBytes());
+            user.setProfileImageFilename(file.getOriginalFilename());
+            user.setProfileImageContentType(contentType);
+
+            loggingService.logSecurityEvent("PROFILE_IMAGE_ADDED", userId.toString(), sessionId,
+                    String.format("Profile image added for user: %s", userId));
+
+            return userRepository.save(user);
+
+        } catch (IOException e) {
+            loggingService.logSecurityEvent("PROFILE_IMAGE_UPLOAD_ERROR", userId.toString(), sessionId,
+                    String.format("Failed to upload profile image: %s", e.getMessage()));
+            loggingService.logError("ProfileService", "addProfileImage", "Failed to read image file", e);
+            throw new CustomException(500, "Failed to process image file");
+        } catch (CustomException e) {
+            loggingService.logSecurityEvent("PROFILE_IMAGE_UPLOAD_FAILED", userId.toString(), sessionId,
+                    String.format("Profile image upload failed: %s", e.getMessage()));
+            throw e;
+        } catch (Exception e) {
+            loggingService.logSecurityEvent("PROFILE_IMAGE_UPLOAD_ERROR", userId.toString(), sessionId,
+                    String.format("System error during profile image upload: %s", e.getMessage()));
+            loggingService.logError("ProfileService", "addProfileImage", "Unexpected error during profile image upload",
+                    e);
+            throw new CustomException(500, "Failed to upload profile image");
+        }
+    }
+
+    public void removeProfileImage(Long userId) {
+        String sessionId = loggingService.getCurrentSessionId();
+
+        try {
+            validateUserId(userId);
+            User user = findUserById(userId);
+
+            user.setProfileImageData(null);
+            user.setProfileImageFilename(null);
+            user.setProfileImageContentType(null);
+
+            userRepository.save(user);
+
+            loggingService.logSecurityEvent("PROFILE_IMAGE_REMOVED", userId.toString(), sessionId,
+                    String.format("Profile image removed for user: %s", userId));
+
+        } catch (CustomException e) {
+            loggingService.logSecurityEvent("PROFILE_IMAGE_REMOVAL_FAILED", userId.toString(), sessionId,
+                    String.format("Profile image removal failed: %s", e.getMessage()));
+            throw e;
+        } catch (Exception e) {
+            loggingService.logSecurityEvent("PROFILE_IMAGE_REMOVAL_ERROR", userId.toString(), sessionId,
+                    String.format("System error during profile image removal: %s", e.getMessage()));
+            loggingService.logError("ProfileService", "removeProfileImage",
+                    "Unexpected error during profile image removal", e);
+            throw new CustomException(500, "Failed to remove profile image");
+        }
+    }
+
+    public byte[] getProfileImage(Long userId) {
+        try {
+            validateUserId(userId);
+            User user = findUserById(userId);
+
+            return user.getProfileImageData();
+
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            loggingService.logError("ProfileService", "getProfileImage",
+                    "Unexpected error during profile image retrieval", e);
+            throw new CustomException(500, "Failed to retrieve profile image");
+        }
+    }
+
+    public String getProfileImageContentType(Long userId) {
+        try {
+            validateUserId(userId);
+            User user = findUserById(userId);
+
+            return user.getProfileImageContentType();
+
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            loggingService.logError("ProfileService", "getProfileImageContentType",
+                    "Unexpected error during profile image content type retrieval", e);
+            throw new CustomException(500, "Failed to retrieve profile image content type");
+        }
+    }
+
+    public boolean hasProfileImage(Long userId) {
+        try {
+            validateUserId(userId);
+            User user = findUserById(userId);
+
+            return user.getProfileImageData() != null && user.getProfileImageData().length > 0;
+
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            loggingService.logError("ProfileService", "hasProfileImage", "Unexpected error during profile image check",
+                    e);
+            throw new CustomException(500, "Failed to check profile image status");
+        }
+    }
+
+    private boolean isValidImageType(String contentType) {
+        return contentType != null && (contentType.equals("image/jpeg") || contentType.equals("image/jpg")
+                || contentType.equals("image/png") || contentType.equals("image/gif"));
     }
 }

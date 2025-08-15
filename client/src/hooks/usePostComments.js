@@ -16,8 +16,6 @@ export const usePostComments = (postId) => {
 
     try {
       setLoading(true);
-      console.log(`Fetching comments for post ${postId}`);
-
       const response = await axios.get(`${API_URL}comments/post/${postId}`, {
         withCredentials: true,
         headers: {
@@ -25,18 +23,19 @@ export const usePostComments = (postId) => {
         },
       });
 
-      console.log('Comments response:', response.data);
-
       if (response.status === 200) {
         const commentsData = Array.isArray(response.data) ? response.data : [];
-        console.log('Setting comments:', commentsData);
         setComments(commentsData);
         setError(null);
       }
     } catch (error) {
-      console.error('Error fetching comments:', error);
       setError('Failed to load comments');
       setComments([]);
+      this.reportError(
+        new Error(
+          `Failed to load comments: ${error?.message || 'Unknown error'}`
+        )
+      );
     } finally {
       setLoading(false);
     }

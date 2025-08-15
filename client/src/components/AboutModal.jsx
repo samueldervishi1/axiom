@@ -45,9 +45,11 @@ const AboutModal = ({ isOpen, onClose, onSuccess, currentAbout = '' }) => {
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Error updating about:', error);
       setError(
         error.response?.data?.message || 'Failed to update about section'
+      );
+      throw new Error(
+        `Failed to update about section: ${error?.message || 'Unknown error'}`
       );
     } finally {
       setIsLoading(false);

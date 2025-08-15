@@ -50,8 +50,10 @@ const SkillModal = ({ isOpen, onClose, onSuccess }) => {
         endorsementCount: 0,
       });
     } catch (error) {
-      console.error('Error adding skill:', error);
       setError(error.response?.data?.message || 'Failed to add skill');
+      this.reportError(
+        new Error(`Failed to add skill: ${error?.message || 'Unknown error'}`)
+      );
     } finally {
       setIsLoading(false);
     }

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import { openDB } from 'idb';
 import { useAuth } from '../auth/AuthContext';
-import { MdDelete, MdSchedule, MdPublish } from 'react-icons/md';
+import { MdDelete, MdSchedule, MdPublish, MdImage } from 'react-icons/md';
 import { LuSendHorizontal } from 'react-icons/lu';
 import { BiCalendar } from 'react-icons/bi';
 import styles from '../styles/post.module.css';
@@ -16,6 +16,8 @@ const PostForm = ({ onPostCreated }) => {
   const [isScheduled, setIsScheduled] = useState(false);
   const [scheduledDateTime, setScheduledDateTime] = useState('');
   const [showScheduleInput, setShowScheduleInput] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [, setSnackbar] = useState({
     open: false,
     message: '',
@@ -59,6 +61,36 @@ const PostForm = ({ onPostCreated }) => {
     return now.toISOString().slice(0, 16);
   }, []);
 
+  const handleImageSelect = useCallback(
+    (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        if (file.size > 10 * 1024 * 1024) {
+          showSnackbar('Image file too large (max 10MB)', 'error');
+          return;
+        }
+
+        if (!file.type.startsWith('image/')) {
+          showSnackbar('Please select an image file', 'error');
+          return;
+        }
+
+        setSelectedImage(file);
+
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = (e) => setImagePreview(e.target.result);
+        reader.readAsDataURL(file);
+      }
+    },
+    [showSnackbar]
+  );
+
+  const handleRemoveImage = useCallback(() => {
+    setSelectedImage(null);
+    setImagePreview(null);
+  }, []);
+
   const handlePostSubmit = useCallback(
     async (content, isOffline = false) => {
       if (
@@ -69,14 +101,6 @@ const PostForm = ({ onPostCreated }) => {
         (isOffline && !content)
       )
         return;
-
-      console.log('Submitting post:', {
-        content,
-        isScheduled,
-        scheduledDateTime,
-        username,
-        userId,
-      });
 
       if (isScheduled) {
         if (!scheduledDateTime) {
@@ -100,13 +124,13 @@ const PostForm = ({ onPostCreated }) => {
         let response;
 
         if (isScheduled) {
+          // Scheduled posts don't support images yet
           const payload = {
             content,
             authorId: userId,
             authorName: username,
             scheduledFor: scheduledDateTime + ':00',
           };
-          console.log('Scheduled post payload:', payload);
 
           response = await axios.post(
             `${API_URL}posts/create-scheduled`,
@@ -119,23 +143,35 @@ const PostForm = ({ onPostCreated }) => {
             }
           );
         } else {
-          const payload = {
-            action: 'CREATE',
-            content,
-            authorId: userId,
-            authorName: username,
-          };
-          console.log('Regular post payload:', payload);
+          // Regular posts with optional image
+          if (selectedImage) {
+            const formData = new FormData();
+            formData.append('content', content);
+            formData.append('authorId', userId);
+            formData.append('authorName', username);
+            formData.append('image', selectedImage);
 
-          response = await axios.post(`${API_URL}posts/create`, payload, {
-            withCredentials: true,
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
+            response = await axios.post(`${API_URL}posts/create`, formData, {
+              withCredentials: true,
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+            });
+          } else {
+            const payload = {
+              content,
+              authorId: userId,
+              authorName: username,
+            };
+
+            response = await axios.post(`${API_URL}posts/create`, payload, {
+              withCredentials: true,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+          }
         }
-
-        console.log('Response:', response);
 
         if (response.status === 200) {
           const message = isScheduled
@@ -147,22 +183,28 @@ const PostForm = ({ onPostCreated }) => {
           setIsScheduled(false);
           setScheduledDateTime('');
           setShowScheduleInput(false);
+          setSelectedImage(null);
+          setImagePreview(null);
           onPostCreated?.();
         }
       } catch (error) {
-        console.error('Full error:', error);
         if (!navigator.onLine && !isScheduled) {
           await savePostOffline(content);
           showSnackbar(
             'Post saved offline. It will be sent when you are online.',
             'warning'
           );
+          throw new Error(
+            `Post saved offline: ${error?.message || 'Unknown error'}`
+          );
         } else {
-          console.error('Error creating post:', error);
           const errorMsg = isScheduled
             ? 'Error scheduling post. Please try again.'
             : 'Error creating post. Please try again.';
           showSnackbar(errorMsg, 'error');
+          throw new Error(
+            `Post submission failed: ${error?.message || 'Unknown error'}`
+          );
         }
       } finally {
         setIsSubmitting(false);
@@ -174,6 +216,7 @@ const PostForm = ({ onPostCreated }) => {
       userId,
       isScheduled,
       scheduledDateTime,
+      selectedImage,
       showSnackbar,
       savePostOffline,
       onPostCreated,
@@ -207,6 +250,8 @@ const PostForm = ({ onPostCreated }) => {
     setIsScheduled(false);
     setScheduledDateTime('');
     setShowScheduleInput(false);
+    setSelectedImage(null);
+    setImagePreview(null);
   };
 
   const toggleScheduleMode = () => {
@@ -240,6 +285,24 @@ const PostForm = ({ onPostCreated }) => {
           }}
         />
 
+        {imagePreview && (
+          <div className={styles.image_preview_container}>
+            <img
+              src={imagePreview}
+              alt='Preview'
+              className={styles.image_preview}
+            />
+            <button
+              type='button'
+              onClick={handleRemoveImage}
+              className={styles.remove_image_btn}
+              title='Remove image'
+            >
+              <MdDelete />
+            </button>
+          </div>
+        )}
+
         {showScheduleInput && (
           <div className={styles.schedule_container}>
             <BiCalendar className={styles.calendar_icon} />
@@ -260,6 +323,20 @@ const PostForm = ({ onPostCreated }) => {
         )}
 
         <div className={styles.icons_container}>
+          <input
+            type='file'
+            accept='image/*'
+            onChange={handleImageSelect}
+            className={styles.image_input}
+            id='image-upload'
+          />
+          <label
+            htmlFor='image-upload'
+            className={styles.image_btn}
+            title='Add image'
+          >
+            <MdImage />
+          </label>
           <button
             type='button'
             className={`${styles.schedule_btn} ${isScheduled ? styles.schedule_active : ''}`}

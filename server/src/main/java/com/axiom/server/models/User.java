@@ -123,6 +123,16 @@ public class User {
     @Column(name = "ABOUT", length = 4000)
     private String about;
 
+    @Lob
+    @Column(name = "PROFILE_IMAGE_DATA")
+    private byte[] profileImageData;
+
+    @Column(name = "PROFILE_IMAGE_FILENAME")
+    private String profileImageFilename;
+
+    @Column(name = "PROFILE_IMAGE_CONTENT_TYPE")
+    private String profileImageContentType;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "USER_ID")
     private List<Experience> experiences = new ArrayList<>();

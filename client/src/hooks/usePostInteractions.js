@@ -38,23 +38,17 @@ export const usePostInteractions = (postId, userId) => {
 
   const getPostCommentsCount = async (postId) => {
     try {
-      console.log(`Fetching comments count for post ${postId}`);
       const response = await axios.get(`${API_URL}comments/${postId}/count`, {
         withCredentials: true,
         headers: {
           'Content-Type': 'application/json',
         },
       });
-
-      console.log('Comments count response:', response.data);
-
       if (response.status === 200) {
         if (response.data.response_text) {
           const commentsData = JSON.parse(response.data.response_text);
-          console.log('Parsed comments data:', commentsData);
           return commentsData.commentsCount || 0;
         } else {
-          console.log('Direct comments count:', response.data.commentsCount);
           return response.data.commentsCount || 0;
         }
       }
@@ -115,7 +109,6 @@ export const usePostInteractions = (postId, userId) => {
     if (!userId || !postId) return;
 
     try {
-      console.log(`Refreshing counts for post ${postId}, user ${userId}`);
       const [postCountResponse, commentsCount, userHasLiked] =
         await Promise.all([
           axios.get(`${API_URL}posts/count/${postId}`, {
@@ -124,10 +117,6 @@ export const usePostInteractions = (postId, userId) => {
           getPostCommentsCount(postId),
           checkUserLikedPost(userId, postId),
         ]);
-
-      console.log('Setting likes count:', postCountResponse.data.likesCount);
-      console.log('Setting comment count:', commentsCount);
-      console.log('Setting is liked:', userHasLiked);
 
       setLikesCount(postCountResponse.data.likesCount);
       setCommentCount(commentsCount);

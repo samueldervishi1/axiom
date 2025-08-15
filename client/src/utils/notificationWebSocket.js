@@ -22,7 +22,6 @@ export const startNotificationWebSocket = async (onNotification) => {
       try {
         stompClient.subscribe(`/topic/notifications/${userId}`, (message) => {
           const payload = JSON.parse(message.body);
-          console.log('Notification:', payload);
           if (onNotification) onNotification(payload);
         });
       } catch (err) {

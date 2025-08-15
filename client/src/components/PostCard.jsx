@@ -28,6 +28,96 @@ import { usePostInteractions } from '../hooks/usePostInteractions.js';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+const PostImage = ({ postId, hasImage, cachedImageUrl }) => {
+  const [imageUrl, setImageUrl] = useState(cachedImageUrl);
+  const [isLoading, setIsLoading] = useState(!cachedImageUrl && hasImage);
+  const [imageError, setImageError] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const imgRef = useRef(null);
+
+  useEffect(() => {
+    if (cachedImageUrl) {
+      setImageUrl(cachedImageUrl);
+      setIsLoading(false);
+    }
+  }, [cachedImageUrl]);
+
+  // Intersection Observer for lazy loading if no cached image
+  useEffect(() => {
+    if (!hasImage || cachedImageUrl) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1, rootMargin: '50px' }
+    );
+
+    if (imgRef.current) {
+      observer.observe(imgRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasImage, cachedImageUrl]);
+
+  // Fallback lazy loading if no cached image
+  useEffect(() => {
+    if (!isVisible || imageUrl || !hasImage) return;
+
+    const loadImage = async () => {
+      try {
+        const response = await axios.get(`${API_URL}posts/${postId}/image`, {
+          withCredentials: true,
+          responseType: 'blob',
+          timeout: 10000,
+        });
+
+        if (response.status === 200 && response.data.size > 0) {
+          const url = URL.createObjectURL(response.data);
+          setImageUrl(url);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        setImageError(true);
+        setIsLoading(false);
+        throw new Error(
+          `Failed to load post image: ${error?.message || 'Unknown error'}`
+        );
+      }
+    };
+
+    loadImage();
+  }, [isVisible, postId, hasImage]);
+
+  if (!hasImage) return null;
+
+  return (
+    <div ref={imgRef} className={styles.postImageContainer}>
+      {isLoading && (
+        <div className={styles.imageSkeleton}>
+          <div className={styles.imageLoader}>Loading image...</div>
+        </div>
+      )}
+      {imageUrl && (
+        <img
+          src={imageUrl}
+          alt='Post content'
+          className={`${styles.postImage} ${styles.imageLoaded}`}
+          onError={() => setImageError(true)}
+        />
+      )}
+      {imageError && (
+        <div className={styles.imageError}>
+          <span>Failed to load image</span>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const PostCard = ({
   id,
   content,
@@ -37,6 +127,8 @@ const PostCard = ({
   userId,
   username,
   imageUrl,
+  hasImage,
+  cachedImageUrl,
   onPostDeleted,
   onPostRefresh,
   savedUserIds = [],
@@ -314,8 +406,12 @@ const PostCard = ({
         style={{ cursor: 'pointer' }}
       >
         <p>{content}</p>
-        {imageUrl && (
-          <img src={imageUrl} alt='Post content' className={styles.postImage} />
+        {id && (
+          <PostImage
+            postId={id}
+            hasImage={hasImage || imageUrl || false}
+            cachedImageUrl={cachedImageUrl}
+          />
         )}
       </div>
 

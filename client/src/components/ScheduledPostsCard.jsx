@@ -31,8 +31,12 @@ const ScheduledPostsCard = () => {
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {
-      console.error('Error fetching scheduled posts:', err);
       setError('Failed to load scheduled posts');
+      this.reportError(
+        new Error(
+          `Failed to load scheduled posts: ${err?.message || 'Unknown error'}`
+        )
+      );
     } finally {
       setLoading(false);
     }

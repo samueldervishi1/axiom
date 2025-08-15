@@ -5,7 +5,10 @@ import com.axiom.server.models.Post;
 import com.axiom.server.models.ScheduledPostRequest;
 import com.axiom.server.services.DBService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -129,7 +132,7 @@ public class PostController {
         }
     }
 
-    @PostMapping("/create")
+    @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Object>> createPost(@RequestBody Post post) {
         validatePostContent(post.getContent());
         validateAuthorId(post.getAuthorId());
@@ -140,6 +143,94 @@ public class PostController {
         params.put("authorName", post.getAuthorName());
 
         return querySingleResult("create", params, "Failed to create post");
+    }
+
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, Object>> createPostMultipart(@RequestParam("content") String content,
+            @RequestParam("authorId") String authorId, @RequestParam("authorName") String authorName,
+            @RequestParam(value = "image", required = false) MultipartFile image) {
+
+        validatePostContent(content);
+        validateAuthorId(authorId);
+        validateAuthorName(authorName);
+
+        try {
+            if (image != null && !image.isEmpty()) {
+                validateImageFile(image);
+
+                Post postObj = new Post();
+                postObj.setContent(content);
+                postObj.setAuthorId(authorId);
+                postObj.setAuthorName(authorName);
+                postObj.setImageData(image.getBytes());
+                postObj.setImageFilename(image.getOriginalFilename());
+                postObj.setImageContentType(image.getContentType());
+
+                List<Map<String, Object>> result = dbService.createPostWithImage(postObj);
+                return ResponseEntity.ok(result.get(0));
+            } else {
+                Map<String, Object> params = new HashMap<>();
+                params.put("content", content);
+                params.put("authorId", authorId);
+                params.put("authorName", authorName);
+
+                return querySingleResult("create", params, "Failed to create post");
+            }
+        } catch (IOException e) {
+            throw new CustomException(400, "Error processing image: " + e.getMessage());
+        } catch (SQLException e) {
+            throw new CustomException(500, "Database error: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/{postId}/image")
+    public ResponseEntity<byte[]> getPostImage(@PathVariable Long postId) {
+        if (postId == null) {
+            throw new CustomException(400, "Post ID is required");
+        }
+
+        try {
+            Map<String, Object> imageData = dbService.getPostImageData(postId);
+
+            if (imageData == null) {
+                throw new CustomException(404, "Image not found");
+            }
+
+            Object imageDataObj = imageData.get("IMAGE_DATA");
+            byte[] imageBytes = null;
+
+            if (imageDataObj instanceof byte[]) {
+                imageBytes = (byte[]) imageDataObj;
+            } else if (imageDataObj instanceof java.sql.Blob) {
+                try {
+                    java.sql.Blob blob = (java.sql.Blob) imageDataObj;
+                    imageBytes = blob.getBytes(1, (int) blob.length());
+                } catch (SQLException sqlEx) {
+                    throw new CustomException(500, "Error reading image data");
+                }
+            } else if (imageDataObj != null) {
+                throw new CustomException(500, "Unsupported image data format");
+            }
+
+            if (imageBytes == null || imageBytes.length == 0) {
+                throw new CustomException(404, "Image not found");
+            }
+
+            String contentType = (String) imageData.get("IMAGE_CONTENT_TYPE");
+            String filename = (String) imageData.get("IMAGE_FILENAME");
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(
+                    MediaType.parseMediaType(contentType != null ? contentType : "application/octet-stream"));
+            headers.setContentDispositionFormData("inline", filename);
+
+            return ResponseEntity.ok().headers(headers).body(imageBytes);
+
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CustomException(500, "Failed to retrieve image");
+        }
     }
 
     @PostMapping("/create-scheduled")
@@ -288,6 +379,35 @@ public class PostController {
         }
         if (scheduledFor.isBefore(LocalDateTime.now())) {
             throw new CustomException(400, "Scheduled time cannot be in the past");
+        }
+    }
+
+    private void validateAuthorName(String authorName) {
+        if (authorName == null || authorName.trim().isEmpty()) {
+            throw new CustomException(400, "Author name is required");
+        }
+    }
+
+    private void validateImageFile(MultipartFile image) {
+        if (image == null || image.isEmpty()) {
+            throw new CustomException(400, "Image file is required");
+        }
+
+        // Check file size (max 10MB)
+        if (image.getSize() > 10 * 1024 * 1024) {
+            throw new CustomException(400, "Image file too large (max 10MB)");
+        }
+
+        // Check if it's actually an image
+        String contentType = image.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new CustomException(400, "File must be an image");
+        }
+
+        // Allow common image formats
+        if (!contentType.equals("image/jpeg") && !contentType.equals("image/png") && !contentType.equals("image/gif")
+                && !contentType.equals("image/webp")) {
+            throw new CustomException(400, "Unsupported image format. Please use JPEG, PNG, GIF, or WebP");
         }
     }
 }

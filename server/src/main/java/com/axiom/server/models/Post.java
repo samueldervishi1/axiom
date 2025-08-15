@@ -48,6 +48,16 @@ public class Post {
     @Column(name = "REPORTED")
     private Boolean reported = false;
 
+    @Lob
+    @Column(name = "IMAGE_DATA")
+    private byte[] imageData;
+
+    @Column(name = "IMAGE_FILENAME")
+    private String imageFilename;
+
+    @Column(name = "IMAGE_CONTENT_TYPE")
+    private String imageContentType;
+
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) {

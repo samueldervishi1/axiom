@@ -41,6 +41,66 @@
   color: #8899a6;
 }
 
+.image_preview_container {
+  position: relative;
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+}
+
+.image_preview {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.remove_image_btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.remove_image_btn:hover {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.image_input {
+  display: none;
+}
+
+.image_btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: transparent;
+  color: #1da1f2;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 18px;
+}
+
+.image_btn:hover {
+  background-color: rgba(29, 161, 242, 0.1);
+  color: #0d8bd9;
+}
+
 .schedule_container {
   display: flex;
   align-items: center;

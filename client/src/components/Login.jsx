@@ -69,23 +69,17 @@ const LoginScript = () => {
           return;
         }
 
-        console.log('Login successful - checking account status');
-
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
         const deactivated = await isUserDeactivated(formState.username);
 
         if (deactivated) {
-          console.log('Account is deactivated, redirecting...');
           navigate('/account-deactivated');
         } else {
           login(true);
-          console.log('Account is active, navigating to home');
           navigate('/home');
         }
       } catch (error) {
-        console.error('Error during login:', error);
-
         const isNetworkError =
           error.message === 'Failed to fetch' ||
           error.message.includes('NetworkError');
@@ -98,6 +92,7 @@ const LoginScript = () => {
           error: generalErrorMessage,
           loading: false,
         }));
+        throw new Error(`Login failed: ${error?.message || 'Unknown error'}`);
       } finally {
         setFormState((prev) => ({ ...prev, loading: false }));
       }

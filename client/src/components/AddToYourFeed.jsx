@@ -31,10 +31,7 @@ const AddToYourFeed = () => {
     },
   ];
 
-  const handleConnect = (companyName) => {
-    console.log(`Connecting to ${companyName}`);
-    // Here you would typically make an API call to follow/connect
-  };
+  const handleConnect = () => {};
 
   const handleViewAll = () => {
     navigate('/connect');

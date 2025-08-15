@@ -140,7 +140,9 @@ const ChatAI = () => {
         }
       }
     } catch (error) {
-      console.error('Error loading chat history:', error);
+      throw new Error(
+        `Failed to load chat history: ${error?.message || 'Unknown error'}`
+      );
     }
   };
 
@@ -277,8 +279,6 @@ const ChatAI = () => {
     setChatMessages((prevMessages) => [...prevMessages, message]);
     setUserInput('');
 
-    console.log('Sending question to backend...');
-
     const handleRateLimit = () => {
       setIsRateLimited(true);
       setCountdown(30);
@@ -350,9 +350,11 @@ const ChatAI = () => {
           setIsProcessingResponse(false);
         }
       } else {
-        console.error('Error: ', response.statusText);
         setIsThinking(false);
         setIsProcessingResponse(false);
+        throw new Error(
+          `Failed to process response: ${response.statusText || 'Unknown error'}`
+        );
       }
     } catch (error) {
       if (error.response?.status === 405) {
@@ -367,7 +369,6 @@ const ChatAI = () => {
         setIsThinking(false);
         setChatMessages((prevMessages) => [...prevMessages, errorResponse]);
       } else {
-        console.error('Error: ', error.message);
         const errorMessage =
           'Something went wrong. Please check your internet connection or try again later.';
         const errorResponse = {
@@ -377,6 +378,9 @@ const ChatAI = () => {
         };
         setChatMessages((prevMessages) => [...prevMessages, errorResponse]);
         setIsThinking(false);
+        throw new Error(
+          `Failed to process response: ${error?.message || 'Unknown error'}`
+        );
       }
       setIsProcessingResponse(false);
     }

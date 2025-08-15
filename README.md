@@ -12,7 +12,7 @@ This project aims to create a basic social media platform where users can connec
 **Server:** 
 - Java: Programming language used for backend development.
 - Spring Boot: Framework for creating Java applications.
-- MongoDB: NoSQL database for data storage.
+- Oracle Database: Relational database for data storage.
 
 
 ## Setup
@@ -59,11 +59,13 @@ npm run dev
 - The frontend server will start on http://localhost:5173.
 
 ## Database Setup
-- Configure MongoDB or your preferred database connection in the backend application properties.
+- Configure Oracle Database connection in the backend application properties.
  
     application.properties:
-    - spring.data.mongodb.uri=mongodb+srv://<username>:<password>@<cluster-address>/<dbname>?retryWrites=true&w=majority&appName=<appName>
-    - spring.data.mongodb.database=database name
+    - spring.datasource.url=jdbc:oracle:thin:@localhost:1521/XEPDB1
+    - spring.datasource.username=your_username
+    - spring.datasource.password=your_password
+    - spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
 
 ## Usage
 - Register as a new user or log in with existing credentials.

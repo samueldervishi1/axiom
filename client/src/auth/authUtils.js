@@ -35,10 +35,10 @@ class TokenManager {
     }
 
     try {
-      const response = await axios.get(`${API_URL}auth/me`, {
+      await axios.get(`${API_URL}auth/me`, {
         withCredentials: true,
       });
-      console.log('Token is valid, no refresh needed', response.data);
+
       return true;
     } catch (error) {
       if (error.response?.status === 401) {
@@ -68,7 +68,6 @@ class TokenManager {
       this.refreshInProgress = false;
 
       if (response.status === 200) {
-        console.log('Token refreshed successfully');
         this.dispatchTokenRefreshedEvent();
         return true;
       } else {
@@ -78,9 +77,10 @@ class TokenManager {
       }
     } catch (error) {
       this.refreshInProgress = false;
-      console.error('Token refresh error:', error);
       this.dispatchTokenExpiredEvent();
-      return false;
+      throw new Error(
+        `Token refresh failed: ${error?.message || 'Unknown error'}`
+      );
     }
   }
 
@@ -130,10 +130,10 @@ class TokenManager {
         window.location.href = '/login';
       }
     } catch (error) {
-      console.error('Logout error:', error);
       if (typeof window !== 'undefined') {
         window.location.href = '/login';
       }
+      throw new Error(`Logout failed: ${error?.message || 'Unknown error'}`);
     }
   }
 }
@@ -145,7 +145,7 @@ tokenManager.onTokenExpired(() => {
 });
 
 tokenManager.onTokenRefreshed(() => {
-  console.log('Session extended successfully');
+  //do nothing
 });
 
 export const getUserInfo = async () => {
@@ -155,8 +155,9 @@ export const getUserInfo = async () => {
     });
     return response.data;
   } catch (error) {
-    console.error('Failed to get user info:', error);
-    return null;
+    throw new Error(
+      `Failed to get user info: ${error?.message || 'Unknown error'}`
+    );
   }
 };
 
@@ -172,8 +173,7 @@ export const getUsernameFromServer = async () => {
 
 export const getCompleteUserProfile = async (username) => {
   if (!username) {
-    console.error('Username is required to fetch complete profile');
-    return null;
+    throw new Error('Username is required to fetch complete profile');
   }
 
   try {
@@ -182,8 +182,9 @@ export const getCompleteUserProfile = async (username) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Failed to get complete user profile:', error);
-    return null;
+    throw new Error(
+      `Failed to get complete user profile: ${error?.message || 'Unknown error'}`
+    );
   }
 };
 
@@ -215,8 +216,9 @@ export const reactivateAccount = async (
     );
     return response.status === 200;
   } catch (error) {
-    console.error('Failed to reactivate account:', error);
-    throw error;
+    throw new Error(
+      `Failed to reactivate account: ${error?.message || 'Unknown error'}`
+    );
   }
 };
 
