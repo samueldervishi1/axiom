@@ -285,7 +285,7 @@ const Navbar = () => {
                 onClick={() => navigate('/chat')}
               >
                 <SiPoe className={styles.icon_p} />
-                <span className={styles.nav_text}>Sophia Ultimate</span>
+                <span className={styles.nav_text}>Sage Ultimate</span>
               </button>
             </div>
 
@@ -392,7 +392,7 @@ const Navbar = () => {
                   }}
                 >
                   <SiPoe className={styles.icon_p} />
-                  <span>Sophia Ultra</span>
+                  <span>Sage Ultimate</span>
                 </button>
               </div>
             )}

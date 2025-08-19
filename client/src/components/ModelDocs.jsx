@@ -332,7 +332,7 @@ content-type: application/json`}
      --header "content-type: application/json" \\
      --data \\
 '{
-    "model": "sophia-ultimate-240725",
+    "model": "sage-ultimate-240725",
     "max_tokens": 1024,
     "messages": [
         {"role": "user", "content": "Hello, world"}
@@ -387,21 +387,21 @@ content-type: application/json`}
           </div>
 
           <div className={styles.model_updates}>
-            <h4>Sophia Ultimate Model Updates</h4>
+            <h4>Sage Ultimate Model Updates</h4>
             <div className={styles.update_card}>
               <h5>Increased Rate Limits</h5>
               <p>
-                Increased rate limits for Sophia Ultimate on the Axiom API to
-                give you more capacity to build and scale with Sophia. For
-                customers with usage tier 1-4 rate limits, these changes apply
-                immediately to your account - no action needed.
+                Increased rate limits for Sage Ultimate on the Axiom API to give
+                you more capacity to build and scale with Sage. For customers
+                with usage tier 1-4 rate limits, these changes apply immediately
+                to your account - no action needed.
               </p>
             </div>
 
             <div className={styles.update_card}>
               <h5>New Refusal Stop Reason</h5>
               <p>
-                Sophia Ultimate now includes a new "refusal" stop reason in
+                Sage Ultimate now includes a new "refusal" stop reason in
                 responses:
               </p>
               <pre className={styles.code_block}>
@@ -409,7 +409,7 @@ content-type: application/json`}
   "id": "msg_014XEDjypDjFzgKVWdFUXxZP",
   "type": "message",
   "role": "assistant",
-  "model": "sophia-ultimate-240725",
+  "model": "sage-ultimate-240725",
   "content": [{"type": "text", "text": "I would be happy to assist you. You can "}],
   "stop_reason": "refusal",
   "stop_sequence": null,
@@ -430,18 +430,18 @@ content-type: application/json`}
               <h5>Token-Efficient Tool Use No Longer Supported</h5>
               <p>
                 <strong>Important:</strong> Token-efficient tool use is only
-                available in Sophia Ultra and is no longer supported in newer
+                available in Sage Ultra and is no longer supported in newer
                 models.
               </p>
               <p>
-                If you're migrating from Sophia Ultra and using token-efficient
+                If you're migrating from Sage Ultra and using token-efficient
                 tool use, we recommend removing the{' '}
                 <code>token-efficient-tools-2025-02-19</code> beta header from
                 your requests.
               </p>
               <p>
                 The <code>token-efficient-tools-2025-02-19</code> beta header
-                can still be included in Sophia Ultimate requests, but it will
+                can still be included in Sage Ultimate requests, but it will
                 have no effect.
               </p>
             </div>
@@ -460,7 +460,7 @@ content-type: application/json`}
               </li>
               <li>
                 <strong>Token-Efficient Tool Use:</strong> Optimization for
-                better performance (Sophia Ultra only)
+                better performance (Sage Ultra only)
               </li>
             </ul>
           </div>

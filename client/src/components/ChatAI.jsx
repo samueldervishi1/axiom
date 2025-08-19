@@ -862,7 +862,7 @@ const ChatAI = () => {
 
               <div className={styles.right_controls}>
                 <div className={styles.model_selector}>
-                  <span>Sophia Ultimate</span>
+                  <span>Sage Ultimate</span>
                   <small>Smart, efficient model</small>
                 </div>
 
