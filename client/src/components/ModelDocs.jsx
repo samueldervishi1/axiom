@@ -18,6 +18,7 @@ const ModelDocs = () => {
     supported: { label: 'Supported', color: '#8b5cf6', priority: 3 },
     legacy: { label: 'Legacy', color: '#f59e0b', priority: 4 },
     deprecated: { label: 'Deprecated', color: '#ef4444', priority: 5 },
+    latest: { label: 'Latest', color: '#06b6d4', priority: 1 },
     'end-of-life': { label: 'End of Life', color: '#dc2626', priority: 6 },
   };
 

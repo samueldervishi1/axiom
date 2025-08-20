@@ -29,4 +29,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u.following FROM User u WHERE u.id = :userId")
     Optional<List<String>> findFollowingById(@Param("userId") Long userId);
+
+    Optional<User> findByStripeCustomerId(String stripeCustomerId);
 }

@@ -281,11 +281,41 @@
   gap: 4px;
 }
 
+.displayNameContainer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .displayName {
   font-size: 24px;
   font-weight: 600;
   color: #1c1c1c;
   margin: 0;
+  line-height: 1.2;
+}
+
+.premiumBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.premiumIcon {
+  font-size: 22px;
+  color: #ffd700;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  animation: premium-glow 3s ease-in-out infinite alternate;
+  margin-top: -10px;
+}
+
+@keyframes premium-glow {
+  from {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  }
+  to {
+    filter: drop-shadow(0 2px 6px rgba(255, 215, 0, 0.7));
+  }
 }
 
 .username {

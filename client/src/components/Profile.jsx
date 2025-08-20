@@ -12,6 +12,7 @@ import {
   BsFillInfoSquareFill,
   BsFillFileEarmarkPostFill,
 } from 'react-icons/bs';
+import { FaCrown, FaGem } from 'react-icons/fa';
 import styles from '../styles/profile.module.css';
 import profileAvatar from '../assets/user.webp';
 import backgroundImage from '../assets/background.jpg';
@@ -25,6 +26,7 @@ import AboutProfileModal from './AboutProfileModal';
 import ProfileEditModal from './ProfileEditModal';
 import UserPostsModal from './UserPostsModal';
 import AddToYourFeed from './AddToYourFeed';
+import SubscriptionCard from './SubscriptionCard';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -36,6 +38,7 @@ const Profile = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [, setShowDropdown] = useState(false);
   const [profileImageUrl, setProfileImageUrl] = useState(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
   const dropdownRef = useRef(null);
 
   const [showExperienceModal, setShowExperienceModal] = useState(false);
@@ -66,6 +69,20 @@ const Profile = () => {
           setProfile(profileResponse.data);
         } catch (error) {
           console.error('Error fetching profile:', error);
+        }
+
+        // Fetch subscription status
+        try {
+          const subscriptionResponse = await axios.get(
+            `${API_URL}subscription/status`,
+            {
+              withCredentials: true,
+            }
+          );
+          setSubscriptionStatus(subscriptionResponse.data);
+        } catch (error) {
+          console.warn('Failed to fetch subscription status:', error);
+          setSubscriptionStatus(null);
         }
 
         if (userId) {
@@ -178,6 +195,19 @@ const Profile = () => {
         }
       );
       setProfile(profileResponse.data);
+
+      try {
+        const subscriptionResponse = await axios.get(
+          `${API_URL}subscription/status`,
+          {
+            withCredentials: true,
+          }
+        );
+        setSubscriptionStatus(subscriptionResponse.data);
+      } catch (error) {
+        console.warn('Failed to refresh subscription status:', error);
+        setSubscriptionStatus(null);
+      }
 
       if (userId) {
         try {
@@ -373,9 +403,33 @@ const Profile = () => {
               </button>
 
               <div className={styles.userInfo}>
-                <h1 className={styles.displayName}>
-                  {profile.fullName || profile.displayName || profile.username}
-                </h1>
+                <div className={styles.displayNameContainer}>
+                  <h1 className={styles.displayName}>
+                    {profile.fullName ||
+                      profile.displayName ||
+                      profile.username}
+                  </h1>
+                  {subscriptionStatus?.subscriptionStatus === 'active' &&
+                    (subscriptionStatus?.planType === 'pro' ||
+                      subscriptionStatus?.planType === 'ultimate' ||
+                      subscriptionStatus?.role === 'pro_account' ||
+                      subscriptionStatus?.role === 'ultimate_account') && (
+                      <div className={styles.premiumBadge}>
+                        {subscriptionStatus?.planType === 'ultimate' ||
+                        subscriptionStatus?.role === 'ultimate_account' ? (
+                          <FaGem
+                            className={styles.premiumIcon}
+                            title='Ultimate Member'
+                          />
+                        ) : (
+                          <FaCrown
+                            className={styles.premiumIcon}
+                            title='Pro Member'
+                          />
+                        )}
+                      </div>
+                    )}
+                </div>
 
                 {(profile.bio || profile.profession) && (
                   <p className={styles.bioText}>
@@ -735,6 +789,7 @@ const Profile = () => {
           </div>
 
           <AddToYourFeed />
+          <SubscriptionCard currentSubscription={subscriptionStatus} />
         </div>
       </div>
 

@@ -149,7 +149,7 @@ public class AuthController {
         try {
             Claims claims = jwtTokenUtil.parseAndValidateToken(refreshToken);
 
-            if (!jwtTokenUtil.isRefreshToken(claims)) {
+            if (jwtTokenUtil.isRefreshToken(claims)) {
                 return createResponse(new CustomException(401, "Invalid token type"));
             }
 

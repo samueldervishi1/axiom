@@ -157,7 +157,7 @@ public class JwtTokenUtil {
 
     public boolean isRefreshToken(Claims claims) {
         String tokenType = claims.get(CLAIM_TOKEN_TYPE, String.class);
-        return "refresh".equals(tokenType);
+        return !"refresh".equals(tokenType);
     }
 
     public boolean isAccessToken(Claims claims) {

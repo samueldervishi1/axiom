@@ -154,6 +154,13 @@
             <artifactId>html2pdf</artifactId>
             <version>4.0.5</version>
         </dependency>
+
+        <!--Stripe dependency-->
+        <dependency>
+            <groupId>com.stripe</groupId>
+            <artifactId>stripe-java</artifactId>
+            <version>29.5.0-beta.2</version>
+        </dependency>
     </dependencies>
 
     <build>

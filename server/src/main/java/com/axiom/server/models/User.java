@@ -149,6 +149,21 @@ public class User {
     @JoinColumn(name = "USER_ID")
     private List<Certificate> certificates = new ArrayList<>();
 
+    @Column(name = "STRIPE_CUSTOMER_ID")
+    private String stripeCustomerId;
+
+    @Column(name = "SUBSCRIPTION_STATUS")
+    private String subscriptionStatus = "inactive";
+
+    @Column(name = "PLAN_TYPE")
+    private String planType = "free";
+
+    @Column(name = "SUBSCRIPTION_START_DATE")
+    private LocalDateTime subscriptionStartDate;
+
+    @Column(name = "SUBSCRIPTION_END_DATE")
+    private LocalDateTime subscriptionEndDate;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

@@ -3,9 +3,11 @@ import { Link } from 'react-router-dom';
 import styles from '../styles/home.module.css';
 import CreatePost from './CreatePost';
 import AddToYourFeed from './AddToYourFeed';
+import SubscriptionCard from './SubscriptionCard';
 import { getUsernameFromServer, getUserIdFromServer } from '../auth/authUtils';
 import axios from 'axios';
 import backgroundImage from '../assets/background.jpg';
+import { FaCrown, FaGem } from 'react-icons/fa';
 
 const PostList = React.lazy(() => import('./PostList'));
 
@@ -20,6 +22,7 @@ const Home = () => {
   const [profile, setProfile] = useState(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [profileImageUrl, setProfileImageUrl] = useState(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
 
   const handlePostRefresh = useCallback(() => {
     setRefreshTrigger((prev) => prev + 1);
@@ -43,7 +46,19 @@ const Home = () => {
           setProfile(profileResponse.data);
         }
 
-        // Fetch profile image
+        try {
+          const subscriptionResponse = await axios.get(
+            `${API_URL}subscription/status`,
+            {
+              withCredentials: true,
+            }
+          );
+          setSubscriptionStatus(subscriptionResponse.data);
+        } catch (err) {
+          console.warn('Failed to fetch subscription status:', err);
+          setSubscriptionStatus(null);
+        }
+
         if (userId) {
           try {
             const imageResponse = await axios.get(
@@ -59,7 +74,6 @@ const Home = () => {
               setProfileImageUrl(imageUrl);
             }
           } catch (err) {
-            // No profile image - use default
             setProfileImageUrl(null);
             console.warn('Failed to fetch profile image:', err);
           }
@@ -76,7 +90,6 @@ const Home = () => {
     fetchUserProfile();
   }, []);
 
-  // Cleanup effect for profile image URL
   useEffect(() => {
     return () => {
       if (profileImageUrl) {
@@ -113,11 +126,33 @@ const Home = () => {
             </div>
             <div className={styles.profile_info}>
               <Link to='/profile' className={styles.profile_name_link}>
-                <h3 className={styles.profile_name}>
-                  {isLoadingProfile
-                    ? 'Loading...'
-                    : profile?.fullName || profile?.displayName || 'User'}
-                </h3>
+                <div className={styles.profile_name_container}>
+                  <h3 className={styles.profile_name}>
+                    {isLoadingProfile
+                      ? 'Loading...'
+                      : profile?.fullName || profile?.displayName || 'User'}
+                  </h3>
+                  {subscriptionStatus?.subscriptionStatus === 'active' &&
+                    (subscriptionStatus?.planType === 'pro' ||
+                      subscriptionStatus?.planType === 'ultimate' ||
+                      subscriptionStatus?.role === 'pro_account' ||
+                      subscriptionStatus?.role === 'ultimate_account') && (
+                      <div className={styles.premium_badge}>
+                        {subscriptionStatus?.planType === 'ultimate' ||
+                        subscriptionStatus?.role === 'ultimate_account' ? (
+                          <FaGem
+                            className={styles.premium_icon}
+                            title='Ultimate Member'
+                          />
+                        ) : (
+                          <FaCrown
+                            className={styles.premium_icon}
+                            title='Pro Member'
+                          />
+                        )}
+                      </div>
+                    )}
+                </div>
               </Link>
               {!isLoadingProfile && (profile?.bio || profile?.title) && (
                 <p className={styles.profile_subtitle}>
@@ -129,6 +164,7 @@ const Home = () => {
             </div>
           </div>
         </div>
+        <SubscriptionCard currentSubscription={subscriptionStatus} />
       </div>
 
       <div className={styles.main_content}>
@@ -139,7 +175,6 @@ const Home = () => {
       </div>
       <div className={styles.right_sidebar}>
         <AddToYourFeed />
-
         <div className={styles.footer_links}>
           <div className={styles.link_group}>
             <a href='/settings?section=about' className={styles.footer_link}>

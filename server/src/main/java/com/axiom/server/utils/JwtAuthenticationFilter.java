@@ -229,7 +229,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             Claims refreshClaims = jwtTokenUtil.parseAndValidateToken(refreshToken);
 
-            if (!jwtTokenUtil.isRefreshToken(refreshClaims)) {
+            if (jwtTokenUtil.isRefreshToken(refreshClaims)) {
                 return false;
             }
 
