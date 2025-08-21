@@ -1040,3 +1040,128 @@
     font-size: 13px;
   }
 }
+
+/* Model Dropdown Styles */
+.model_selector {
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.model_header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.model_selector:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+  border-radius: 6px;
+}
+
+.model_dropdown_arrow {
+  font-size: 10px;
+  color: #666;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.model_dropdown {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #e1e5e9;
+  border-radius: 12px;
+  box-shadow:
+    0 -4px 20px rgba(0, 0, 0, 0.08),
+    0 -2px 8px rgba(0, 0, 0, 0.04);
+  z-index: 1000;
+  min-width: 220px;
+  margin-bottom: 4px;
+  overflow: hidden;
+  animation: fadeInDown 0.15s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.model_option {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  text-align: left;
+}
+
+.model_option:last-child {
+  border-bottom: none;
+}
+
+.model_option:hover {
+  background-color: #f8fafc;
+  transform: translateX(2px);
+}
+
+.model_option.selected {
+  background-color: #e8f4fd;
+  border-left: 3px solid #2196f3;
+}
+
+.model_option.selected:hover {
+  background-color: #e0f1fc;
+}
+
+.option_name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+  line-height: 1.3;
+  margin-bottom: 2px;
+}
+
+.option_description {
+  font-size: 11px;
+  color: #666;
+  line-height: 1.2;
+  font-weight: 400;
+}
+
+.model_option.selected .option_name {
+  color: #1976d2;
+}
+
+.model_option.selected .option_description {
+  color: #1565c0;
+}
+
+@media (max-width: 768px) {
+  .model_dropdown {
+    min-width: 200px;
+    right: -10px;
+  }
+
+  .model_option {
+    padding: 10px 14px;
+  }
+
+  .option_name {
+    font-size: 13px;
+  }
+
+  .option_description {
+    font-size: 10px;
+  }
+}

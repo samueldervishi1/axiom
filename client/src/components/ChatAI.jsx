@@ -14,6 +14,7 @@ import {
   MdClose,
   MdHistory,
 } from 'react-icons/md';
+import { IoIosArrowUp } from 'react-icons/io';
 import sendBTN from '../assets/test.svg';
 import styles from '../styles/ai.module.css';
 import { writePrompts } from '../constants/writePrompts';
@@ -46,9 +47,86 @@ const ChatAI = () => {
   const fileInputRef = useRef(null);
   const imageInputRef = useRef(null);
   const textareaRef = useRef(null);
+  const modelDropdownRef = useRef(null);
   const [activeCategory, setActiveCategory] = useState(null);
   const [showChatHistory, setShowChatHistory] = useState(false);
   const [currentConversationId, setCurrentConversationId] = useState(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
+  const [selectedModel, setSelectedModel] = useState('');
+  const [showModelDropdown, setShowModelDropdown] = useState(false);
+
+  const getAvailableModels = () => {
+    if (!subscriptionStatus) {
+      return [
+        {
+          name: 'Sage Advanced',
+          description: 'Essential model for basic tasks',
+        },
+      ];
+    }
+
+    const planType = subscriptionStatus.planType;
+
+    if (planType === 'ultimate') {
+      return [
+        {
+          name: 'Sage Advanced',
+          description: 'Essential model for basic tasks',
+        },
+        { name: 'Sage Pro', description: 'Enhanced model for complex tasks' },
+        {
+          name: 'Sage Supreme',
+          description: 'Premium model for advanced tasks',
+        },
+        {
+          name: 'Sage Ultimate',
+          description: 'Ultimate model for expert tasks',
+        },
+        { name: 'Ultimate Pro', description: 'Professional ultimate model' },
+      ];
+    } else if (planType === 'pro') {
+      return [
+        {
+          name: 'Sage Advanced',
+          description: 'Essential model for basic tasks',
+        },
+        { name: 'Sage Pro', description: 'Enhanced model for complex tasks' },
+        {
+          name: 'Sage Supreme',
+          description: 'Premium model for advanced tasks',
+        },
+      ];
+    } else {
+      return [
+        {
+          name: 'Sage Advanced',
+          description: 'Essential model for basic tasks',
+        },
+      ];
+    }
+  };
+
+  const getDefaultModel = (subscription) => {
+    if (!subscription) {
+      return 'Sage Supreme';
+    }
+
+    const planType = subscription.planType;
+
+    if (planType === 'ultimate') {
+      return 'Sage Supreme';
+    } else if (planType === 'pro') {
+      return 'Sage Supreme';
+    } else {
+      return 'Sage Supreme';
+    }
+  };
+
+  const getModelDescription = (modelName) => {
+    const models = getAvailableModels();
+    const model = models.find((m) => m.name === modelName);
+    return model ? model.description : 'Smart, efficient model';
+  };
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -76,6 +154,27 @@ const ChatAI = () => {
   }, []);
 
   useEffect(() => {
+    const fetchSubscriptionStatus = async () => {
+      try {
+        const response = await axios.get(`${API_URL}subscription/status`, {
+          withCredentials: true,
+        });
+        setSubscriptionStatus(response.data);
+
+        // Set default model based on subscription
+        const defaultModel = getDefaultModel(response.data);
+        setSelectedModel(defaultModel);
+      } catch (error) {
+        console.warn('Failed to fetch subscription status:', error);
+        setSubscriptionStatus(null);
+        setSelectedModel('Sage Supreme');
+      }
+    };
+
+    fetchSubscriptionStatus();
+  }, []);
+
+  useEffect(() => {
     const handleResize = () => {
       setIsMobileView(window.innerWidth < 768);
     };
@@ -83,6 +182,22 @@ const ChatAI = () => {
     window.addEventListener('resize', handleResize);
     return () => {
       window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        modelDropdownRef.current &&
+        !modelDropdownRef.current.contains(event.target)
+      ) {
+        setShowModelDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
@@ -233,17 +348,48 @@ const ChatAI = () => {
 
   const getGreetingByTime = () => {
     const hour = new Date().getHours();
-    let greeting;
+    let timeBasedGreetings;
 
     if (hour >= 5 && hour < 12) {
-      greeting = 'Good morning';
+      timeBasedGreetings = [
+        `Good morning, ${username}!`,
+        `Hello, ${username}! Ready to start your day?`,
+        `Morning, ${username}! What's on your agenda today?`,
+        `Hey ${username}! How can I help you this morning?`,
+        `Good morning! What would you like to explore today, ${username}?`,
+      ];
     } else if (hour >= 12 && hour < 18) {
-      greeting = 'Good afternoon';
+      timeBasedGreetings = [
+        `Good afternoon, ${username}!`,
+        `Hello, ${username}! What's new today?`,
+        `Hey ${username}! How's your day going?`,
+        `Good afternoon! What can I help you with, ${username}?`,
+        `Hi ${username}! What's on your mind this afternoon?`,
+      ];
     } else {
-      greeting = 'Good evening';
+      timeBasedGreetings = [
+        `Good evening, ${username}!`,
+        `Hello, ${username}! How was your day?`,
+        `Hey ${username}! What's on your mind tonight?`,
+        `Good evening! How can I assist you, ${username}?`,
+        `Hi ${username}! Ready to wrap up your day with some help?`,
+      ];
     }
 
-    return `${greeting}, ${username}!`;
+    const generalGreetings = [
+      `Hello, ${username}! What can I help you with today?`,
+      `Hi ${username}! What's sparking your curiosity?`,
+      `Hey ${username}! What would you like to explore?`,
+      `Hello! What's on your mind, ${username}?`,
+      `Hi ${username}! Ready to dive into something interesting?`,
+      `Hey ${username}! What brings you here today?`,
+      `Hello, ${username}! How can I make your day better?`,
+    ];
+
+    const allGreetings = [...timeBasedGreetings, ...generalGreetings];
+
+    const randomIndex = Math.floor(Math.random() * allGreetings.length);
+    return allGreetings[randomIndex];
   };
 
   const handleSubmit = async (e) => {
@@ -861,9 +1007,51 @@ const ChatAI = () => {
               </div>
 
               <div className={styles.right_controls}>
-                <div className={styles.model_selector}>
-                  <span>Sage Ultimate</span>
-                  <small>Smart, efficient model</small>
+                <div
+                  ref={modelDropdownRef}
+                  className={styles.model_selector}
+                  onClick={() => {
+                    const availableModels = getAvailableModels();
+                    if (availableModels.length > 1) {
+                      setShowModelDropdown(!showModelDropdown);
+                    }
+                  }}
+                >
+                  <div className={styles.model_header}>
+                    <span className={styles.model_name}>
+                      {selectedModel || 'Sage Supreme'}
+                    </span>
+                    {getAvailableModels().length > 1 && (
+                      <div className={styles.model_dropdown_arrow}>
+                        <IoIosArrowUp />
+                      </div>
+                    )}
+                  </div>
+
+                  {showModelDropdown && getAvailableModels().length > 1 && (
+                    <div className={styles.model_dropdown}>
+                      {getAvailableModels().map((model) => (
+                        <div
+                          key={model.name}
+                          className={`${styles.model_option} ${
+                            selectedModel === model.name ? styles.selected : ''
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedModel(model.name);
+                            setShowModelDropdown(false);
+                          }}
+                        >
+                          <span className={styles.option_name}>
+                            {model.name}
+                          </span>
+                          <small className={styles.option_description}>
+                            {model.description}
+                          </small>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <button

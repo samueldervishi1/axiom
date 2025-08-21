@@ -109,7 +109,6 @@ public class SubscriptionService {
             throw new Exception("No active subscription found");
         }
 
-        // Get active subscriptions for customer
         Map<String, Object> params = new HashMap<>();
         params.put("customer", user.getStripeCustomerId());
         params.put("status", "active");
@@ -167,63 +166,38 @@ public class SubscriptionService {
 
     private void handleCheckoutSessionCompleted(Event event) {
         try {
-            System.out.println("DEBUG: Starting handleCheckoutSessionCompleted");
+            Session session;
 
-            // Try different approaches to get the session
-            Session session = null;
-
-            // Approach 1: Try deserializing the object
             try {
                 session = (Session) event.getDataObjectDeserializer().getObject().orElse(null);
-                System.out.println(
-                        "DEBUG: Deserialization approach - session is " + (session != null ? "not null" : "null"));
             } catch (Exception e) {
-                System.out.println("DEBUG: Deserialization failed: " + e.getMessage());
+                throw new Exception("Deserialization approach failed: " + e.getMessage());
             }
-
-            // Approach 2: If session is null, try to parse the raw JSON manually
             if (session == null) {
                 try {
                     String eventData = event.getData().toString();
-                    System.out.println("DEBUG: Event data string: " + eventData);
-
-                    // Look for session ID in the event data string
                     if (eventData.contains("cs_test_") || eventData.contains("cs_live_")) {
-                        // Find the session ID pattern
                         String pattern = eventData.contains("cs_test_") ? "cs_test_" : "cs_live_";
                         int startIndex = eventData.indexOf(pattern);
                         if (startIndex != -1) {
                             int endIndex = eventData.indexOf("\"", startIndex);
                             String sessionId = eventData.substring(startIndex, endIndex);
-                            System.out.println("DEBUG: Extracted session ID: " + sessionId);
-
-                            // Retrieve the session directly from Stripe
                             session = Session.retrieve(sessionId);
-                            System.out.println("DEBUG: Retrieved session from Stripe API");
                         }
                     }
                 } catch (Exception e) {
-                    System.out.println("DEBUG: Manual parsing failed: " + e.getMessage());
+                    throw new Exception("Deserialization approach failed: " + e.getMessage());
                 }
             }
 
             if (session == null) {
-                System.out.println("DEBUG: Could not get session data from event");
                 return;
             }
-
-            System.out.println("DEBUG: Successfully got session");
-            System.out.println("DEBUG: Session ID: " + session.getId());
-            System.out.println("DEBUG: Session metadata: " + session.getMetadata());
 
             String userIdStr = session.getMetadata().get("userId");
             String planType = session.getMetadata().get("planType");
 
-            System.out.println("DEBUG: UserId from metadata: " + userIdStr);
-            System.out.println("DEBUG: PlanType from metadata: " + planType);
-
             if (userIdStr == null || planType == null) {
-                System.out.println("DEBUG: Missing metadata - userId: " + userIdStr + ", planType: " + planType);
                 return;
             }
 
@@ -232,21 +206,11 @@ public class SubscriptionService {
 
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
-                System.out.println("DEBUG: Found user: " + user.getUsername());
-                System.out.println("DEBUG: Before update - Role: " + user.getRole() + ", PlanType: "
-                        + user.getPlanType() + ", Status: " + user.getSubscriptionStatus());
-
                 updateUserSubscription(user, "active", planType);
                 updateUserRole(user, planType);
-
-                System.out.println("DEBUG: After update - Role: " + user.getRole() + ", PlanType: " + user.getPlanType()
-                        + ", Status: " + user.getSubscriptionStatus());
-            } else {
-                System.out.println("DEBUG: User not found with ID: " + userId);
             }
         } catch (Exception e) {
-            System.out.println("DEBUG: Exception in handleCheckoutSessionCompleted: " + e.getMessage());
-            e.printStackTrace();
+            throw new RuntimeException("Failed to handle checkout.session.completed event: " + e.getMessage());
         }
     }
 

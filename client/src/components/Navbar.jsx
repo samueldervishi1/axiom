@@ -14,6 +14,7 @@ import { CgProfile } from 'react-icons/cg';
 import loaderImage from '../assets/377.gif';
 import { IoIosPeople } from 'react-icons/io';
 import { TiHome } from 'react-icons/ti';
+import { TbPremiumRights } from 'react-icons/tb';
 import logo from '../assets/logo.png';
 import styles from '../styles/navbar.module.css';
 
@@ -29,11 +30,28 @@ const Navbar = () => {
   const [, setUserId] = useState(null);
   const [userInitial, setUserInitial] = useState('');
   const [profileImageUrl, setProfileImageUrl] = useState(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
   const searchRef = useRef(null);
   const menuRef = useRef(null);
   const navigate = useNavigate();
   const { logout } = useAuth();
   const location = useLocation();
+
+  const getAIModelName = () => {
+    if (!subscriptionStatus) {
+      return 'Sage Advanced';
+    }
+
+    const planType = subscriptionStatus.planType;
+
+    if (planType === 'ultimate') {
+      return 'Sage Ultimate';
+    } else if (planType === 'pro') {
+      return 'Sage Supreme';
+    } else {
+      return 'Sage Advanced';
+    }
+  };
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -57,6 +75,20 @@ const Navbar = () => {
 
         if (username) {
           setUserInitial(username.charAt(0).toUpperCase());
+        }
+
+        // Fetch subscription status
+        try {
+          const subscriptionResponse = await axios.get(
+            `${import.meta.env.VITE_API_URL}subscription/status`,
+            {
+              withCredentials: true,
+            }
+          );
+          setSubscriptionStatus(subscriptionResponse.data);
+        } catch (error) {
+          console.warn('Failed to fetch subscription status:', error);
+          setSubscriptionStatus(null);
         }
 
         // Fetch profile image
@@ -282,10 +314,18 @@ const Navbar = () => {
 
               <button
                 className={styles.nav_item}
+                onClick={() => navigate('/plan')}
+              >
+                <TbPremiumRights className={styles.icon_p} />
+                <span className={styles.nav_text}>Upgrade</span>
+              </button>
+
+              <button
+                className={styles.nav_item}
                 onClick={() => navigate('/chat')}
               >
                 <SiPoe className={styles.icon_p} />
-                <span className={styles.nav_text}>Sage Ultimate</span>
+                <span className={styles.nav_text}>{getAIModelName()}</span>
               </button>
             </div>
 
@@ -386,13 +426,21 @@ const Navbar = () => {
 
                 <button
                   className={styles.mobile_item}
+                  onClick={() => navigate('/plan')}
+                >
+                  <TbPremiumRights className={styles.icon_p} />
+                  <span>Upgrade</span>
+                </button>
+
+                <button
+                  className={styles.mobile_item}
                   onClick={() => {
                     setIsMenuOpen(false);
                     navigate('/chat');
                   }}
                 >
                   <SiPoe className={styles.icon_p} />
-                  <span>Sage Ultimate</span>
+                  <span>{getAIModelName()}</span>
                 </button>
               </div>
             )}

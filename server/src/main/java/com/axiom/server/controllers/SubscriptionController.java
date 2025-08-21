@@ -2,7 +2,6 @@ package com.axiom.server.controllers;
 
 import com.axiom.server.models.SubscriptionPlan;
 import com.axiom.server.services.SubscriptionService;
-import com.axiom.server.utils.JwtTokenUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -18,11 +17,9 @@ import java.util.Map;
 public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
-    private final JwtTokenUtil jwtTokenUtil;
 
-    public SubscriptionController(SubscriptionService subscriptionService, JwtTokenUtil jwtTokenUtil) {
+    public SubscriptionController(SubscriptionService subscriptionService) {
         this.subscriptionService = subscriptionService;
-        this.jwtTokenUtil = jwtTokenUtil;
     }
 
     @GetMapping("/plans")

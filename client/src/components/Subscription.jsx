@@ -5,68 +5,91 @@ import styles from '../styles/subscription.module.css';
 import {
   FaCrown,
   FaGem,
-  FaRocket,
-  FaCheck,
   FaTimes,
   FaSpinner,
+  FaBrain,
+  FaInfinity,
 } from 'react-icons/fa';
+import { RiGeminiLine } from 'react-icons/ri';
+import { LuMessagesSquare } from 'react-icons/lu';
+import { LuBrain } from 'react-icons/lu';
+import { VscTelescope, VscCodeOss } from 'react-icons/vsc';
+import { GoTasklist } from 'react-icons/go';
+import { IoCodeSlashOutline } from 'react-icons/io5';
+import { MdOutlineImageSearch, MdUploadFile } from 'react-icons/md';
+import {
+  LiaNewspaperSolid,
+  LiaTasksSolid,
+  LiaBrainSolid,
+} from 'react-icons/lia';
+import { PiBrainLight, PiImagesLight, PiMemoryThin } from 'react-icons/pi';
+import { SiOpenaigym } from 'react-icons/si';
 
 const API_URL = import.meta.env.VITE_API_URL;
-
-const getPlanIcon = (planType) => {
-  switch (planType?.toLowerCase()) {
-    case 'pro':
-      return <FaCrown className={styles.planIconElement} />;
-    case 'ultimate':
-      return <FaGem className={styles.planIconElement} />;
-    default:
-      return <FaRocket className={styles.planIconElement} />;
-  }
-};
 
 const getPlanFeatures = (plan) => {
   if (!plan) return [];
 
   const features = [];
 
-  if (plan.maxRequestsPerDay) {
-    if (plan.maxRequestsPerDay === 5000) {
-      features.push('Unlimited daily requests');
-    } else {
-      features.push(
-        `${plan.maxRequestsPerDay.toLocaleString()} daily requests`
-      );
-    }
-  }
-
-  if (plan.premiumModelsAccess) {
-    features.push('Premium AI models access');
-  }
-
   switch (plan.planType?.toLowerCase()) {
+    case 'free':
+      features.push(
+        { text: 'Access to Sage Advanced', icon: <LiaBrainSolid /> },
+        { text: 'Limited file uploads', icon: <MdUploadFile /> },
+        { text: 'Limited memory and context', icon: <PiMemoryThin /> }
+      );
+      break;
     case 'pro':
       features.push(
-        'Priority support',
-        'Advanced analytics',
-        'Enhanced productivity tools',
-        'Custom integrations'
+        {
+          text: 'Sage Supreme with advanced reasoning',
+          icon: <RiGeminiLine />,
+        },
+        { text: 'Sage Pro', icon: <FaGem /> },
+        { text: 'Expanded messaging and uploads', icon: <LuMessagesSquare /> },
+        {
+          text: 'Expanded and faster image creation',
+          icon: <MdOutlineImageSearch />,
+        },
+        { text: 'Expanded memory and context', icon: <PiBrainLight /> },
+        {
+          text: 'Expanded deep research and agent mode',
+          icon: <VscTelescope />,
+        },
+        { text: 'Projects, tasks', icon: <GoTasklist /> },
+        { text: 'Codex agent', icon: <IoCodeSlashOutline /> }
       );
       break;
     case 'ultimate':
       features.push(
-        'All Pro features included',
-        'Dedicated support team',
-        'White-label options',
-        'Custom branding',
-        'API access',
-        'Advanced reporting'
+        { text: 'Sage Ultimate Pro with pro reasoning', icon: <SiOpenaigym /> },
+        { text: 'Sage Ultimate model', icon: <FaGem /> },
+        { text: 'Unlimited messages and uploads', icon: <FaInfinity /> },
+        {
+          text: 'Unlimited and faster image creation',
+          icon: <PiImagesLight />,
+        },
+        { text: 'Maximum memory and context', icon: <LuBrain /> },
+        {
+          text: 'Maximum deep research and agent mode',
+          icon: <VscTelescope />,
+        },
+        {
+          text: 'Expanded projects, tasks, and custom GPTs',
+          icon: <LiaTasksSolid />,
+        },
+        { text: 'Expanded Codex agent', icon: <VscCodeOss /> },
+        {
+          text: 'Research preview of new features',
+          icon: <LiaNewspaperSolid />,
+        }
       );
       break;
     default:
       features.push(
-        'Standard support',
-        'Core functionality',
-        'Community access'
+        { text: 'Access to Sage Advanced', icon: <FaBrain /> },
+        { text: 'Basic functionality' }
       );
   }
 
@@ -142,6 +165,8 @@ const SubscriptionTest = () => {
 
       await fetchSubscriptionStatus();
       alert('Subscription cancelled successfully!');
+      // Refresh the page after successful cancellation
+      window.location.reload();
     } catch (err) {
       setError('Failed to cancel subscription: ' + err.message);
     } finally {
@@ -190,68 +215,39 @@ const SubscriptionTest = () => {
         </div>
       )}
 
-      <div className={styles.statusCard}>
-        <div className={styles.statusHeader}>
-          <h2>Your Current Plan</h2>
-          <button
-            onClick={fetchSubscriptionStatus}
-            disabled={loading}
-            className={styles.refreshBtn}
-            title='Refresh Status'
-          >
-            {loading ? <FaSpinner className={styles.spinning} /> : 'Refresh'}
-          </button>
-        </div>
-        <div className={styles.statusContent}>
-          {subscriptionStatus ? (
-            <div className={styles.statusGrid}>
-              <div className={styles.statusItem}>
-                <span className={styles.statusLabel}>Status</span>
-                <span
-                  className={`${styles.statusValue} ${styles[subscriptionStatus.subscriptionStatus || 'inactive']}`}
-                >
-                  {subscriptionStatus.subscriptionStatus === 'active' ? (
-                    <>
-                      <FaCheck className={styles.statusIcon} /> Active
-                    </>
-                  ) : (
-                    <>
-                      <FaTimes className={styles.statusIcon} /> Inactive
-                    </>
-                  )}
-                </span>
-              </div>
-              <div className={styles.statusItem}>
-                <span className={styles.statusLabel}>Plan Type</span>
-                <span className={styles.statusValue}>
-                  {getPlanIcon(subscriptionStatus.planType || 'free')}
-                  {(subscriptionStatus.planType || 'free').toUpperCase()}
-                </span>
-              </div>
-              {subscriptionStatus.subscriptionEndDate && (
-                <div className={styles.statusItem}>
-                  <span className={styles.statusLabel}>End Date</span>
-                  <span className={styles.statusValue}>
-                    {new Date(
-                      subscriptionStatus.subscriptionEndDate
-                    ).toLocaleDateString()}
-                  </span>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className={styles.loadingStatus}>
-              <FaSpinner className={styles.spinning} />
-              Loading subscription status...
-            </div>
-          )}
-        </div>
-      </div>
-
       <div className={styles.plansSection}>
         <h2 className={styles.sectionTitle}>Choose Your Plan</h2>
         {plans.length > 0 ? (
           <div className={styles.plansGrid}>
+            <div className={styles.planCard}>
+              <div className={styles.planHeader}>
+                <h3 className={styles.planName}>FREE</h3>
+                <div className={styles.planPrice}>
+                  <span className={styles.currency}>$</span>
+                  <span className={styles.amount}>0</span>
+                  <span className={styles.period}>/month</span>
+                </div>
+              </div>
+              <div className={styles.planDescription}>
+                Perfect for getting started with basic AI assistance
+              </div>
+              <div className={styles.planFeatures}>
+                {getPlanFeatures({ planType: 'free' }).map((feature, index) => (
+                  <div key={index} className={styles.feature}>
+                    {feature.icon && (
+                      <span className={styles.featureIcon}>{feature.icon}</span>
+                    )}
+                    {feature.text || feature}
+                  </div>
+                ))}
+              </div>
+              <button
+                disabled={true}
+                className={`${styles.subscribeBtn} ${styles.currentBtn}`}
+              >
+                Current Plan
+              </button>
+            </div>
             {plans.map((plan) => {
               const isCurrentPlan =
                 subscriptionStatus?.planType === plan.planType &&
@@ -259,7 +255,7 @@ const SubscriptionTest = () => {
               return (
                 <div
                   key={plan.id}
-                  className={`${styles.planCard} ${isCurrentPlan ? styles.currentPlan : ''} ${plan.planType === 'ultimate' ? styles.featured : ''}`}
+                  className={`${styles.planCard} ${plan.planType === 'ultimate' ? styles.featured : ''}`}
                 >
                   {plan.planType === 'ultimate' && (
                     <div className={styles.featuredBadge}>
@@ -267,9 +263,6 @@ const SubscriptionTest = () => {
                     </div>
                   )}
                   <div className={styles.planHeader}>
-                    <div className={styles.planIcon}>
-                      {getPlanIcon(plan.planType)}
-                    </div>
                     <h3 className={styles.planName}>
                       {plan.name || plan.planType.toUpperCase()}
                     </h3>
@@ -292,8 +285,12 @@ const SubscriptionTest = () => {
                   <div className={styles.planFeatures}>
                     {getPlanFeatures(plan).map((feature, index) => (
                       <div key={index} className={styles.feature}>
-                        <FaCheck className={styles.featureIcon} />
-                        {feature}
+                        {feature.icon && (
+                          <span className={styles.featureIcon}>
+                            {feature.icon}
+                          </span>
+                        )}
+                        {feature.text || feature}
                       </div>
                     ))}
                   </div>
