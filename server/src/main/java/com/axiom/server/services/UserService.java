@@ -3,6 +3,9 @@ package com.axiom.server.services;
 import com.axiom.server.exceptions.CustomException;
 import com.axiom.server.models.*;
 import com.axiom.server.repositories.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -45,8 +48,9 @@ public class UserService {
                 .orElseThrow(() -> new CustomException(404, String.format(USER_NOT_FOUND_BY_ID, userId)));
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public Page<User> getAllUsers(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return userRepository.findAll(pageable);
     }
 
     public List<UserLiteDTO> getFollowers(Long userId) {

@@ -30,6 +30,7 @@ const UserSettings = lazy(() => import('./components/SettingsProfile'));
 const PostDetails = lazy(() => import('./components/PostDetails'));
 const FollowerScreen = lazy(() => import('./components/FollowerScreen'));
 const Subscription = lazy(() => import('./components/Subscription'));
+const Connect = lazy(() => import('./components/Connect'));
 
 // Inner component that uses Router context
 const AppContent = () => {
@@ -113,6 +114,10 @@ const AppContent = () => {
           <Route
             path='/plan'
             element={<ProtectedRoute element={<Subscription />} />}
+          />
+          <Route
+            path='/connect'
+            element={<ProtectedRoute element={<Connect />} />}
           />
 
           {/* Fallback Routes */}

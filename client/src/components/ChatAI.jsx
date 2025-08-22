@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'react-toastify';
@@ -21,8 +21,8 @@ import { writePrompts } from '../constants/writePrompts';
 import { learnPrompts } from '../constants/learnPrompts';
 import { codePrompts } from '../constants/codePrompts';
 import { lifePrompts } from '../constants/lifePrompts';
-import ChatHistory from './ChatHistory';
 
+const ChatHistory = React.lazy(() => import('./ChatHistory'));
 const API_URL = import.meta.env.VITE_API_URL;
 
 const ChatAI = () => {
@@ -108,24 +108,18 @@ const ChatAI = () => {
 
   const getDefaultModel = (subscription) => {
     if (!subscription) {
-      return 'Sage Supreme';
+      return 'Sage Advanced';
     }
 
     const planType = subscription.planType;
 
     if (planType === 'ultimate') {
-      return 'Sage Supreme';
+      return 'Ultimate Pro';
     } else if (planType === 'pro') {
       return 'Sage Supreme';
     } else {
-      return 'Sage Supreme';
+      return 'Sage Advanced';
     }
-  };
-
-  const getModelDescription = (modelName) => {
-    const models = getAvailableModels();
-    const model = models.find((m) => m.name === modelName);
-    return model ? model.description : 'Smart, efficient model';
   };
 
   useEffect(() => {
@@ -167,7 +161,7 @@ const ChatAI = () => {
       } catch (error) {
         console.warn('Failed to fetch subscription status:', error);
         setSubscriptionStatus(null);
-        setSelectedModel('Sage Supreme');
+        setSelectedModel('Sage Advanced');
       }
     };
 
@@ -1019,7 +1013,7 @@ const ChatAI = () => {
                 >
                   <div className={styles.model_header}>
                     <span className={styles.model_name}>
-                      {selectedModel || 'Sage Supreme'}
+                      {selectedModel || 'Sage Advanced'}
                     </span>
                     {getAvailableModels().length > 1 && (
                       <div className={styles.model_dropdown_arrow}>

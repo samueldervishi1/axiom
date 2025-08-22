@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaCrown, FaGem, FaRocket, FaArrowRight } from 'react-icons/fa';
 import axios from 'axios';
 import styles from '../styles/subscriptionCard.module.css';
+import { IoDiamondSharp } from 'react-icons/io5';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -74,7 +75,7 @@ const SubscriptionCard = ({ currentSubscription }) => {
     } else {
       const recommendedPlan = proPlan || plans[0];
       return {
-        icon: <FaRocket className={styles.planIcon} />,
+        icon: <IoDiamondSharp className={styles.planIcon} />,
         title: 'Unlock Premium',
         description: recommendedPlan
           ? `Start with ${recommendedPlan.name} for just $${recommendedPlan.price}/${recommendedPlan.billingInterval.replace('ly', '')}`

@@ -2,7 +2,7 @@ import React, { useState, useCallback, memo, Suspense, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styles from '../styles/home.module.css';
 import CreatePost from './CreatePost';
-import AddToYourFeed from './AddToYourFeed';
+import ConnectSidebar from './ConnectSidebar';
 import SubscriptionCard from './SubscriptionCard';
 import { getUsernameFromServer, getUserIdFromServer } from '../auth/authUtils';
 import axios from 'axios';
@@ -174,7 +174,7 @@ const Home = () => {
         </Suspense>
       </div>
       <div className={styles.right_sidebar}>
-        <AddToYourFeed />
+        <ConnectSidebar />
         <div className={styles.footer_links}>
           <div className={styles.link_group}>
             <a href='/settings?section=about' className={styles.footer_link}>
@@ -194,7 +194,12 @@ const Home = () => {
             </a>
           </div>
           <div className={styles.copyright}>
-            <p>&copy; 2025 Axiom. All rights reserved.</p>
+            <p>
+              &copy; 2025 Axiom. All rights reserved.{' '}
+              <span style={{ color: 'gray', fontSize: '0.8em' }}>
+                v6.0.0-rc.25
+              </span>
+            </p>
           </div>
         </div>
       </div>

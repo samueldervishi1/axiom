@@ -1,0 +1,290 @@
+.connect_container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+  background: white;
+}
+
+.connect_card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.connect_header {
+  text-align: center;
+  margin-bottom: 32px;
+  padding-top: 20px;
+}
+
+.connect_header h1 {
+  font-size: 32px;
+  font-weight: 600;
+  color: #000000;
+  margin: 0 0 8px;
+}
+
+.connect_header p {
+  font-size: 16px;
+  color: #666666;
+  margin: 0;
+}
+
+.users_grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.user_card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.user_card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+}
+
+.user_avatar {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #e0e0e0;
+}
+
+.avatar_image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.user_info {
+  margin-bottom: 20px;
+}
+
+.user_name {
+  font-size: 20px;
+  font-weight: 600;
+  color: #000000;
+  margin: 0 0 8px;
+}
+
+.user_title {
+  font-size: 14px;
+  color: #666666;
+  margin: 0 0 8px;
+  font-weight: 500;
+}
+
+.user_bio {
+  font-size: 14px;
+  color: #666666;
+  margin: 0 0 12px;
+  line-height: 1.4;
+  max-height: 2.8em;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.user_stats {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.stat {
+  font-size: 12px;
+  color: #666666;
+  font-weight: 500;
+}
+
+.user_actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.connect_button {
+  background: #0073b1;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.connect_button:hover {
+  background: #005885;
+}
+
+.message_button {
+  background: transparent;
+  color: #0073b1;
+  border: 1px solid #0073b1;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.message_button:hover {
+  background: #0073b1;
+  color: white;
+}
+
+.loading_container {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.loading_spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #0073b1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading_container p {
+  color: #666666;
+  font-size: 16px;
+  margin: 0;
+}
+
+.load_more_container {
+  text-align: center;
+  padding: 24px;
+}
+
+.load_more_button {
+  background: #0073b1;
+  color: white;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.load_more_button:hover {
+  background: #005885;
+}
+
+.end_message {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666666;
+  font-size: 16px;
+}
+
+.end_message p {
+  margin: 0;
+}
+
+.empty_state {
+  text-align: center;
+  padding: 80px 20px;
+  color: #666666;
+}
+
+.empty_state h3 {
+  font-size: 24px;
+  margin: 0 0 12px;
+  color: #333333;
+}
+
+.empty_state p {
+  font-size: 16px;
+  margin: 0;
+}
+
+@media (max-width: 1000px) {
+  .users_grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .users_grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .connect_container {
+    padding: 16px;
+  }
+
+  .connect_header h1 {
+    font-size: 24px;
+  }
+
+  .users_grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .user_card {
+    padding: 20px;
+  }
+
+  .user_actions {
+    flex-direction: column;
+  }
+
+  .connect_button,
+  .message_button {
+    width: 100%;
+    padding: 10px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .connect_container {
+    padding: 12px;
+  }
+
+  .user_card {
+    padding: 16px;
+  }
+
+  .user_name {
+    font-size: 18px;
+  }
+}

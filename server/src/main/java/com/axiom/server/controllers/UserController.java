@@ -3,6 +3,8 @@ package com.axiom.server.controllers;
 import com.axiom.server.models.*;
 import com.axiom.server.services.PdfService;
 import com.axiom.server.services.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +26,11 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    public ResponseEntity<Page<User>> getAllUsers(@RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        Page<User> users = userService.getAllUsers(page, size);
+        return ResponseEntity.ok(users);
     }
 
     @GetMapping("/lookup/{username}")
