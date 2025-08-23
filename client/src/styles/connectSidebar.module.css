@@ -1,0 +1,175 @@
+.feed_container {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #000000;
+}
+
+.info_icon_container {
+  position: relative;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.info_icon_container:hover {
+  background-color: #f5f5f5;
+}
+
+.info_icon {
+  font-size: 16px;
+  color: #666666;
+}
+
+.tooltip {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background-color: #ffffff;
+  color: #333333;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e0e0e0;
+  z-index: 1000;
+  max-width: 200px;
+  white-space: normal;
+  line-height: 1.4;
+}
+
+.tooltip::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  right: 12px;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid #ffffff;
+}
+
+.companies_list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.company_item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.company_item:hover {
+  background-color: #f8f9fa;
+}
+
+.company_logo {
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.company_info {
+  flex: 1;
+}
+
+.company_name {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #000000;
+}
+
+.company_description {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #666666;
+}
+
+.connect_button {
+  background: none;
+  border: 1px solid #0073b1;
+  color: #0073b1;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.connect_button:hover {
+  background-color: #0073b1;
+  color: #ffffff;
+}
+
+.view_all_button {
+  width: 100%;
+  background: none;
+  border: 1px solid #0073b1;
+  color: #0073b1;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view_all_button:hover {
+  background-color: #f0f7ff;
+}
+
+@media (max-width: 768px) {
+  .feed_container {
+    padding: 16px;
+  }
+
+  .company_item {
+    padding: 8px;
+  }
+
+  .company_logo {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
+
+  .tooltip {
+    max-width: 160px;
+    right: -20px;
+  }
+}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IoInformationCircleOutline } from 'react-icons/io5';
-import styles from '../styles/addToYourFeed.module.css';
+import styles from '../styles/connectSidebar.module.css';
 import userDefaultImage from '../assets/user.webp';
 import { getUserIdFromServer } from '../auth/authUtils';
 import axios from 'axios';

@@ -25,7 +25,7 @@ import AboutModal from './AboutModal';
 import AboutProfileModal from './AboutProfileModal';
 import ProfileEditModal from './ProfileEditModal';
 import UserPostsModal from './UserPostsModal';
-import AddToYourFeed from './AddToYourFeed';
+import ConnectSidebar from './ConnectSidebar';
 import SubscriptionCard from './SubscriptionCard';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -788,7 +788,7 @@ const Profile = () => {
             </div>
           </div>
 
-          <AddToYourFeed />
+          <ConnectSidebar />
           <SubscriptionCard currentSubscription={subscriptionStatus} />
         </div>
       </div>
