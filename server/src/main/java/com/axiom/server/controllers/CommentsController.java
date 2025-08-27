@@ -3,7 +3,9 @@ package com.axiom.server.controllers;
 import com.axiom.server.exceptions.CustomException;
 import com.axiom.server.models.Comment;
 import com.axiom.server.services.DBService;
+import com.axiom.server.utils.ValidationUtils;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -25,10 +27,14 @@ public class CommentsController {
     @GetMapping("/post/{postId}")
     public ResponseEntity<List<Map<String, Object>>> getCommentsByPostId(@PathVariable String postId,
             @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size) {
+
+        String validatedPostId = ValidationUtils.validatePostIdString(postId);
+        ValidationUtils.validatePagination(page, size);
+
         try {
             Map<String, Object> request = new HashMap<>();
             request.put("action", "GET_COMMENTS_BY_POST_ID");
-            request.put("postId", postId);
+            request.put("postId", validatedPostId);
             request.put("page", page);
             request.put("size", size);
 
@@ -61,14 +67,20 @@ public class CommentsController {
     }
 
     @PostMapping("/create/{userId}/{postId}")
+    @Transactional
     public ResponseEntity<Map<String, Object>> createComment(@PathVariable String userId, @PathVariable String postId,
             @RequestBody Comment comment) {
+
+        String validatedUserId = ValidationUtils.validateUserIdString(userId);
+        String validatedPostId = ValidationUtils.validatePostIdString(postId);
+        String validatedContent = ValidationUtils.validateContent(comment.getContent());
+
         try {
             Map<String, Object> request = new HashMap<>();
             request.put("action", "CREATE_COMMENT");
-            request.put("userId", userId);
-            request.put("postId", postId);
-            request.put("content", comment.getContent());
+            request.put("userId", validatedUserId);
+            request.put("postId", validatedPostId);
+            request.put("content", validatedContent);
 
             if (comment.getCommentTimestamp() != null) {
                 request.put("commentTimestamp", comment.getCommentTimestamp().toString());

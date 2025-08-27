@@ -112,6 +112,15 @@ public class AuthController {
             return createResponse(new CustomException(400, "Password is empty"));
         }
 
+        // Input validation and sanitization
+        username = username.trim();
+        if (username.length() > 50) {
+            return createResponse(new CustomException(400, "Username too long"));
+        }
+        if (password.length() > 128) {
+            return createResponse(new CustomException(400, "Password too long"));
+        }
+
         String ipAddress = getIpAddress(request);
 
         try {
@@ -149,7 +158,7 @@ public class AuthController {
         try {
             Claims claims = jwtTokenUtil.parseAndValidateToken(refreshToken);
 
-            if (jwtTokenUtil.isRefreshToken(claims)) {
+            if (!jwtTokenUtil.isRefreshToken(claims)) {
                 return createResponse(new CustomException(401, "Invalid token type"));
             }
 
@@ -219,6 +228,23 @@ public class AuthController {
             }
             if (password == null || password.isBlank()) {
                 throw new CustomException(400, "Password is required");
+            }
+
+            username = username.trim();
+            email = email.trim().toLowerCase();
+            fullName = fullName.trim();
+
+            if (username.length() > 50) {
+                throw new CustomException(400, "Username too long");
+            }
+            if (email.length() > 100 || !email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                throw new CustomException(400, "Invalid email format");
+            }
+            if (fullName.length() > 100) {
+                throw new CustomException(400, "Full name too long");
+            }
+            if (password.length() < 8 || password.length() > 128) {
+                throw new CustomException(400, "Password must be between 8 and 128 characters");
             }
 
             String ipAddress = getIpAddress(request);

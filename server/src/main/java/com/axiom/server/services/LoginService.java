@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -25,11 +26,13 @@ public class LoginService {
     private final JwtTokenUtil jwtTokenUtil;
     private final LoggingService loggingService;
 
+    @Transactional
     public String login(String username, String password, String ipAddress) {
         Map<String, String> tokens = performLogin(username, password, ipAddress, false);
         return tokens.get("accessToken");
     }
 
+    @Transactional
     public Map<String, String> loginWithRefreshToken(String username, String password, String ipAddress) {
         return performLogin(username, password, ipAddress, true);
     }
@@ -46,6 +49,9 @@ public class LoginService {
             String commonSessionId = jwtTokenUtil.generateSecureSessionId();
             String accessToken = jwtTokenUtil.generateAccessToken(user.getUsername(), user.getId(), user.isTwoFa(),
                     commonSessionId);
+
+            updateLoginMetadata(user, ipAddress);
+            userRepository.save(user);
 
             runPostLoginAsync(user, ipAddress, username, sessionId);
 
@@ -84,7 +90,24 @@ public class LoginService {
     }
 
     private void verifyPassword(String rawPassword, User user) {
-        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
+        if (rawPassword == null || rawPassword.length() > 128) {
+            throw new CustomException(401, INVALID_CREDENTIALS);
+        }
+
+        long startTime = System.nanoTime();
+        boolean passwordMatches = passwordEncoder.matches(rawPassword, user.getPassword());
+        long elapsedTime = System.nanoTime() - startTime;
+
+        long minTimeNanos = 100_000_000;
+        if (elapsedTime < minTimeNanos) {
+            try {
+                Thread.sleep((minTimeNanos - elapsedTime) / 1_000_000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        if (!passwordMatches) {
             throw new CustomException(401, INVALID_CREDENTIALS);
         }
     }
@@ -92,15 +115,14 @@ public class LoginService {
     private void runPostLoginAsync(User user, String ipAddress, String username, String sessionId) {
         CompletableFuture.runAsync(() -> {
             try {
-
                 if (ipChanged(user.getLastLoginIp(), ipAddress)) {
                     loggingService.logSecurityEvent("LOGIN_IP_CHANGED", username, sessionId,
                             String.format("User %s logged in from new IP %s (previous: %s)", username, ipAddress,
                                     user.getLastLoginIp()));
                 }
 
-                updateLoginMetadata(user, ipAddress);
-                userRepository.save(user);
+                loggingService.logSecurityEvent("LOGIN_SUCCESS", username, sessionId,
+                        String.format("User %s successfully logged in from IP %s", username, ipAddress));
 
             } catch (Exception e) {
                 loggingService.logSecurityEvent("POST_LOGIN_ERROR", username, sessionId,
@@ -121,6 +143,13 @@ public class LoginService {
         if (user.getFirstTimeLoggedIn() == null) {
             user.setFirstTimeLoggedIn(now);
             user.setLoginStreak(1);
+        } else {
+            LocalDateTime lastLogin = user.getLastLoginTime();
+            if (lastLogin != null && lastLogin.toLocalDate().equals(now.minusDays(1).toLocalDate())) {
+                user.setLoginStreak(user.getLoginStreak() + 1);
+            } else if (lastLogin != null && !lastLogin.toLocalDate().equals(now.toLocalDate())) {
+                user.setLoginStreak(1);
+            }
         }
         user.setLastLoginIp(ipAddress);
         user.setLastLoginTime(now);

@@ -6,7 +6,9 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -24,8 +26,15 @@ public class InteractionService {
 
     public InteractionService(AxiomRepository axiomRepository, LoggingService loggingService) {
         this.axiomRepository = axiomRepository;
-        this.restTemplate = new RestTemplate();
+        this.restTemplate = createRestTemplateWithTimeouts();
         this.loggingService = loggingService;
+    }
+
+    private RestTemplate createRestTemplateWithTimeouts() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(10000);
+        factory.setReadTimeout(30000);
+        return new RestTemplate(factory);
     }
 
     public Axiom sendQuestionToModel(ChatRequest chatRequest) {
@@ -38,12 +47,31 @@ public class InteractionService {
             String answer = callModelApi(chatRequest.getQuestion());
             conversation.setChattrAnswer(answer);
             conversation.setSuccess(true);
-        } catch (Exception e) {
-            log.error("Error calling API", e);
-            loggingService.logError("InteractionService", "sendQuestionToModel", e.getMessage(), e);
-            conversation.setChattrAnswer(e.getMessage() != null ? e.getMessage() : "API call failed");
+        } catch (IllegalStateException e) {
+            log.error("Configuration error: {}", e.getMessage());
+            loggingService.logError("InteractionService", "sendQuestionToModel",
+                    "Configuration error: " + e.getMessage(), e);
+            conversation.setChattrAnswer("Service temporarily unavailable due to configuration issue");
             conversation.setSuccess(false);
-            conversation.setErrorMessage(e.getMessage());
+            conversation.setErrorMessage("Configuration error");
+        } catch (RuntimeException e) {
+            if (e.getMessage() != null && e.getMessage().contains("API communication failed")) {
+                log.error("API communication error: {}", e.getMessage());
+                loggingService.logError("InteractionService", "sendQuestionToModel",
+                        "API communication error: " + e.getMessage(), e);
+                conversation.setChattrAnswer("Unable to connect to AI service. Please try again later.");
+                conversation.setSuccess(false);
+                conversation.setErrorMessage("API communication error");
+            } else {
+                throw e;
+            }
+        } catch (Exception e) {
+            log.error("Unexpected error during API call", e);
+            loggingService.logError("InteractionService", "sendQuestionToModel", "Unexpected error: " + e.getMessage(),
+                    e);
+            conversation.setChattrAnswer("An unexpected error occurred. Please try again later.");
+            conversation.setSuccess(false);
+            conversation.setErrorMessage("Unexpected error");
         }
 
         Axiom savedConversation = axiomRepository.save(conversation);
@@ -90,29 +118,47 @@ public class InteractionService {
     }
 
     private String callModelApi(String question) {
-        String url = apiURL;
+        if (apiURL == null || apiURL.trim().isEmpty()) {
+            throw new IllegalStateException("API URL is not configured");
+        }
+        if (apiKey == null || apiKey.trim().isEmpty()) {
+            throw new IllegalStateException("API key is not configured");
+        }
 
+        String url = apiURL;
         ModelRequest request = new ModelRequest(question);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("x-goog-api-key", apiKey);
+        headers.set("User-Agent", "Axiom-Server/1.0");
 
         HttpEntity<ModelRequest> entity = new HttpEntity<>(request, headers);
 
         try {
+            long startTime = System.currentTimeMillis();
+
             ResponseEntity<ModelResponse> response = restTemplate.exchange(url, HttpMethod.POST, entity,
                     ModelResponse.class);
+
+            long responseTime = System.currentTimeMillis() - startTime;
+            log.debug("API call completed in {}ms with status: {}", responseTime, response.getStatusCode());
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 return extractResponse(response.getBody());
             } else {
-                throw new RuntimeException("API call failed: " + response.getStatusCode());
+                String errorMsg = String.format("API call failed with status: %s", response.getStatusCode());
+                log.warn(errorMsg);
+                throw new RuntimeException(errorMsg);
             }
+        } catch (RestClientException e) {
+            log.error("REST client error calling API: {}", e.getMessage());
+            loggingService.logError("InteractionService", "callModelApi", "REST client error: " + e.getMessage(), e);
+            throw new RuntimeException("API communication failed: " + e.getMessage(), e);
         } catch (Exception e) {
-            log.error("Error calling API: {}", e.getMessage());
-            loggingService.logError("InteractionService", "getConversationHistory", e.getMessage(), e);
-            throw new RuntimeException("Failed to get response", e);
+            log.error("Unexpected error calling API: {}", e.getMessage());
+            loggingService.logError("InteractionService", "callModelApi", "Unexpected error: " + e.getMessage(), e);
+            throw new RuntimeException("Failed to get response from API", e);
         }
     }
 

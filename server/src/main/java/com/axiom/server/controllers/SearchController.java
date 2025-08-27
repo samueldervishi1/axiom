@@ -2,6 +2,7 @@ package com.axiom.server.controllers;
 
 import com.axiom.server.models.User;
 import com.axiom.server.services.SearchService;
+import com.axiom.server.utils.ValidationUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +22,9 @@ public class SearchController {
 
     @GetMapping("/all")
     public ResponseEntity<List<User>> searchAll(@RequestParam String query) {
-        List<User> users = searchService.searchUsers(query);
+        String validatedQuery = ValidationUtils.validateSearchQuery(query);
+
+        List<User> users = searchService.searchUsers(validatedQuery);
         return ResponseEntity.ok(users);
     }
 }

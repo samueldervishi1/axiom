@@ -4,9 +4,10 @@ import com.axiom.server.exceptions.CustomException;
 import com.axiom.server.models.Post;
 import com.axiom.server.models.ScheduledPostRequest;
 import com.axiom.server.services.DBService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.MediaType;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -133,6 +134,7 @@ public class PostController {
     }
 
     @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Transactional
     public ResponseEntity<Map<String, Object>> createPost(@RequestBody Post post) {
         validatePostContent(post.getContent());
         validateAuthorId(post.getAuthorId());
@@ -146,6 +148,7 @@ public class PostController {
     }
 
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Transactional
     public ResponseEntity<Map<String, Object>> createPostMultipart(@RequestParam("content") String content,
             @RequestParam("authorId") String authorId, @RequestParam("authorName") String authorName,
             @RequestParam(value = "image", required = false) MultipartFile image) {
@@ -201,9 +204,8 @@ public class PostController {
 
             if (imageDataObj instanceof byte[]) {
                 imageBytes = (byte[]) imageDataObj;
-            } else if (imageDataObj instanceof java.sql.Blob) {
+            } else if (imageDataObj instanceof java.sql.Blob blob) {
                 try {
-                    java.sql.Blob blob = (java.sql.Blob) imageDataObj;
                     imageBytes = blob.getBytes(1, (int) blob.length());
                 } catch (SQLException sqlEx) {
                     throw new CustomException(500, "Error reading image data");

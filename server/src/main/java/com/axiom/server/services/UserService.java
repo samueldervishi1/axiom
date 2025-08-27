@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +34,7 @@ public class UserService {
         this.certificateRepository = certificateRepository;
     }
 
+    @Transactional(readOnly = true)
     public User getUserInfo(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomException(404, String.format(USER_NOT_FOUND_BY_USERNAME, username)));
@@ -43,13 +45,17 @@ public class UserService {
                 .orElseThrow(() -> new CustomException(404, String.format(USER_NOT_FOUND_BY_ID, userId)));
     }
 
+    @Transactional(readOnly = true)
     public User getUserById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(404, String.format(USER_NOT_FOUND_BY_ID, userId)));
     }
 
-    public Page<User> getAllUsers(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    @Transactional(readOnly = true)
+    public Page<User> getAllUsers(Integer page, Integer size) {
+        int defaultPage = page != null ? page : 0;
+        int defaultSize = size != null ? size : 5;
+        Pageable pageable = PageRequest.of(defaultPage, defaultSize);
         return userRepository.findAll(pageable);
     }
 

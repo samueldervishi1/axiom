@@ -51,7 +51,7 @@ public class User {
     @Column(name = "ACCOUNT_CREATION_DATE")
     private LocalDateTime accountCreationDate;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "USER_REPORTED_POSTS", joinColumns = @JoinColumn(name = "USER_ID"))
     @Column(name = "POST_ID")
     private List<String> reportedPostIds = new ArrayList<>();
@@ -74,27 +74,27 @@ public class User {
     @Column(name = "FIRST_TIME_LOGGED_IN")
     private LocalDateTime firstTimeLoggedIn;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "USER_FOLLOWERS", joinColumns = @JoinColumn(name = "USER_ID"))
     @Column(name = "FOLLOWER_ID")
     private List<Long> followers = new ArrayList<>();
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "USER_FOLLOWING", joinColumns = @JoinColumn(name = "USER_ID"))
     @Column(name = "FOLLOWING_ID")
     private List<Long> following = new ArrayList<>();
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "USER_BLOCKED_USERS", joinColumns = @JoinColumn(name = "USER_ID"))
     @Column(name = "BLOCKED_USER_ID")
     private List<Long> blockedUsers = new ArrayList<>();
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "USER_SAVED_POSTS", joinColumns = @JoinColumn(name = "USER_ID"))
     @Column(name = "POST_ID")
     private List<String> savedPostIds = new ArrayList<>();
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "USER_LINKS", joinColumns = @JoinColumn(name = "USER_ID"))
     @Column(name = "LINK")
     private List<String> links = new ArrayList<>();

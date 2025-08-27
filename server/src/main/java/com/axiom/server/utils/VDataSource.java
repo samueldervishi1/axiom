@@ -48,24 +48,41 @@ public class VDataSource {
     }
 
     private HikariConfig getHikariConfig() {
+        HikariConfig config = getConfig();
+
+        // Oracle connection properties for performance
+        config.addDataSourceProperty("oracle.jdbc.timezoneAsRegion", "false");
+        config.addDataSourceProperty("oracle.net.keepAlive", "true");
+        config.addDataSourceProperty("oracle.jdbc.ReadTimeout", "15000");
+
+        // Oracle statement caching for better performance
+        config.addDataSourceProperty("oracle.jdbc.implicitStatementCacheSize", "50");
+        config.addDataSourceProperty("oracle.jdbc.explicitStatementCacheSize", "50");
+        config.addDataSourceProperty("oracle.net.CONNECT_TIMEOUT", "10000");
+        config.addDataSourceProperty("oracle.jdbc.useFetchSizeWithLongColumn", "true");
+
+        // Oracle performance tuning
+        config.addDataSourceProperty("oracle.jdbc.defaultRowPrefetch", "20");
+        config.addDataSourceProperty("oracle.jdbc.maxCachedBufferSize", "50");
+        return config;
+    }
+
+    private HikariConfig getConfig() {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(url);
         config.setUsername(username);
         config.setPassword(password);
         config.setDriverClassName(driverClassName);
 
-        // Oracle-specific optimizations
-        config.setMaximumPoolSize(20);
-        config.setMinimumIdle(5);
-        config.setConnectionTimeout(30000);
-        config.setIdleTimeout(600000);
-        config.setMaxLifetime(1800000);
-        config.setLeakDetectionThreshold(60000);
-
-        // Oracle connection properties
-        config.addDataSourceProperty("oracle.jdbc.timezoneAsRegion", "false");
-        config.addDataSourceProperty("oracle.net.keepAlive", "true");
-        config.addDataSourceProperty("oracle.jdbc.ReadTimeout", "30000");
+        // Optimized pool settings for high performance
+        config.setMaximumPoolSize(25); // Increased for better concurrency
+        config.setMinimumIdle(10); // Higher minimum for faster response times
+        config.setConnectionTimeout(15000); // Reduced timeout for faster failure detection
+        config.setIdleTimeout(300000); // 5 minutes idle timeout
+        config.setMaxLifetime(900000); // 15 minutes max lifetime
+        config.setLeakDetectionThreshold(30000); // 30 seconds leak detection
+        config.setValidationTimeout(5000); // 5 seconds validation timeout
+        config.setInitializationFailTimeout(10000); // 10 seconds init timeout
         return config;
     }
 
