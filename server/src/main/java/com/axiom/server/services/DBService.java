@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 public class DBService {
 
     private final LoggingService loggingService;
+    private final CacheManager cacheManager;
 
     @Value("${app.database.package.name}")
     private String postPkgName;
@@ -40,21 +41,28 @@ public class DBService {
     @Value("${db.performance.slow-query-threshold-ms:1000}")
     private long slowQueryThresholdMs;
 
-    public DBService(VDataSource vDataSource, LoggingService loggingService) {
+    public DBService(VDataSource vDataSource, LoggingService loggingService, CacheManager cacheManager) {
         this.vDataSource = vDataSource;
         this.loggingService = loggingService;
+        this.cacheManager = cacheManager;
     }
 
     public List<Map<String, Object>> executeQuery(Object requestBody)
             throws SQLException, IOException, CustomException {
+
+        String requestSignature = generateRequestSignature(requestBody);
+        var queryCache = cacheManager.<String, List<Map<String, Object>>>getCache("db-queries", 30, 1000);
+        List<Map<String, Object>> cachedResult = queryCache.getIfPresent(requestSignature);
+        if (cachedResult != null) {
+            log.debug("Cache hit for signature: {}", requestSignature);
+            return cachedResult;
+        }
 
         StopWatch stopWatch = new StopWatch("DBService.executeQuery");
         stopWatch.start();
 
         List<Map<String, Object>> response;
         String executeQueryCall = "begin ?:=" + postPkgName + ".executeQuery(?); end;";
-
-        String requestSignature = generateRequestSignature(requestBody);
 
         int attempt = 0;
         SQLException lastException = null;
@@ -66,8 +74,7 @@ public class DBService {
 
                 log.debug("DB Request - JSON: {} (Attempt: {})", jsonRequest, attempt + 1);
 
-                try (CallableStatement callableStatement = executeCallWithCache(conn, executeQueryCall, inParameters,
-                        requestSignature)) {
+                try (CallableStatement callableStatement = executeCallWithCache(conn, executeQueryCall, inParameters)) {
                     callableStatement.setQueryTimeout(30);
 
                     try (ResultSet resultSet = (ResultSet) callableStatement.getObject(1)) {
@@ -104,12 +111,14 @@ public class DBService {
         stopWatch.stop();
         long executionTime = stopWatch.getTotalTimeMillis();
         logQueryPerformance(requestSignature, executionTime);
+        queryCache.put(requestSignature, response);
+        log.debug("Cached result for signature: {}", requestSignature);
 
         return response;
     }
 
-    private CallableStatement executeCallWithCache(Connection conn, String query, Object[] inParameters,
-            String signature) throws SQLException {
+    private CallableStatement executeCallWithCache(Connection conn, String query, Object[] inParameters)
+            throws SQLException {
         CallableStatement statement = getPreparedCallWithCache(conn, query, inParameters);
         statement.execute();
         return statement;
@@ -309,20 +318,17 @@ public class DBService {
         }
     }
 
-    /**
-     * Get performance statistics (useful for monitoring)
-     */
     public Map<String, Object> getPerformanceStats() {
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalQueries", queryPerformanceMetrics.size());
         stats.put("queryMetrics", new HashMap<>(queryPerformanceMetrics));
 
-        // Calculate average execution time per query type
         Map<String, Double> avgExecutionTimes = new HashMap<>();
-        queryPerformanceMetrics.forEach((sig, totalTime) -> {
-            // This is simplified - in production you'd track count separately
+        for (Map.Entry<String, Long> entry : queryPerformanceMetrics.entrySet()) {
+            String sig = entry.getKey();
+            Long totalTime = entry.getValue();
             avgExecutionTimes.put(sig, totalTime.doubleValue());
-        });
+        }
         stats.put("averageExecutionTimes", avgExecutionTimes);
 
         return stats;

@@ -12,9 +12,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-/**
- * Service for monitoring application performance metrics
- */
 @Service
 @Slf4j
 public class PerformanceMonitoringService {
@@ -28,58 +25,40 @@ public class PerformanceMonitoringService {
     private final AtomicLong totalErrors = new AtomicLong(0);
     private final LocalDateTime startupTime = LocalDateTime.now();
 
-    /**
-     * Records a successful request
-     */
     public void recordRequest(String endpoint, long responseTimeMs) {
         requestCounts.computeIfAbsent(endpoint, k -> new AtomicLong(0)).incrementAndGet();
         totalResponseTimes.computeIfAbsent(endpoint, k -> new AtomicLong(0)).addAndGet(responseTimeMs);
         totalRequests.incrementAndGet();
 
-        // Track slowest request for this endpoint
         slowestRequests.merge(endpoint, responseTimeMs, Long::max);
 
-        // Log slow requests
-        if (responseTimeMs > 2000) { // 2 seconds threshold
+        if (responseTimeMs > 2000) {
             log.warn("Slow request detected: {} took {}ms", endpoint, responseTimeMs);
         }
     }
 
-    /**
-     * Records an error for an endpoint
-     */
     public void recordError(String endpoint) {
         errorCounts.computeIfAbsent(endpoint, k -> new AtomicLong(0)).incrementAndGet();
         totalErrors.incrementAndGet();
     }
 
-    /**
-     * Gets comprehensive performance statistics
-     */
     public Map<String, Object> getPerformanceStats() {
         Map<String, Object> stats = new HashMap<>();
 
-        // Overall stats
         stats.put("uptime", getUptimeInfo());
         stats.put("totalRequests", totalRequests.get());
         stats.put("totalErrors", totalErrors.get());
         stats.put("errorRate", calculateOverallErrorRate());
 
-        // System metrics
         stats.put("systemMetrics", getSystemMetrics());
 
-        // Endpoint-specific stats
         stats.put("endpointStats", getEndpointStats());
 
-        // Top slow endpoints
         stats.put("slowestEndpoints", getSlowestEndpoints());
 
         return stats;
     }
 
-    /**
-     * Gets statistics for a specific endpoint
-     */
     public Map<String, Object> getEndpointStats(String endpoint) {
         Map<String, Object> stats = new HashMap<>();
 
@@ -97,9 +76,6 @@ public class PerformanceMonitoringService {
         return stats;
     }
 
-    /**
-     * Resets all performance metrics (useful for testing or periodic resets)
-     */
     public void resetMetrics() {
         requestCounts.clear();
         totalResponseTimes.clear();
@@ -121,22 +97,19 @@ public class PerformanceMonitoringService {
     private Map<String, Object> getSystemMetrics() {
         Map<String, Object> system = new HashMap<>();
 
-        // Memory metrics
         MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
-        system.put("heapMemoryUsed", memoryBean.getHeapMemoryUsage().getUsed() / (1024 * 1024)); // MB
-        system.put("heapMemoryMax", memoryBean.getHeapMemoryUsage().getMax() / (1024 * 1024)); // MB
-        system.put("nonHeapMemoryUsed", memoryBean.getNonHeapMemoryUsage().getUsed() / (1024 * 1024)); // MB
+        system.put("heapMemoryUsed", memoryBean.getHeapMemoryUsage().getUsed() / (1024 * 1024));
+        system.put("heapMemoryMax", memoryBean.getHeapMemoryUsage().getMax() / (1024 * 1024));
+        system.put("nonHeapMemoryUsed", memoryBean.getNonHeapMemoryUsage().getUsed() / (1024 * 1024));
 
-        // Thread metrics
         ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();
         system.put("activeThreads", threadBean.getThreadCount());
         system.put("peakThreads", threadBean.getPeakThreadCount());
 
-        // CPU metrics (approximate)
         Runtime runtime = Runtime.getRuntime();
         system.put("availableProcessors", runtime.availableProcessors());
-        system.put("totalMemory", runtime.totalMemory() / (1024 * 1024)); // MB
-        system.put("freeMemory", runtime.freeMemory() / (1024 * 1024)); // MB
+        system.put("totalMemory", runtime.totalMemory() / (1024 * 1024));
+        system.put("freeMemory", runtime.freeMemory() / (1024 * 1024));
 
         return system;
     }
@@ -144,9 +117,7 @@ public class PerformanceMonitoringService {
     private Map<String, Object> getEndpointStats() {
         Map<String, Object> endpointStats = new HashMap<>();
 
-        requestCounts.forEach((endpoint, count) -> {
-            endpointStats.put(endpoint, getEndpointStats(endpoint));
-        });
+        requestCounts.forEach((endpoint, count) -> endpointStats.put(endpoint, getEndpointStats(endpoint)));
 
         return endpointStats;
     }
@@ -160,21 +131,17 @@ public class PerformanceMonitoringService {
         return total > 0 ? (double) totalErrors.get() / total * 100 : 0.0;
     }
 
-    /**
-     * Gets health status based on performance metrics
-     */
     public Map<String, Object> getHealthStatus() {
         Map<String, Object> health = new HashMap<>();
 
         double errorRate = calculateOverallErrorRate();
-        boolean isHealthy = errorRate < 5.0; // Less than 5% error rate
+        boolean isHealthy = errorRate < 5.0;
 
         health.put("status", isHealthy ? "UP" : "DOWN");
         health.put("errorRate", errorRate);
         health.put("totalRequests", totalRequests.get());
         health.put("uptime", "Since " + startupTime);
 
-        // System health indicators
         MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
         double memoryUsage = (double) memoryBean.getHeapMemoryUsage().getUsed()
                 / memoryBean.getHeapMemoryUsage().getMax() * 100;
