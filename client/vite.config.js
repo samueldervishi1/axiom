@@ -14,8 +14,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Axiom',
-        short_name: 'Axiom',
+        name: 'Twizzle',
+        short_name: 'Twizzle',
         description: 'A modern social media app built with React and Vite',
         theme_color: '#ffffff',
         background_color: '#ffffff',

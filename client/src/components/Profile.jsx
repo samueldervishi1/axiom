@@ -7,6 +7,9 @@ import {
   FaBook,
   FaTrophy,
   FaCloudDownloadAlt,
+  FaShare,
+  FaGamepad,
+  FaCheckCircle,
 } from 'react-icons/fa';
 import {
   BsFillInfoSquareFill,
@@ -27,6 +30,7 @@ import ProfileEditModal from './ProfileEditModal';
 import UserPostsModal from './UserPostsModal';
 import ConnectSidebar from './ConnectSidebar';
 import SubscriptionCard from './SubscriptionCard';
+import QRCodeModal from './QRCodeModal';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -52,6 +56,8 @@ const Profile = () => {
   const [showResourcesDropdown, setShowResourcesDropdown] = useState(false);
   const [showVisitDropdown, setShowVisitDropdown] = useState(false);
   const [showMoreLinks, setShowMoreLinks] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [showBingoModal, setShowBingoModal] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -408,6 +414,12 @@ const Profile = () => {
                     {profile.fullName ||
                       profile.displayName ||
                       profile.username}
+                    {profile.isVerified && (
+                      <FaCheckCircle
+                        className={styles.verifiedBadge}
+                        title='Verified Account'
+                      />
+                    )}
                   </h1>
                   {subscriptionStatus?.subscriptionStatus === 'active' &&
                     (subscriptionStatus?.planType === 'pro' ||
@@ -788,6 +800,21 @@ const Profile = () => {
             </div>
           </div>
 
+          <div className={styles.funCard}>
+            <div className={styles.funHeader}>
+              <h3 className={styles.funTitle}>Fun Stuff</h3>
+            </div>
+            <div className={styles.funActions}>
+              <button
+                className={styles.funBtn}
+                onClick={() => setShowQRModal(true)}
+              >
+                <FaShare className={styles.funIcon} />
+                Share Profile
+              </button>
+            </div>
+          </div>
+
           <ConnectSidebar />
           <SubscriptionCard currentSubscription={subscriptionStatus} />
         </div>
@@ -840,6 +867,13 @@ const Profile = () => {
       <UserPostsModal
         isOpen={showUserPostsModal}
         onClose={() => setShowUserPostsModal(false)}
+      />
+
+      <QRCodeModal
+        isOpen={showQRModal}
+        onClose={() => setShowQRModal(false)}
+        profile={profile}
+        profileImageUrl={profileImageUrl}
       />
     </div>
   );

@@ -257,7 +257,11 @@ const Navbar = () => {
         <div className={styles.history_div_2}>
           <div className={styles.navbar_left}>
             <a style={{ textDecoration: 'none', color: 'black' }} href='/home'>
-              <img src={logo} className={styles.logo_image} alt='Axiom Logo' />
+              <img
+                src={logo}
+                className={styles.logo_image}
+                alt='Twizzle Logo'
+              />
             </a>
 
             <div className={styles.search_container} ref={searchRef}>

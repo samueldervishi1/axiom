@@ -230,7 +230,7 @@ const ModelDocs = () => {
                   <div className={styles.usage_code}>
                     <h4>Usage Example</h4>
                     <pre className={styles.code_block}>
-                      {`POST http://localhost:8080/axiom/api/core/v4.0.0/loom/mindstream/generate
+                      {`POST http://localhost:8080/twizzle/api/beta/v9/mindstream/generate
 
 {
   "model": "${model.modelId}",
@@ -267,10 +267,11 @@ const ModelDocs = () => {
         <div className={styles.api_section}>
           <h3>Authentication</h3>
           <p>
-            All requests to the Axiom API must include an <code>x-api-key</code>{' '}
-            header with your API key. If you are using the Client SDKs, you will
-            set the API when constructing a client, and then the SDK will send
-            the header on your behalf with every request.
+            All requests to the Twizzle API must include an{' '}
+            <code>x-api-key</code> header with your API key. If you are using
+            the Client SDKs, you will set the API when constructing a client,
+            and then the SDK will send the header on your behalf with every
+            request.
           </p>
           <pre className={styles.code_block}>
             {`x-api-key: YOUR_API_KEY
@@ -281,8 +282,8 @@ content-type: application/json`}
         <div className={styles.api_section}>
           <h3>Content Types</h3>
           <p>
-            The Axiom API always accepts JSON in request bodies and returns JSON
-            in response bodies. You will need to send the{' '}
+            The Twizzle API always accepts JSON in request bodies and returns
+            JSON in response bodies. You will need to send the{' '}
             <code>content-type: application/json</code> header in requests. If
             you are using the Client SDKs, this will be taken care of
             automatically.
@@ -313,7 +314,9 @@ content-type: application/json`}
 
         <div className={styles.api_section}>
           <h3>Response Headers</h3>
-          <p>The Axiom API includes the following headers in every response:</p>
+          <p>
+            The Twizzle API includes the following headers in every response:
+          </p>
           <ul>
             <li>
               <code>request-id</code>: A globally unique identifier for the
@@ -328,8 +331,8 @@ content-type: application/json`}
           <div className={styles.example_section}>
             <h4>cURL</h4>
             <pre className={styles.code_block}>
-              {`curl http://localhost:8080/axiom/api/core/v16-loom/generate \\
-     --header "x-api-key: $AXIOM_API_KEY" \\
+              {`curl http://localhost:8080/Twizzle/api/core/v16-loom/generate \\
+     --header "x-api-key: $Twizzle_API_KEY" \\
      --header "content-type: application/json" \\
      --data \\
 '{
@@ -392,10 +395,10 @@ content-type: application/json`}
             <div className={styles.update_card}>
               <h5>Increased Rate Limits</h5>
               <p>
-                Increased rate limits for Sage Ultimate on the Axiom API to give
-                you more capacity to build and scale with Sage. For customers
-                with usage tier 1-4 rate limits, these changes apply immediately
-                to your account - no action needed.
+                Increased rate limits for Sage Ultimate on the Twizzle API to
+                give you more capacity to build and scale with Sage. For
+                customers with usage tier 1-4 rate limits, these changes apply
+                immediately to your account - no action needed.
               </p>
             </div>
 
@@ -473,7 +476,7 @@ content-type: application/json`}
             <div className={styles.help_option}>
               <h4>Contact Support</h4>
               <p>
-                Email us at <strong>support@axiom.com</strong> for migration
+                Email us at <strong>support@Twizzle.com</strong> for migration
                 assistance
               </p>
             </div>
@@ -517,7 +520,7 @@ content-type: application/json`}
       <div className={styles.docs_header}>
         <h1>AI Models Documentation</h1>
         <p>
-          Complete guide to Axiom's AI models, API usage, and migration
+          Complete guide to Twizzle's AI models, API usage, and migration
           information.
         </p>
       </div>

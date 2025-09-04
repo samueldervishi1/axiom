@@ -309,6 +309,15 @@
   margin-top: -10px;
 }
 
+.verifiedBadge {
+  font-size: 18px;
+  color: #1da1f2;
+  margin-left: 8px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  display: inline-flex;
+  align-items: center;
+}
+
 @keyframes premium-glow {
   from {
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
@@ -1193,6 +1202,271 @@
   border: 1px solid #e0e0e0;
   padding: 20px;
   margin-bottom: 20px;
+}
+
+/* QR Code Styles */
+.qrCodeContainer {
+  text-align: center;
+  padding: 20px;
+}
+
+.qrCodeImage {
+  width: 150px;
+  height: 150px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.qrCodeDescription {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+.qrCodeActions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.qrCodeBtn {
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qrCodeBtn:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+}
+
+/* Bingo Styles */
+.bingoContainer {
+  padding: 10px;
+}
+
+.bingoGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  margin-bottom: 15px;
+  max-width: 300px;
+  margin: 0 auto 15px;
+}
+
+.bingoCell {
+  aspect-ratio: 1;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #f8f9fa;
+  padding: 4px;
+}
+
+.bingoCell:hover {
+  border-color: #007bff;
+  background: #e3f2fd;
+}
+
+.bingoCellChecked {
+  background: #28a745 !important;
+  border-color: #28a745 !important;
+  color: white;
+}
+
+.bingoCellFree {
+  background: #ffc107 !important;
+  border-color: #ffc107 !important;
+  color: #000;
+  font-weight: bold;
+  cursor: default;
+}
+
+.bingoCellText {
+  font-size: 10px;
+  text-align: center;
+  font-weight: 500;
+  line-height: 1.2;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+.bingoDescription {
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.bingoActions {
+  display: flex;
+  gap: 8px;
+}
+
+.bingoActionBtn {
+  background: #17a2b8;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bingoActionBtn:hover {
+  background: #138496;
+}
+
+.bingoActionBtn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.sectionIcon {
+  margin-right: 8px;
+}
+
+/* Fun Card Styles */
+.funCard {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.funHeader {
+  margin-bottom: 15px;
+}
+
+.funTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.funActions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.funBtn {
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 500;
+}
+
+.funBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+}
+
+.funIcon {
+  margin-right: 8px;
+}
+
+/* Share Dropdown */
+.shareDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 8px;
+  z-index: 1000;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  animation: shinyRotate 3s ease-in-out infinite;
+}
+
+/* Bingo Dropdown */
+.bingoDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 8px;
+  z-index: 1000;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  animation: shinyRotate 3s ease-in-out infinite;
+}
+
+/* Shiny Rotating Effect */
+@keyframes shinyRotate {
+  0% {
+    transform: perspective(1000px) rotateY(0deg);
+    background: linear-gradient(135deg, #f8f9fa 0%, #fff 50%, #f8f9fa 100%);
+  }
+  25% {
+    transform: perspective(1000px) rotateY(5deg);
+    background: linear-gradient(135deg, #fff 0%, #f0f8ff 50%, #fff 100%);
+  }
+  50% {
+    transform: perspective(1000px) rotateY(0deg);
+    background: linear-gradient(135deg, #f0f8ff 0%, #e8f4fd 50%, #f0f8ff 100%);
+  }
+  75% {
+    transform: perspective(1000px) rotateY(-5deg);
+    background: linear-gradient(135deg, #e8f4fd 0%, #fff 50%, #e8f4fd 100%);
+  }
+  100% {
+    transform: perspective(1000px) rotateY(0deg);
+    background: linear-gradient(135deg, #f8f9fa 0%, #fff 50%, #f8f9fa 100%);
+  }
+}
+
+/* Enhanced QR Code in dropdown */
+.shareDropdown .qrCodeContainer {
+  animation: none;
+  background: transparent;
+}
+
+.shareDropdown .qrCodeImage {
+  box-shadow: 0 8px 32px rgba(0, 123, 255, 0.3);
+  border: 3px solid #007bff;
+}
+
+/* Enhanced Bingo in dropdown */
+.bingoDropdown .bingoContainer {
+  animation: none;
+  background: transparent;
+}
+
+.bingoDropdown .bingoGrid {
+  box-shadow: 0 8px 32px rgba(23, 162, 184, 0.3);
 }
 
 .sectionHeader {

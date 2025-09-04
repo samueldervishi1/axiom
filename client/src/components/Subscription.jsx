@@ -219,35 +219,42 @@ const SubscriptionTest = () => {
         <h2 className={styles.sectionTitle}>Choose Your Plan</h2>
         {plans.length > 0 ? (
           <div className={styles.plansGrid}>
-            <div className={styles.planCard}>
-              <div className={styles.planHeader}>
-                <h3 className={styles.planName}>FREE</h3>
-                <div className={styles.planPrice}>
-                  <span className={styles.currency}>$</span>
-                  <span className={styles.amount}>0</span>
-                  <span className={styles.period}>/month</span>
-                </div>
-              </div>
-              <div className={styles.planDescription}>
-                Perfect for getting started with basic AI assistance
-              </div>
-              <div className={styles.planFeatures}>
-                {getPlanFeatures({ planType: 'free' }).map((feature, index) => (
-                  <div key={index} className={styles.feature}>
-                    {feature.icon && (
-                      <span className={styles.featureIcon}>{feature.icon}</span>
-                    )}
-                    {feature.text || feature}
+            {(!subscriptionStatus?.subscriptionStatus ||
+              subscriptionStatus?.subscriptionStatus !== 'active') && (
+              <div className={styles.planCard}>
+                <div className={styles.planHeader}>
+                  <h3 className={styles.planName}>FREE</h3>
+                  <div className={styles.planPrice}>
+                    <span className={styles.currency}>$</span>
+                    <span className={styles.amount}>0</span>
+                    <span className={styles.period}>/month</span>
                   </div>
-                ))}
+                </div>
+                <div className={styles.planDescription}>
+                  Perfect for getting started with basic AI assistance
+                </div>
+                <div className={styles.planFeatures}>
+                  {getPlanFeatures({ planType: 'free' }).map(
+                    (feature, index) => (
+                      <div key={index} className={styles.feature}>
+                        {feature.icon && (
+                          <span className={styles.featureIcon}>
+                            {feature.icon}
+                          </span>
+                        )}
+                        {feature.text || feature}
+                      </div>
+                    )
+                  )}
+                </div>
+                <button
+                  disabled={true}
+                  className={`${styles.subscribeBtn} ${styles.currentBtn}`}
+                >
+                  Current Plan
+                </button>
               </div>
-              <button
-                disabled={true}
-                className={`${styles.subscribeBtn} ${styles.currentBtn}`}
-              >
-                Current Plan
-              </button>
-            </div>
+            )}
             {plans.map((plan) => {
               const isCurrentPlan =
                 subscriptionStatus?.planType === plan.planType &&
@@ -294,19 +301,39 @@ const SubscriptionTest = () => {
                       </div>
                     ))}
                   </div>
-                  <button
-                    onClick={() => createCheckoutSession(plan.planType)}
-                    disabled={loading || isCurrentPlan}
-                    className={`${styles.subscribeBtn} ${isCurrentPlan ? styles.currentBtn : ''} ${plan.planType === 'ultimate' ? styles.featuredBtn : ''}`}
-                  >
-                    {loading ? (
-                      <FaSpinner className={styles.spinning} />
-                    ) : isCurrentPlan ? (
-                      'Current Plan'
-                    ) : (
-                      `Upgrade to ${plan.name || plan.planType}`
-                    )}
-                  </button>
+                  {isCurrentPlan ? (
+                    <div className={styles.currentPlanActions}>
+                      <button
+                        disabled={true}
+                        className={`${styles.subscribeBtn} ${styles.currentBtn}`}
+                      >
+                        Current Plan
+                      </button>
+                      <button
+                        onClick={cancelSubscription}
+                        disabled={loading}
+                        className={styles.cancelPlanBtn}
+                      >
+                        {loading ? (
+                          <FaSpinner className={styles.spinning} />
+                        ) : (
+                          'Cancel & Downgrade to Free'
+                        )}
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => createCheckoutSession(plan.planType)}
+                      disabled={loading}
+                      className={`${styles.subscribeBtn} ${plan.planType === 'ultimate' ? styles.featuredBtn : ''}`}
+                    >
+                      {loading ? (
+                        <FaSpinner className={styles.spinning} />
+                      ) : (
+                        `Upgrade to ${plan.name || plan.planType}`
+                      )}
+                    </button>
+                  )}
                 </div>
               );
             })}
@@ -318,32 +345,6 @@ const SubscriptionTest = () => {
           </div>
         )}
       </div>
-
-      {subscriptionStatus?.subscriptionStatus === 'active' && (
-        <div className={styles.cancelSection}>
-          <div className={styles.cancelCard}>
-            <h3 className={styles.cancelTitle}>Cancel Subscription</h3>
-            <p className={styles.cancelDescription}>
-              You can cancel your subscription at any time. You'll continue to
-              have access to premium features until the end of your current
-              billing period.
-            </p>
-            <button
-              onClick={cancelSubscription}
-              disabled={loading}
-              className={styles.cancelBtn}
-            >
-              {loading ? (
-                <>
-                  <FaSpinner className={styles.spinning} /> Processing...
-                </>
-              ) : (
-                'Cancel Subscription'
-              )}
-            </button>
-          </div>
-        </div>
-      )}
 
       {loading && (
         <div className={styles.loadingOverlay}>

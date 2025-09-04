@@ -160,7 +160,7 @@ const Register = () => {
     <div className={styles.auth_container}>
       <div className={styles.auth_card}>
         <div className={styles.auth_left}>
-          <div className={styles.logo}>𝒜𝓍𝒾𝑜𝓂</div>
+          <div className={styles.logo}>Twizzle</div>
           <div className={styles.back_link}></div>
           <div className={styles.hero_content}>
             <h2>Where true voices connect.</h2>

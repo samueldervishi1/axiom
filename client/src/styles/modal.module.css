@@ -23,10 +23,625 @@
   max-width: 600px;
   max-height: calc(100vh - 120px);
   overflow-y: auto;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   position: relative;
-  animation: modalSlideIn 0.3s ease-out;
-  margin: 10px auto 50px auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* QR Code Modal Styles - Threads Card Design */
+.qrModal {
+  max-width: 400px;
+  background: rgba(0, 0, 0, 0.95);
+  border: 1px solid #333;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+}
+
+.qrModal .modalHeader {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.qrModal .modalTitle {
+  color: white;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.qrModal .modalIcon {
+  font-size: 18px;
+}
+
+.qrModal .closeBtn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.qrModal .closeBtn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.qrModalBody {
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  background: transparent;
+}
+
+.qrContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.threadsCard {
+  width: 320px;
+  background: #ffffff;
+  border-radius: 20px;
+  position: relative;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+  animation: cardFloat 6s ease-in-out infinite;
+  overflow: hidden;
+}
+
+.threadsCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    45deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 25%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0.3) 75%,
+    transparent 100%
+  );
+  animation: holoShine 4s ease-in-out infinite;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.cardNotchTop {
+  width: 40px;
+  height: 20px;
+  background: #000;
+  border-radius: 0 0 20px 20px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+}
+
+.cardNotchBottom {
+  width: 40px;
+  height: 20px;
+  background: #000;
+  border-radius: 20px 20px 0 0;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+}
+
+.cardBody {
+  padding: 40px 35px;
+  position: relative;
+  z-index: 2;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 30px;
+  height: 50px;
+}
+
+.axiomLogo {
+  width: 50px;
+  height: 50px;
+  background: #000;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.cardFields {
+  margin-bottom: 30px;
+}
+
+.fieldRow {
+  margin-bottom: 20px;
+}
+
+.fieldLabel {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 6px;
+}
+
+.fieldValue {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  color: #000;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: 1px;
+}
+
+.qrSection {
+  margin-bottom: 30px;
+}
+
+.qrImage {
+  width: 100px;
+  height: 100px;
+  border-radius: 8px;
+  border: 2px solid #000;
+}
+
+.profileSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profileLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profileAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+}
+
+.profileUsername {
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+}
+
+.verifiedBadge {
+  width: 20px;
+  height: 20px;
+  background: #007bff;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.userId {
+  font-size: 18px;
+  font-weight: 700;
+  color: #000;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.saveCardBtn {
+  background: white;
+  color: #000;
+  border: 1px solid #ddd;
+  border-radius: 25px;
+  padding: 12px 32px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.saveCardBtn:hover {
+  background: #f8f9fa;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Card Animations */
+@keyframes cardFloat {
+  0%,
+  100% {
+    transform: perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px);
+  }
+  25% {
+    transform: perspective(1000px) rotateX(2deg) rotateY(3deg) translateY(-5px);
+  }
+  50% {
+    transform: perspective(1000px) rotateX(0deg) rotateY(6deg) translateY(-8px);
+  }
+  75% {
+    transform: perspective(1000px) rotateX(-2deg) rotateY(3deg) translateY(-5px);
+  }
+}
+
+@keyframes holoShine {
+  0% {
+    opacity: 0;
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  25% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateX(-50%) skewX(-20deg);
+  }
+  75% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(150%) skewX(-20deg);
+  }
+}
+
+/* Bingo Modal Styles */
+.bingoModal {
+  max-width: 500px;
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+  border: none;
+  animation: modalShine 4s ease-in-out infinite;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.bingoModalBody {
+  padding: 0;
+}
+
+.bingoContainer {
+  padding: 30px;
+  background: white;
+  border-radius: 16px;
+  margin: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.winBanner {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  animation: celebration 1s ease-in-out;
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.winIcon {
+  font-size: 20px;
+}
+
+.bingoGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+  max-width: 350px;
+  margin: 0 auto 20px;
+  padding: 20px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.bingoGridWin {
+  animation: bingoWin 2s ease-in-out;
+}
+
+.bingoCell {
+  aspect-ratio: 1;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+  padding: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.bingoCell::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.6),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.bingoCell:hover::before {
+  left: 100%;
+}
+
+.bingoCell:hover {
+  border-color: #007bff;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.bingoCellChecked {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+  border-color: #28a745 !important;
+  color: white;
+  transform: scale(1.1);
+}
+
+.bingoCellFree {
+  background: linear-gradient(135deg, #ffc107 0%, #ffca2c 100%) !important;
+  border-color: #ffc107 !important;
+  color: #000;
+  font-weight: bold;
+  cursor: default;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
+}
+
+.bingoCellText {
+  font-size: 11px;
+  text-align: center;
+  font-weight: 500;
+  line-height: 1.2;
+  word-break: break-word;
+  z-index: 1;
+  position: relative;
+}
+
+.bingoInstructions {
+  color: #666;
+  font-size: 16px;
+  text-align: center;
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+.bingoActions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.bingoActionBtn {
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+}
+
+.bingoActionBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(23, 162, 184, 0.4);
+}
+
+.bingoActionBtn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* QR Code Animations */
+@keyframes cardShine {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes scanLine {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(160px);
+    opacity: 0.7;
+  }
+}
+
+/* Shared Modal Animations */
+@keyframes modalShine {
+  0%,
+  100% {
+    box-shadow: 0 0 30px rgba(102, 126, 234, 0.4);
+    transform: perspective(1000px) rotateY(0deg);
+  }
+  25% {
+    box-shadow: 0 0 40px rgba(118, 75, 162, 0.5);
+    transform: perspective(1000px) rotateY(2deg);
+  }
+  50% {
+    box-shadow: 0 0 50px rgba(102, 126, 234, 0.6);
+    transform: perspective(1000px) rotateY(0deg);
+  }
+  75% {
+    box-shadow: 0 0 40px rgba(118, 75, 162, 0.5);
+    transform: perspective(1000px) rotateY(-2deg);
+  }
+}
+
+@keyframes qrGlow {
+  0% {
+    box-shadow: 0 0 20px rgba(0, 123, 255, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 30px rgba(0, 123, 255, 0.6);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes celebration {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes bingoWin {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.02) rotateZ(1deg);
+  }
+  50% {
+    transform: scale(1.05) rotateZ(0deg);
+  }
+  75% {
+    transform: scale(1.02) rotateZ(-1deg);
+  }
+  100% {
+    transform: scale(1) rotateZ(0deg);
+  }
+}
+
+.loadingContainer {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.errorContainer {
+  text-align: center;
+  padding: 40px;
+  color: #dc3545;
+}
+
+.retryBtn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  cursor: pointer;
+  margin-top: 15px;
+}
+
+.modalHeader {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modalTitle {
+  color: white;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modalIcon {
+  font-size: 18px;
+}
+
+.closeBtn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.closeBtn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
 }
 
 /* Top Skills Card */

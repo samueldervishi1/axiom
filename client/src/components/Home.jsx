@@ -194,12 +194,7 @@ const Home = () => {
             </a>
           </div>
           <div className={styles.copyright}>
-            <p>
-              &copy; 2025 Axiom. All rights reserved.{' '}
-              <span style={{ color: 'gray', fontSize: '0.8em' }}>
-                v6.0.0-rc.25
-              </span>
-            </p>
+            <p>&copy; 2025 Twizzle. All rights reserved. </p>
           </div>
         </div>
       </div>

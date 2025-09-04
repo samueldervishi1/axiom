@@ -9,7 +9,7 @@ import {
 import styles from '../styles/contact.module.css';
 
 const CONTACT_INFO = {
-  email: 'support@axiom.com',
+  email: 'support@twizzle.com',
   phone: '(123) 456-7890',
   address: '123 Chat Street, Digital City',
   instagram: 'https://www.instagram.com/samueldervishi_',

@@ -351,6 +351,40 @@
   transform: none;
 }
 
+.currentPlanActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.cancelPlanBtn {
+  width: 100%;
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.cancelPlanBtn:hover:not(:disabled) {
+  background: #c82333;
+  transform: translateY(-1px);
+}
+
+.cancelPlanBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .noPlans {
   text-align: center;
   padding: 3rem;

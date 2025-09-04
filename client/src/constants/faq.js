@@ -1,17 +1,17 @@
 export const faqs = [
   {
-    question: 'What are the main features of Axiom?',
+    question: 'What are the main features of Twizzle?',
     answer:
-      'Axiom offers text posts and robust privacy controls to ensure a personalized and safe experience for its users.',
+      'Twizzle offers text posts and robust privacy controls to ensure a personalized and safe experience for its users.',
   },
   {
-    question: 'How does Axiom foster a culture of kindness and respect?',
+    question: 'How does Twizzle foster a culture of kindness and respect?',
     answer:
-      'By promoting healthy interactions, discouraging harmful behavior, and encouraging users to engage in thoughtful conversations, Axiom ensures a supportive and positive environment.',
+      'By promoting healthy interactions, discouraging harmful behavior, and encouraging users to engage in thoughtful conversations, Twizzle ensures a supportive and positive environment.',
   },
   {
-    question: 'How does Axiom protect my privacy?',
+    question: 'How does Twizzle protect my privacy?',
     answer:
-      'Axiom employs cutting-edge security measures to protect your personal data and gives you full control over your information and privacy settings.',
+      'Twizzle employs cutting-edge security measures to protect your personal data and gives you full control over your information and privacy settings.',
   },
 ];

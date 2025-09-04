@@ -73,7 +73,7 @@ const DeactivatedAccount = () => {
         <h2>Account Deactivated</h2>
         <p>
           Your account has been deactivated. To reactivate your account and
-          continue using Axiom, please fill in the form below.
+          continue using Twizzle, please fill in the form below.
         </p>
 
         {formState.error && (
